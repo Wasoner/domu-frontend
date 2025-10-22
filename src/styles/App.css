@@ -1,8 +1,16 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0.5rem 2rem;
   text-align: center;
+}
+
+/* Main content area: take more vertical space and center only horizontally */
+.app-main {
+  min-height: calc(100vh - 120px);
+  /* leave space for header/footer */
+  display: block;
+  padding-top: 1.5rem;
 }
 
 .logo {
@@ -11,9 +19,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -22,6 +32,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -39,4 +50,149 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Header layout styles */
+
+.app-header {
+  background: transparent;
+  color: inherit;
+  padding: 0.35rem 0; /* compact header */
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  justify-content: space-between;
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-logo svg {
+  color: var(--color-turquoise);
+}
+
+.brand-text {
+  font-weight: 700;
+  letter-spacing: 0.12rem;
+  color: white
+}
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+}
+.brand-logo img {
+  display: block; /* remove inline baseline whitespace */
+  object-fit: contain;
+  max-width: 100%;
+  height: auto; /* size controlled by .brand-img */
+}
+
+/* make logo bigger and responsive */
+.brand-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain
+}
+
+.brand-img.small {
+  width: 48px;
+  height: 48px
+}
+
+@media (max-width: 900px) {
+  .brand-img { width: 40px; height: 40px }
+}
+
+@media (max-width: 600px) {
+  .brand-img { width: 32px; height: 32px }
+}
+
+/* separators for header/footer (same size, leave 20px gap left/right)
+   implemented as a full-width element that visually stops 20px from edges */
+.separator {
+  height: 1px;
+  background: var(--color-black);
+  width: calc(100% - 40px);
+  margin: 0 auto;
+}
+
+.sep-header {
+  margin-top: 0.6rem;
+}
+
+.sep-footer {
+  margin-bottom: 0.6rem;
+}
+
+.main-nav {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.nav-item {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.btn-primary {
+  background: var(--color-orange);
+  color: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* subtle header background using palette */
+.app-header {
+  background: rgba(255, 255, 255, 0.02);
 }
