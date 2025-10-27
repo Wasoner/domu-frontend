@@ -7,10 +7,10 @@
 
 /* Main content area: take more vertical space and center only horizontally */
 .app-main {
-  min-height: calc(100vh - 120px);
+min-height: calc(100vh - 120px);
+display: block;
   /* leave space for header/footer */
-  display: block;
-  padding-top: 1.5rem;
+padding-top: 2.5rem;
 }
 
 .logo {
@@ -57,7 +57,8 @@
 .app-header {
   background: transparent;
   color: inherit;
-  padding: 0.35rem 0; /* compact header */
+  padding: 0.35rem 0;
+  /* compact header */
 }
 
 .header-inner {
@@ -88,26 +89,34 @@
 .brand-text {
   font-weight: 700;
   letter-spacing: 0.12rem;
-  color: white
+  color: white;
 }
 
 .brand-logo {
   display: inline-flex;
-  align-items: center;
 }
-.brand-logo img {
-  display: block; /* remove inline baseline whitespace */
-  object-fit: contain;
-  max-width: 100%;
-  height: auto; /* size controlled by .brand-img */
+/* Cards unified style: same height, dark gray background from palette */
+.feature-card, .resident-card, .cta-inner {
+  box-sizing: border-box;
+  border-radius: 12px;
+  padding: 1.6rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  background: var(--color-gray-dark);
+  color: white;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* make logo bigger and responsive */
-.brand-img {
-  width: 64px;
-  height: 64px;
-  object-fit: contain
-}
+.feature-card h3, .resident-card h3, .cta-inner h3 { margin-top: 0; margin-bottom: 0.6rem }
+.feature-card__body, .resident-card__body { font-size: 0.98rem }
+
+.resident-card input { padding: 0.6rem; border-radius: 6px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: white }
+
+.cta-section { margin-top: 1rem }
+.cta-inner { padding: 1.4rem }
+.cta-inner h3 { color: white; margin:0 0 1rem }
 
 .brand-img.small {
   width: 48px;
@@ -115,11 +124,17 @@
 }
 
 @media (max-width: 900px) {
-  .brand-img { width: 40px; height: 40px }
+  .brand-img {
+    width: 40px;
+    height: 40px
+  }
 }
 
 @media (max-width: 600px) {
-  .brand-img { width: 32px; height: 32px }
+  .brand-img {
+    width: 32px;
+    height: 32px
+  }
 }
 
 /* separators for header/footer (same size, leave 20px gap left/right)
@@ -132,11 +147,11 @@
 }
 
 .sep-header {
-  margin-top: 0.6rem;
+  margin-top: 1rem;
 }
 
 .sep-footer {
-  margin-bottom: 0.6rem;
+  margin-bottom: 1rem;
 }
 
 .main-nav {
@@ -195,4 +210,132 @@
 /* subtle header background using palette */
 .app-header {
   background: rgba(255, 255, 255, 0.02);
+}
+
+/* Header-specific logo sizing: keep header logo small so it doesn't break layout */
+.app-header .brand-img {
+  width: 36px;
+  height: 36px;
+}
+
+/* ensure header items vertically centered with smaller logo */
+.app-header .header-inner { align-items: center; }
+
+/* Make header content and separator slightly wider than the main container
+   so they 'sobresalgan' ~20px a cada lado */
+.app-header .header-inner {
+  max-width: 1240px; /* container is 1200px, so this makes it 20px wider each side */
+}
+.app-header .separator,
+.app-header .separator.sep-header {
+  display: block;
+  height: 1px;
+  background: var(--color-black);
+  box-sizing: border-box;
+  /* position relative so we can nudge it 20px from each side */
+  position: relative;
+  left: 20px;
+  width: calc(100% - 40px);
+}
+/* Cards for home */
+.cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+
+
+@media (max-width: 900px) {
+  .cards-row {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-img {
+    width: 44px;
+    height: 44px
+  }
+}
+
+/* Home grid: left content + right stacked cards */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* Left column (hero): center and align content to match reference image */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.left-column h1 {
+  color: var(--color-turquoise);
+  font-size: 2.6rem;
+  line-height: 1.05;
+  margin: 0 0 0.8rem 0;
+  max-width: 980px;
+}
+
+.lead {
+  color: rgba(0, 0, 0, 0.72);
+  max-width: 60ch;
+  margin: 0.25rem auto 1.25rem auto;
+}
+
+.hero-media {
+  margin-top: 1.6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-media img {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px;
+  display: block;
+}
+
+.hero-logo {
+  width: 100%;
+  max-width: 360px; 
+  height: auto;
+  display: block;
+  margin: 1.2rem 0 0.8rem 0;
+}
+
+
+.right-column {
+  position: relative
+}
+
+.stack-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem
+}
+
+.stack-cards>* {
+  width: 100%
+}
+
+@media (max-width: 1000px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .right-column {
+    order: 2
+  }
+
+  .left-column {
+    order: 1
+  }
 }
