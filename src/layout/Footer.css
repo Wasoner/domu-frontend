@@ -1,0 +1,18 @@
+.app-footer {
+  background: white;
+  padding: 2rem 0;
+  text-align: center;
+  margin-top: auto;
+}
+
+.app-footer small {
+  color: var(--color-gray-dark);
+  font-size: 0.9rem;
+}
+
+.separator {
+  height: 1px;
+  background: var(--color-gray);
+  width: calc(100% - 4rem);
+  margin: 0 auto;
+}

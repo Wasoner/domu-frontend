@@ -1,6 +1,6 @@
-import React from 'react';
+import './CTASection.css';
 
-const CTASection = ({ children, ctaText = 'Solicitar acceso' }) => {
+const CTASection = ({ ctaText = 'Solicitar acceso' }) => {
     return (
         <section className="cta-section">
             <div className="cta-inner">

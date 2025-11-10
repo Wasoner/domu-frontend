@@ -1,15 +1,26 @@
-import './styles/App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Home, About } from './pages'
+import { Home, About, Login, Dashboard, ResidentPortal } from './pages'
+import { AppProvider } from './context'
+import { ROUTES } from './constants'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-    </BrowserRouter>
+    <AppProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path={ROUTES.HOME} element={<Home />} />
+          <Route path={ROUTES.ABOUT} element={<About />} />
+          <Route path={ROUTES.LOGIN} element={<Login />} />
+
+          {/* Protected Routes - Admin */}
+          <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+
+          {/* Protected Routes - Resident */}
+          <Route path={ROUTES.RESIDENT_PORTAL} element={<ResidentPortal />} />
+        </Routes>
+      </BrowserRouter>
+    </AppProvider>
   )
 }
 

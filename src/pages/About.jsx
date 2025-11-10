@@ -1,5 +1,5 @@
-import React from 'react';
 import { Header, MainContent, Footer } from '../layout';
+import './About.css';
 
 const About = () => {
   return (
@@ -7,8 +7,10 @@ const About = () => {
       <Header />
 
       <MainContent>
-        <h1>About Domu</h1>
-        <p>This is an example About page. Add more content here.</p>
+        <article>
+          <h1>Acerca de Domu</h1>
+          <p>Domu es una plataforma integral diseñada para simplificar la administración de edificios y condominios. Ofrecemos herramientas modernas y eficientes para gestionar tu comunidad.</p>
+        </article>
       </MainContent>
 
       <Footer />

@@ -1,0 +1,98 @@
+.login-page {
+  min-height: calc(100vh - 140px);
+}
+
+.login-container {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 3rem 2rem;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-gray);
+}
+
+.login-container h1 {
+  color: var(--color-turquoise);
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--color-black);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--color-gray);
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+  color: var(--color-black);
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-turquoise);
+  box-shadow: 0 0 0 4px rgba(83, 164, 151, 0.1);
+}
+
+.login-form .btn-primary {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.link-back {
+  display: block;
+  text-align: center;
+  margin-top: 1.5rem;
+  color: var(--color-orange);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link-back:hover {
+  color: var(--color-turquoise);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease;
+}
+
+@media (max-width: 640px) {
+  .login-container {
+    padding: 2rem 1.5rem;
+  }
+}
+

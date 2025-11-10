@@ -1,0 +1,105 @@
+.app-header {
+  background: white;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.header-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.brand-link:hover {
+  opacity: 0.8;
+}
+
+.brand-img {
+  width: 40px;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
+.brand-link:hover .brand-img {
+  transform: scale(1.05);
+}
+
+.main-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-item {
+  color: var(--color-black);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
+
+.nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-turquoise);
+  transition: width 0.3s ease;
+}
+
+.nav-item:hover {
+  color: var(--color-turquoise);
+}
+
+.nav-item:hover::after {
+  width: 100%;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .main-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-inner {
+    padding: 0 1rem;
+  }
+
+  .brand-img {
+    width: 32px;
+    height: 32px;
+  }
+}

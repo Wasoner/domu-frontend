@@ -1,4 +1,5 @@
-import React from 'react';
+import PropTypes from 'prop-types';
+import './ResidentCard.css';
 
 const ResidentCard = ({ title, children }) => {
     return (
@@ -7,6 +8,11 @@ const ResidentCard = ({ title, children }) => {
             <div className="resident-card__body">{children}</div>
         </div>
     );
+};
+
+ResidentCard.propTypes = {
+    title: PropTypes.string.isRequired,
+    children: PropTypes.node.isRequired,
 };
 
 export default ResidentCard;

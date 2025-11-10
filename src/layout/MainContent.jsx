@@ -1,9 +1,9 @@
-import React from 'react';
+import './MainContent.css';
 
-const MainContent = ({ children }) => {
+const MainContent = ({ children, fullWidth = false }) => {
   return (
     <main className="app-main">
-      <div className="container">{children}</div>
+      {fullWidth ? children : <div className="container">{children}</div>}
     </main>
   );
 };

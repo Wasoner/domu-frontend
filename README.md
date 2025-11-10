@@ -1,14 +1,34 @@
 # Domu Frontend
 
-A modern React application built with Vite, following the latest best practices and industry-standard folder structure.
+Una plataforma integral para la gestión de comunidades de edificios y comunidades residenciales.
 
-## 🚀 Features
+## 🚀 Características
 
-- ⚡️ **Vite** - Lightning-fast build tool and dev server
-- ⚛️ **React 19** - Latest version of React with concurrent features
-- 🎨 **ESLint** - Code linting and formatting
-- 📁 **Organized Structure** - Scalable folder structure following best practices
-- 🔥 **Hot Module Replacement (HMR)** - Fast refresh during development
+- ⚡️ **Vite** - Build tool rápido y servidor de desarrollo
+- ⚛️ **React 19** - Última versión de React con características concurrentes
+- 🎨 **ESLint** - Linting y formato de código
+- 📁 **Estructura Organizada** - Estructura de carpetas escalable siguiendo mejores prácticas
+- 🔥 **Hot Module Replacement (HMR)** - Recarga rápida durante el desarrollo
+- 🔐 **Sistema de Autenticación** - Login para administradores y residentes
+- 👥 **Portal de Residentes** - Gestión de gastos comunes y servicios
+- 🏢 **Dashboard Administrativo** - Panel de control para administradores
+- 💰 **Gestión de Pagos** - Sistema de gastos comunes y facturación
+
+## 🎯 Funcionalidades Principales (En Desarrollo)
+
+### Portal de Residentes
+- Consulta de gastos comunes
+- Pago online de gastos comunes
+- Comunicaciones y avisos
+- Eventos y actividades
+- Solicitud de servicios
+
+### Dashboard Administrativo
+- Gestión de comunidades
+- Gestión de residentes
+- Gastos comunes
+- Facturación y cobranza
+- Reportes y analytics
 
 ## 📋 Prerequisites
 
