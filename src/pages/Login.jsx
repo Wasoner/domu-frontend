@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Header, MainContent, Footer } from '../layout';
 import { Button } from '../components';
 import { ROUTES } from '../constants';
+import { api } from '../services';
+import { useAppContext } from '../context';
 import './Login.css';
 
 /**
@@ -11,20 +13,49 @@ import './Login.css';
  */
 const Login = () => {
     const navigate = useNavigate();
+    const { setUser } = useAppContext();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         userType: 'resident',
     });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Login attempt:', formData);
+        setError('');
+        setLoading(true);
 
-        if (formData.userType === 'admin') {
-            navigate(ROUTES.DASHBOARD);
-        } else {
-            navigate(ROUTES.RESIDENT_PORTAL);
+        try {
+            // Llamar al backend para autenticar (solo email y password)
+            const response = await api.auth.login(
+                formData.email,
+                formData.password
+            );
+
+            // Determinar el tipo de usuario basado en roleId de la respuesta
+            const userRoleId = response.user?.roleId;
+            const userType = userRoleId === 1 ? 'admin' : 'resident';
+
+            // Guardar información del usuario en el contexto
+            setUser({
+                email: formData.email,
+                userType: userType,
+                ...response.user,
+            });
+
+            // Navegar según el tipo de usuario
+            if (userType === 'admin') {
+                navigate(ROUTES.DASHBOARD);
+            } else {
+                navigate(ROUTES.RESIDENT_PORTAL);
+            }
+        } catch (error) {
+            console.error('Error en login:', error);
+            setError(error.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -44,6 +75,12 @@ const Login = () => {
                     <h1>Iniciar Sesión</h1>
 
                     <form onSubmit={handleSubmit} className="login-form" aria-label="Formulario de inicio de sesión">
+                        {error && (
+                            <div className="error-message" role="alert">
+                                {error}
+                            </div>
+                        )}
+
                         <div className="form-group">
                             <label htmlFor="userType">Tipo de usuario</label>
                             <select
@@ -52,6 +89,7 @@ const Login = () => {
                                 value={formData.userType}
                                 onChange={handleChange}
                                 required
+                                disabled={loading}
                             >
                                 <option value="resident">Residente</option>
                                 <option value="admin">Administrador</option>
@@ -68,6 +106,7 @@ const Login = () => {
                                 onChange={handleChange}
                                 placeholder="tu@email.com"
                                 required
+                                disabled={loading}
                             />
                         </div>
 
@@ -81,15 +120,30 @@ const Login = () => {
                                 onChange={handleChange}
                                 placeholder="••••••••"
                                 required
+                                disabled={loading}
                             />
                         </div>
 
-                        <Button type="submit" variant="primary">Iniciar Sesión</Button>
+                        <Button 
+                            type="submit" 
+                            variant="primary" 
+                            disabled={loading}
+                        >
+                            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                        </Button>
                     </form>
 
-                    <Link to={ROUTES.HOME} className="link-back">
-                        ← Volver al inicio
-                    </Link>
+                    <div className="login-footer">
+                        <p>
+                            ¿No tienes una cuenta?{' '}
+                            <Link to={ROUTES.REGISTER} className="link-register">
+                                Regístrate aquí
+                            </Link>
+                        </p>
+                        <Link to={ROUTES.HOME} className="link-back">
+                            ← Volver al inicio
+                        </Link>
+                    </div>
                 </div>
             </MainContent>
             <Footer />

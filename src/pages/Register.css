@@ -1,9 +1,9 @@
-.login-page {
+.register-page {
   min-height: calc(100vh - 140px);
 }
 
-.login-container {
-  max-width: 480px;
+.register-container {
+  max-width: 600px;
   margin: 2rem auto;
   padding: 3rem 2rem;
   background: white;
@@ -12,17 +12,23 @@
   border: 1px solid var(--color-gray);
 }
 
-.login-container h1 {
+.register-container h1 {
   color: var(--color-turquoise);
   font-size: 2rem;
   margin-bottom: 2rem;
   text-align: center;
 }
 
-.login-form {
+.register-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
 .form-group {
@@ -47,6 +53,7 @@
   background: white;
   color: var(--color-black);
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -63,12 +70,29 @@
   opacity: 0.7;
 }
 
-.login-form .btn-primary {
+.form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  accent-color: var(--color-turquoise);
+}
+
+.form-group input[type="date"] {
+  cursor: pointer;
+}
+
+.form-hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: -0.25rem;
+}
+
+.register-form .btn-primary {
   width: 100%;
   margin-top: 0.5rem;
 }
 
-.login-form .btn-primary:disabled {
+.register-form .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -85,24 +109,36 @@
   animation: fadeIn 0.3s ease;
 }
 
-.login-footer {
+.success-message {
+  padding: 1rem;
+  background-color: #efe;
+  border: 2px solid #cfc;
+  border-radius: 10px;
+  color: #3c3;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.register-footer {
   margin-top: 1.5rem;
   text-align: center;
 }
 
-.login-footer p {
+.register-footer p {
   margin-bottom: 1rem;
   color: var(--color-black);
 }
 
-.link-register {
+.link-login {
   color: var(--color-turquoise);
   font-weight: 600;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
-.link-register:hover {
+.link-login:hover {
   color: var(--color-orange);
   text-decoration: underline;
 }
@@ -137,8 +173,12 @@
 }
 
 @media (max-width: 640px) {
-  .login-container {
+  .register-container {
     padding: 2rem 1.5rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
   }
 }
 

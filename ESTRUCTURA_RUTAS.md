@@ -201,3 +201,5 @@ const Communities = lazy(() => import('./pages/Communities'));
 6. Agregar animaciones de transición entre rutas
 
 
+
+
