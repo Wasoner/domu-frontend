@@ -7,8 +7,8 @@
 // Backend URL - puerto 8080 según configuración del backend
 // En desarrollo, usar el proxy de Vite para evitar CORS
 // En producción, usar la URL completa del backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.DEV ? '/api' : 'http://localhost:8080/api');
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? '/api' : 'http://localhost:7000/api');
 
 /**
  * Get authentication token from localStorage
@@ -23,10 +23,10 @@ const getAuthToken = () => {
 const fetchWrapper = async (url, options = {}) => {
   try {
     const token = getAuthToken();
-    
+
     // Preparar headers - asegurar que Content-Type esté correctamente configurado
     const headers = new Headers();
-    
+
     // Agregar headers del options primero
     if (options.headers) {
       Object.entries(options.headers).forEach(([key, value]) => {
@@ -63,14 +63,14 @@ const fetchWrapper = async (url, options = {}) => {
     // Si la respuesta no es exitosa, intentar parsear el error
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
-      
+
       // Manejo especial para errores de CORS
       if (response.status === 0) {
         errorMessage = 'Error de CORS: El backend no permite peticiones desde este origen. Verifica la configuración CORS del servidor.';
         console.error('[CORS Error] El backend debe permitir peticiones desde:', window.location.origin);
         console.error('[CORS Error] Backend URL:', `${API_BASE_URL}${url}`);
       }
-      
+
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorData.error || errorMessage;
@@ -80,7 +80,7 @@ const fetchWrapper = async (url, options = {}) => {
           console.error('[API Error] No se pudo parsear la respuesta de error:', e);
         }
       }
-      
+
       throw new Error(errorMessage);
     }
 
@@ -97,7 +97,7 @@ const fetchWrapper = async (url, options = {}) => {
       console.error('[Network Error] No se pudo conectar con el backend:', error);
       throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté corriendo en ' + API_BASE_URL);
     }
-    
+
     console.error('[API Error]', error);
     throw error;
   }
@@ -109,19 +109,19 @@ const fetchWrapper = async (url, options = {}) => {
 export const api = {
   // GET request
   get: (endpoint) => fetchWrapper(endpoint, { method: 'GET' }),
-  
+
   // POST request
   post: (endpoint, data) => fetchWrapper(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  
+
   // PUT request
   put: (endpoint, data) => fetchWrapper(endpoint, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  
+
   // DELETE request
   delete: (endpoint) => fetchWrapper(endpoint, { method: 'DELETE' }),
 
@@ -139,12 +139,10 @@ export const api = {
           email: email.trim(),
           password: password,
         };
-        
-        // Usar fetch directamente para evitar problemas con el proxy
-        const backendUrl = import.meta.env.DEV 
-          ? 'http://localhost:8080/api' 
-          : API_BASE_URL;
-        
+
+        // Usar siempre la misma base (en dev será /api y lo manejará el proxy)
+        const backendUrl = API_BASE_URL;
+
         const response = await fetch(`${backendUrl}/auth/login`, {
           method: 'POST',
           headers: {
@@ -152,7 +150,7 @@ export const api = {
           },
           body: JSON.stringify(loginData),
         });
-        
+
         if (!response.ok) {
           let errorMessage = `HTTP error! status: ${response.status}`;
           try {
@@ -164,9 +162,9 @@ export const api = {
           }
           throw new Error(errorMessage);
         }
-        
+
         const responseData = await response.json();
-        
+
         // Guardar token si viene en la respuesta
         if (responseData.token) {
           localStorage.setItem('authToken', responseData.token);
@@ -177,7 +175,7 @@ export const api = {
             localStorage.setItem('userType', userType);
           }
         }
-        
+
         return responseData;
       } catch (error) {
         // Limpiar datos de autenticación en caso de error
@@ -226,43 +224,40 @@ export const api = {
           // roleId debe ser un número (1 = admin, 2 = resident)
           roleId: userData.roleId !== undefined ? Number(userData.roleId) : (userData.userType === 'admin' ? 1 : 2),
         };
-        
+
         // Validar que unitId sea válido
         if (!cleanData.unitId || cleanData.unitId <= 0) {
           throw new Error('El ID de unidad debe ser un número válido. Asegúrate de que la unidad exista en la base de datos.');
         }
-        
+
         if (import.meta.env.DEV) {
           console.log('[Register] Datos limpios:', cleanData);
         }
-        
-        // Usar fetch directamente para evitar problemas con el wrapper y el proxy
-        // En desarrollo, usar directamente la URL del backend para evitar problemas con el proxy
-        const backendUrl = import.meta.env.DEV 
-          ? 'http://localhost:8080/api' 
-          : API_BASE_URL;
-        
+
+        // Usar la misma base para que el proxy de Vite maneje CORS en dev
+        const backendUrl = API_BASE_URL;
+
         const token = getAuthToken();
         const headers = {
           'Content-Type': 'application/json',
         };
-        
+
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         if (import.meta.env.DEV) {
           console.log('[Register] URL:', `${backendUrl}/auth/register`);
           console.log('[Register] Headers:', headers);
           console.log('[Register] Body (string):', JSON.stringify(cleanData));
         }
-        
+
         const response = await fetch(`${backendUrl}/auth/register`, {
           method: 'POST',
           headers: headers,
           body: JSON.stringify(cleanData),
         });
-        
+
         // Manejar respuesta
         if (!response.ok) {
           let errorMessage = `HTTP error! status: ${response.status}`;
@@ -285,17 +280,17 @@ export const api = {
           }
           throw new Error(errorMessage);
         }
-        
+
         // Parsear respuesta exitosa
         const responseData = await response.json();
-        
+
         // Si el registro incluye login automático, guardar token
         if (responseData.token) {
           localStorage.setItem('authToken', responseData.token);
           localStorage.setItem('userType', userData.userType || 'resident');
           localStorage.setItem('userEmail', userData.email);
         }
-        
+
         return responseData;
       } catch (error) {
         // Limpiar datos de autenticación en caso de error

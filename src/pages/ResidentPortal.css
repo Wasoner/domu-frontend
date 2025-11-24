@@ -68,3 +68,91 @@
   margin-top: 1rem;
 }
 
+.resident-portal-page .info-banner {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(83, 164, 151, 0.1), rgba(255, 255, 255, 0.9));
+  border: 1px solid rgba(83, 164, 151, 0.35);
+  text-align: left;
+}
+
+.resident-portal-page .info-banner strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+  color: var(--color-black);
+}
+
+.resident-portal-page .info-grid {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.resident-portal-page .info-card {
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resident-portal-page .info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 38px rgba(83, 164, 151, 0.2);
+  border-color: rgba(83, 164, 151, 0.4);
+}
+
+.resident-portal-page .info-card__icon {
+  font-size: 1.75rem;
+}
+
+.resident-portal-page .layout-guide {
+  margin-top: 2.5rem;
+  text-align: left;
+}
+
+.resident-portal-page .layout-steps {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.resident-portal-page .layout-steps li {
+  border: none;
+  padding: 0;
+}
+
+.resident-portal-page .layout-steps h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  color: var(--color-black);
+}
+
+.resident-portal-page .layout-steps p {
+  margin: 0;
+}
+
+.resident-portal-page .services-section {
+  margin-top: 2.5rem;
+}
+
+.resident-portal-page .under-construction {
+  margin-top: 2.5rem;
+  color: var(--color-gray-dark);
+}
+
+@media (max-width: 640px) {
+  .resident-portal-page .info-card {
+    flex-direction: column;
+  }
+}
+

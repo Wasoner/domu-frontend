@@ -43,3 +43,91 @@
   border-bottom: none;
 }
 
+.dashboard-page .info-banner {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(83, 164, 151, 0.12), rgba(0, 0, 0, 0.02));
+  border: 1px solid rgba(83, 164, 151, 0.3);
+  text-align: left;
+}
+
+.dashboard-page .info-banner strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+  color: var(--color-black);
+}
+
+.dashboard-page .info-grid {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.dashboard-page .info-card {
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-page .info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 38px rgba(83, 164, 151, 0.2);
+  border-color: rgba(83, 164, 151, 0.4);
+}
+
+.dashboard-page .info-card__icon {
+  font-size: 1.75rem;
+}
+
+.dashboard-page .layout-guide {
+  margin-top: 2.5rem;
+  text-align: left;
+}
+
+.dashboard-page .layout-steps {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.dashboard-page .layout-steps li {
+  border: none;
+  padding: 0;
+}
+
+.dashboard-page .layout-steps h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  color: var(--color-black);
+}
+
+.dashboard-page .layout-steps p {
+  margin: 0;
+}
+
+.dashboard-page .features-section {
+  margin-top: 2.5rem;
+}
+
+.dashboard-page .under-construction {
+  margin-top: 2.5rem;
+  color: var(--color-gray-dark);
+}
+
+@media (max-width: 640px) {
+  .dashboard-page .info-card {
+    flex-direction: column;
+  }
+}
+
