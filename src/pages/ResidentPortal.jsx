@@ -1,5 +1,5 @@
 import { useAppContext } from '../context';
-import { Header, MainContent, Footer } from '../layout';
+import { AuthLayout } from '../layout';
 import { VisitRegistrationPanel } from '../components';
 import './ResidentPortal.css';
 
@@ -48,10 +48,8 @@ const ResidentPortal = () => {
     const { user } = useAppContext();
 
     return (
-        <div className="resident-portal-page">
-            <Header />
-            <MainContent>
-                <article>
+        <AuthLayout user={user}>
+            <article>
                     <h1>Portal de Residente</h1>
                     <p>Bienvenido, {user?.email || 'Residente'}</p>
 
@@ -123,10 +121,8 @@ const ResidentPortal = () => {
                     <div className="under-construction">
                         <p>🚧 Esta sección está en desarrollo</p>
                     </div>
-                </article>
-            </MainContent>
-            <Footer />
-        </div>
+            </article>
+        </AuthLayout>
     );
 };
 

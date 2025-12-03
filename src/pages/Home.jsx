@@ -1,5 +1,5 @@
 import { Button, FeatureCard, ResidentCard, VisitRegistrationPanel } from '../components';
-import { Header, MainContent, Footer } from '../layout';
+import { Header, MainContent, Footer, AuthLayout } from '../layout';
 import heroLogo from '../assets/LogotipoDOMU.svg';
 import { ROUTES } from '../constants';
 import { useAppContext } from '../context';
@@ -60,107 +60,103 @@ const upcomingEvent = {
 };
 
 const ResidentHome = ({ user }) => (
-  <div className="home-page home-page--auth fade-in">
-    <Header />
-    <MainContent>
-      <div className="resident-dashboard">
-        <div className="resident-dashboard__left">
-          <section className="resident-card resident-hero" aria-live="polite">
+  <AuthLayout user={user}>
+    <div className="resident-dashboard">
+      <div className="resident-dashboard__left">
+        <section className="resident-card resident-hero" aria-live="polite">
+          <div>
+            <p className="eyebrow">Tus cuentas están al día</p>
+            <h2>Hola, {user?.firstName || user?.email || 'Residente'}</h2>
+            <p>Último pago: 24 Nov 2025 · Próximo pago: 30 Nov 2025</p>
+          </div>
+
+          <div className="resident-hero__amount">
+            <span>Saldo del mes</span>
+            <strong>$78.860</strong>
+          </div>
+
+          <div className="resident-hero__actions">
+            <Button variant="primary">Pagar ahora</Button>
+            <Button variant="ghost">Historial de pagos</Button>
+          </div>
+        </section>
+
+        <section className="resident-card resident-chart" aria-label="Evolución de gastos comunes">
+          <header>
             <div>
-              <p className="eyebrow">Tus cuentas están al día</p>
-              <h2>Hola, {user?.firstName || user?.email || 'Residente'}</h2>
-              <p>Último pago: 24 Nov 2025 · Próximo pago: 30 Nov 2025</p>
+              <h3>Evolución Gastos Comunes</h3>
+              <p>Seguimiento últimos 6 meses</p>
             </div>
+            <button type="button" className="link-button">Comparar</button>
+          </header>
 
-            <div className="resident-hero__amount">
-              <span>Saldo del mes</span>
-              <strong>$78.860</strong>
-            </div>
+          <div className="chart-bars" role="img" aria-label="Barras mensuales de gastos">
+            {residentChartData.map((item) => (
+              <span
+                key={item.month}
+                className="chart-bar"
+                style={{ height: `${item.value}%` }}
+                aria-label={`${item.month}: ${item.amount}`}
+              >
+                <em className="chart-bar__value">{item.amount}</em>
+                <strong className="chart-bar__month">{item.month}</strong>
+              </span>
+            ))}
+          </div>
+        </section>
 
-            <div className="resident-hero__actions">
-              <Button variant="primary">Pagar ahora</Button>
-              <Button variant="ghost">Historial de pagos</Button>
-            </div>
-          </section>
-
-          <section className="resident-card resident-chart" aria-label="Evolución de gastos comunes">
-            <header>
-              <div>
-                <h3>Evolución Gastos Comunes</h3>
-                <p>Seguimiento últimos 6 meses</p>
-              </div>
-              <button type="button" className="link-button">Comparar</button>
-            </header>
-
-            <div className="chart-bars" role="img" aria-label="Barras mensuales de gastos">
-              {residentChartData.map((item) => (
-                <span
-                  key={item.month}
-                  className="chart-bar"
-                  style={{ height: `${item.value}%` }}
-                  aria-label={`${item.month}: ${item.amount}`}
-                >
-                  <em className="chart-bar__value">{item.amount}</em>
-                  <strong className="chart-bar__month">{item.month}</strong>
-                </span>
-              ))}
-            </div>
-          </section>
-
-          <section className="resident-card quick-actions-card">
-            <h3>Accesos rápidos</h3>
-            <ul className="quick-actions">
-              {residentQuickActions.map((action) => (
-                <li key={action.title}>
-                  <div>
-                    <p className="eyebrow">{action.label}</p>
-                    <strong>{action.title}</strong>
-                    <span>{action.description}</span>
-                  </div>
-                  <Button variant="secondary">{action.cta}</Button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
-
-        <aside className="resident-dashboard__right">
-          <section className="resident-card community-wall">
-            <h3>Muro de la comunidad</h3>
-            <ul className="community-feed">
-              {communityFeed.map((item) => (
-                <li key={item.title}>
-                  <p className="community-feed__date">{item.date}</p>
-                  <strong>{item.title}</strong>
-                  <span>{item.description}</span>
-                </li>
-              ))}
-            </ul>
-            <Button variant="ghost">Ir a publicaciones</Button>
-          </section>
-
-          <section className="resident-card qr-card">
-            <h3>App móvil</h3>
-            <p>Escanea el código para pagar, revisar avisos y reservar espacios comunes.</p>
-            <div className="qr-placeholder" aria-hidden="true">QR</div>
-            <div className="store-badges">
-              <span>Google Play ⭐4.5</span>
-              <span>App Store ⭐4.3</span>
-            </div>
-          </section>
-        </aside>
+        <section className="resident-card quick-actions-card">
+          <h3>Accesos rápidos</h3>
+          <ul className="quick-actions">
+            {residentQuickActions.map((action) => (
+              <li key={action.title}>
+                <div>
+                  <p className="eyebrow">{action.label}</p>
+                  <strong>{action.title}</strong>
+                  <span>{action.description}</span>
+                </div>
+                <Button variant="secondary">{action.cta}</Button>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
 
-      <VisitRegistrationPanel user={user} />
+      <aside className="resident-dashboard__right">
+        <section className="resident-card community-wall">
+          <h3>Muro de la comunidad</h3>
+          <ul className="community-feed">
+            {communityFeed.map((item) => (
+              <li key={item.title}>
+                <p className="community-feed__date">{item.date}</p>
+                <strong>{item.title}</strong>
+                <span>{item.description}</span>
+              </li>
+            ))}
+          </ul>
+          <Button variant="ghost">Ir a publicaciones</Button>
+        </section>
 
-      <div className="floating-event" aria-live="polite">
-        <strong>{upcomingEvent.title}</strong>
-        <p>{upcomingEvent.description}</p>
-        <Button variant="primary">Registrarse</Button>
-      </div>
-    </MainContent>
-    <Footer />
-  </div>
+        <section className="resident-card qr-card">
+          <h3>App móvil</h3>
+          <p>Escanea el código para pagar, revisar avisos y reservar espacios comunes.</p>
+          <div className="qr-placeholder" aria-hidden="true">QR</div>
+          <div className="store-badges">
+            <span>Google Play ⭐4.5</span>
+            <span>App Store ⭐4.3</span>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <VisitRegistrationPanel user={user} />
+
+    <div className="floating-event" aria-live="polite">
+      <strong>{upcomingEvent.title}</strong>
+      <p>{upcomingEvent.description}</p>
+      <Button variant="primary">Registrarse</Button>
+    </div>
+  </AuthLayout>
 );
 
 /**

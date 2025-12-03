@@ -1,5 +1,5 @@
 import { useAppContext } from '../context';
-import { Header, MainContent, Footer } from '../layout';
+import { AuthLayout } from '../layout';
 import { VisitRegistrationPanel } from '../components';
 import './Dashboard.css';
 
@@ -48,10 +48,8 @@ const Dashboard = () => {
     const { user } = useAppContext();
 
     return (
-        <div className="dashboard-page">
-            <Header />
-            <MainContent>
-                <article>
+        <AuthLayout user={user}>
+            <article>
                     <h1>Dashboard Administrativo</h1>
                     <p>Bienvenido, {user?.email || 'Administrador'}</p>
 
@@ -108,9 +106,7 @@ const Dashboard = () => {
                 <div className="under-construction">
                     <p>🚧 Esta sección está en desarrollo</p>
                 </div>
-            </MainContent>
-            <Footer />
-        </div>
+        </AuthLayout>
     );
 };
 
