@@ -8,6 +8,14 @@ import { api } from '../services';
  * Handles authentication state and user data
  */
 
+const resolveUserType = (userData) => {
+  if (!userData) return 'resident';
+  if (userData.userType) return userData.userType;
+  if (userData.roleId === 1) return 'admin';
+  if (userData.roleId === 3) return 'concierge';
+  return 'resident';
+};
+
 export const AppProvider = ({ children }) => {
   // Inicializar usuario desde localStorage si existe token
   const [user, setUser] = useState(() => {
@@ -38,6 +46,7 @@ export const AppProvider = ({ children }) => {
           if (userData) {
             setUser({
               ...userData,
+              userType: resolveUserType(userData),
               isAuthenticated: true,
             });
           }
@@ -56,10 +65,17 @@ export const AppProvider = ({ children }) => {
 
   // Función para actualizar el usuario
   const updateUser = (userData) => {
-    setUser(userData);
-    if (userData) {
-      localStorage.setItem('userEmail', userData.email || '');
-      localStorage.setItem('userType', userData.userType || 'resident');
+    const normalizedUser = userData
+      ? {
+          ...userData,
+          userType: resolveUserType(userData),
+        }
+      : null;
+
+    setUser(normalizedUser);
+    if (normalizedUser) {
+      localStorage.setItem('userEmail', normalizedUser.email || '');
+      localStorage.setItem('userType', normalizedUser.userType || 'resident');
     }
   };
 

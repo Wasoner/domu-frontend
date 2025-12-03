@@ -1,5 +1,6 @@
 import { useAppContext } from '../context';
 import { Header, MainContent, Footer } from '../layout';
+import { VisitRegistrationPanel } from '../components';
 import './Dashboard.css';
 
 const adminHighlights = [
@@ -100,6 +101,8 @@ const Dashboard = () => {
                             <li>Reportería</li>
                         </ul>
                     </section>
+
+                    <VisitRegistrationPanel user={user} />
                 </article>
 
                 <div className="under-construction">

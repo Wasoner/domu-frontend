@@ -89,6 +89,16 @@ const Register = () => {
             // Preparar datos para enviar al backend según lo que espera RegistrationRequest
             // El backend espera: firstName, lastName, email, password, phone, documentNumber, 
             // birthDate, resident, unitId (número), roleId (número)
+            const roleMapping = {
+                admin: 1,
+                resident: 2,
+                concierge: 3,
+            };
+
+            const derivedRoleId = formData.roleId
+                ? parseInt(formData.roleId, 10)
+                : roleMapping[formData.userType] || 2;
+
             const registerData = {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
@@ -102,7 +112,7 @@ const Register = () => {
                 // IMPORTANTE: La unidad debe existir en la base de datos antes de registrar el usuario
                 unitId: parseInt(formData.unitId, 10),
                 // roleId se asigna automáticamente según el tipo de usuario
-                roleId: formData.roleId || (formData.userType === 'admin' ? 1 : 2),
+                roleId: derivedRoleId,
             };
             
             // Validar que unitId sea un número válido
@@ -196,6 +206,7 @@ const Register = () => {
                                 disabled={loading}
                             >
                                 <option value="resident">Residente</option>
+                                <option value="concierge">Conserje</option>
                                 <option value="admin">Administrador</option>
                             </select>
                         </div>

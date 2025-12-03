@@ -17,6 +17,18 @@ const getAuthToken = () => {
   return localStorage.getItem('authToken');
 };
 
+const roleIdToUserType = (roleId) => {
+  if (roleId === 1) return 'admin';
+  if (roleId === 3) return 'concierge';
+  return 'resident';
+};
+
+const userTypeToRoleId = (userType) => {
+  if (userType === 'admin') return 1;
+  if (userType === 'concierge') return 3;
+  return 2;
+};
+
 /**
  * Generic fetch wrapper with error handling and authentication
  */
@@ -171,7 +183,7 @@ export const api = {
           localStorage.setItem('userEmail', email);
           // Determinar userType basado en roleId del usuario
           if (responseData.user && responseData.user.roleId) {
-            const userType = responseData.user.roleId === 1 ? 'admin' : 'resident';
+            const userType = roleIdToUserType(responseData.user.roleId);
             localStorage.setItem('userType', userType);
           }
         }
@@ -221,8 +233,8 @@ export const api = {
           resident: Boolean(userData.resident),
           // unitId debe ser un número (ID de la unidad de vivienda)
           unitId: Number(userData.unitId) || 0,
-          // roleId debe ser un número (1 = admin, 2 = resident)
-          roleId: userData.roleId !== undefined ? Number(userData.roleId) : (userData.userType === 'admin' ? 1 : 2),
+          // roleId debe ser un número (1 = admin, 2 = residente, 3 = conserje)
+          roleId: userData.roleId !== undefined ? Number(userData.roleId) : userTypeToRoleId(userData.userType),
         };
 
         // Validar que unitId sea válido

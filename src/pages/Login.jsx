@@ -36,7 +36,11 @@ const Login = () => {
 
             // Determinar el tipo de usuario basado en roleId de la respuesta
             const userRoleId = response.user?.roleId;
-            const userType = userRoleId === 1 ? 'admin' : 'resident';
+            const userType = userRoleId === 1
+                ? 'admin'
+                : userRoleId === 3
+                    ? 'concierge'
+                    : 'resident';
 
             // Guardar información del usuario en el contexto
             setUser({
@@ -92,6 +96,7 @@ const Login = () => {
                                 disabled={loading}
                             >
                                 <option value="resident">Residente</option>
+                                <option value="concierge">Conserje</option>
                                 <option value="admin">Administrador</option>
                             </select>
                         </div>

@@ -1,5 +1,6 @@
 import { useAppContext } from '../context';
 import { Header, MainContent, Footer } from '../layout';
+import { VisitRegistrationPanel } from '../components';
 import './ResidentPortal.css';
 
 const residentHighlights = [
@@ -116,6 +117,8 @@ const ResidentPortal = () => {
                             </div>
                         </div>
                     </section>
+
+                    <VisitRegistrationPanel user={user} />
 
                     <div className="under-construction">
                         <p>🚧 Esta sección está en desarrollo</p>
