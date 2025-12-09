@@ -1,14 +1,17 @@
 .app-header {
-  background: white;
+  background: #ffffff;
   padding: 1rem 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .header-inner {
-  max-width: 1240px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
@@ -20,7 +23,7 @@
 .brand-wrap {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .brand-link {
@@ -36,9 +39,21 @@
   opacity: 0.8;
 }
 
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  padding: 8px;
+}
+
 .brand-img {
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
   transition: transform 0.3s ease;
 }
 
@@ -46,15 +61,24 @@
   transform: scale(1.05);
 }
 
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-black);
+  letter-spacing: -0.02em;
+}
+
 .main-nav {
   display: flex;
-  gap: 2rem;
+  gap: 2.5rem;
   align-items: center;
+  flex: 1;
+  justify-content: center;
 }
 
 .nav-item {
-  color: var(--color-black);
-  font-size: 0.95rem;
+  color: var(--color-gray-dark);
+  font-size: 0.9375rem;
   font-weight: 500;
   padding: 0.5rem 0;
   position: relative;
@@ -74,7 +98,7 @@
 }
 
 .nav-item:hover {
-  color: var(--color-turquoise);
+  color: var(--color-black);
 }
 
 .nav-item:hover::after {
@@ -85,11 +109,22 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-shrink: 0;
+}
+
+.header-btn {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
 }
 
 @media (max-width: 900px) {
   .main-nav {
     display: none;
+  }
+
+  .header-inner {
+    gap: 1rem;
   }
 }
 
@@ -98,8 +133,18 @@
     padding: 0 1rem;
   }
 
-  .brand-img {
-    width: 32px;
-    height: 32px;
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+
+  .brand-name {
+    font-size: 1.125rem;
+  }
+
+  .header-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
   }
 }

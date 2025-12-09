@@ -205,48 +205,159 @@ const Home = () => {
     window.location.href = ROUTES.ABOUT;
   };
 
+  const features = [
+    {
+      icon: '💳',
+      title: 'Gastos Comunes en línea',
+      description: 'Pagos digitales seguros y seguimiento en tiempo real de tus gastos comunes.'
+    },
+    {
+      icon: '📱',
+      title: 'App móvil',
+      description: 'Gestiona tu comunidad desde cualquier lugar con nuestra aplicación móvil.'
+    },
+    {
+      icon: '📢',
+      title: 'Comunicación directa',
+      description: 'Mantén a tu comunidad informada con anuncios y mensajería instantánea.'
+    },
+    {
+      icon: '🔐',
+      title: 'Control de acceso',
+      description: 'Registra visitas y gestiona el acceso a tu comunidad de forma segura.'
+    },
+    {
+      icon: '📊',
+      title: 'Reportes y estadísticas',
+      description: 'Visualiza el estado financiero y la gestión de tu comunidad en tiempo real.'
+    },
+    {
+      icon: '🏠',
+      title: 'Reserva de espacios',
+      description: 'Gestiona la reserva de espacios comunes como quinchos y salas de eventos.'
+    },
+  ];
+
+  const benefits = [
+    {
+      title: 'Para Administradores',
+      items: [
+        'Módulo de recaudación completo',
+        'Reportes financieros detallados',
+        'Gestión centralizada de comunidades',
+        'Comunicación eficiente con residentes'
+      ]
+    },
+    {
+      title: 'Para Residentes',
+      items: [
+        'Pagos de gastos comunes online',
+        'Comunicación directa con administración',
+        'Reserva de espacios comunes',
+        'Acceso desde app móvil'
+      ]
+    },
+    {
+      title: 'Para Comités',
+      items: [
+        'Transparencia en las finanzas',
+        'Revisión en tiempo real de gestión',
+        'Comunicación activa con comunidad',
+        'Toma de decisiones informadas'
+      ]
+    },
+  ];
+
   return (
     <div className="home-page fade-in">
       <Header />
 
-      <MainContent>
+      {/* Hero Section */}
+      <section className="home-hero">
         <div className="container">
-          <div className="home-grid">
-            <section className="left-column">
-              <h1>Software para la administración de edificios y condominios</h1>
-              <p className="lead">Administra edificios con Domu: el software y la aplicación para tu comunidad. Gastos Comunes en línea y mucho más.</p>
-
-              <div className="hero-media">
-                <img src={heroLogo} alt="DOMU - Software para administración de edificios y condominios" className="hero-logo" />
+          <div className="home-hero__content">
+            <div className="home-hero__text">
+              <h1 className="home-hero__title">
+                Software para la administración de <strong>edificios y condominios</strong>
+              </h1>
+              <p className="home-hero__subtitle">
+                Administra edificios con DOMU: el software y la aplicación para tu comunidad. 
+                Gastos Comunes en línea y mucho más.
+              </p>
+              <div className="home-hero__actions">
+                <Button onClick={handleCreateCommunity} variant="primary" className="home-hero__cta">
+                  Crear mi comunidad
+                </Button>
+                <Button onClick={handleResidentLogin} variant="ghost" className="home-hero__secondary">
+                  Soy residente
+                </Button>
               </div>
-            </section>
-
-            <aside className="right-column" aria-label="Acciones principales">
-              <div className="stack-cards">
-                <FeatureCard title="Crea tu comunidad">
-                  <p>Una vez creada tu comunidad te contactaremos para seguir avanzando.</p>
-                  <Button onClick={handleCreateCommunity} variant="primary">
-                    Crea tu Comunidad
-                  </Button>
-                </FeatureCard>
-
-                <ResidentCard title="¿Eres residente?">
-                  <p>Ingresa a tu portal para pagos y comunicación.</p>
-                  <Button onClick={handleResidentLogin} variant="primary">
-                    Soy residente
-                  </Button>
-                </ResidentCard>
-
-                <FeatureCard title="Prueba gratis">
-                  <p>Explora la demo online</p>
-                  <Button onClick={handleDemoAccess} variant="primary">
-                    Entrar Demo Online Gratis
-                  </Button>
-                </FeatureCard>
-              </div>
-            </aside>
+            </div>
+            <div className="home-hero__visual">
+              <img src={heroLogo} alt="DOMU Logo" className="home-hero__logo" />
+            </div>
           </div>
         </div>
+      </section>
+
+      <MainContent>
+        {/* Features Section */}
+        <section className="home-features">
+          <div className="container">
+            <div className="home-section__header">
+              <h2>Funcionalidades principales</h2>
+              <p>Todo lo que necesitas para administrar tu comunidad de forma eficiente</p>
+            </div>
+            <div className="home-features__grid">
+              {features.map((feature, index) => (
+                <div key={index} className="home-feature-card">
+                  <div className="home-feature-card__icon">{feature.icon}</div>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits Section */}
+        <section className="home-benefits">
+          <div className="container">
+            <div className="home-section__header">
+              <h2>El software DOMU está pensado para cada integrante del condominio</h2>
+            </div>
+            <div className="home-benefits__grid">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="home-benefit-card">
+                  <h3>{benefit.title}</h3>
+                  <ul className="home-benefit-list">
+                    {benefit.items.map((item, itemIndex) => (
+                      <li key={itemIndex}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="home-cta">
+          <div className="container">
+            <div className="home-cta__content">
+              <h2>¿Listo para mejorar la gestión de tu comunidad?</h2>
+              <p>Crea tu comunidad ahora y comienza a administrar de forma más eficiente</p>
+              <div className="home-cta__actions">
+                <Button onClick={handleCreateCommunity} variant="primary" className="home-cta__button">
+                  Crear mi comunidad
+                </Button>
+                <Button onClick={handleDemoAccess} variant="ghost" className="home-cta__button">
+                  Ver demo
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
       </MainContent>
 
       <Footer />

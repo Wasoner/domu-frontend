@@ -1,18 +1,25 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/LogotipoDOMU.svg';
+import { Button } from '../components';
 import { ROUTES } from '../constants';
 import './Header.css';
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  const handleResidentClick = () => {
+    navigate(ROUTES.LOGIN);
+  };
 
   return (
     <header className="app-header">
       <div className="header-inner container">
         <div className="brand-wrap">
-          <Link to="/" className="brand-link" aria-label="Domu - Ir al inicio">
+          <Link to="/" className="brand-link" aria-label="DOMU - Ir al inicio">
             <span className="brand-logo" aria-hidden>
               <img src={logo} alt="DOMU - Software para administración de edificios" className="brand-img" />
             </span>
+            <span className="brand-name">DOMU</span>
           </Link>
         </div>
 
@@ -22,7 +29,9 @@ const Header = () => {
         </nav>
 
         <div className="header-actions">
-          <Link to={ROUTES.LOGIN} className="btn btn-ghost">Iniciar sesión</Link>
+          <Button onClick={handleResidentClick} variant="ghost" className="header-btn">
+            Soy residente
+          </Button>
         </div>
       </div>
     </header>

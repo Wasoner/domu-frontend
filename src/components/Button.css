@@ -37,14 +37,16 @@
 
 .btn-ghost {
   background: transparent;
-  color: var(--color-black);
-  border: 2px solid var(--color-gray);
+  color: var(--color-gray-dark);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-weight: 500;
 }
 
 .btn-ghost:hover {
-  background: rgba(128, 130, 130, 0.1);
+  background: rgba(83, 164, 151, 0.05);
   border-color: var(--color-turquoise);
   color: var(--color-turquoise);
+  transform: translateY(-1px);
 }
 
 .btn-danger {
