@@ -8,3 +8,6 @@ export { default as Login } from './Login';
 export { default as Register } from './Register';
 export { default as Dashboard } from './Dashboard';
 export { default as ResidentPortal } from './ResidentPortal';
+export { default as ResidentVisits } from './ResidentVisits';
+export { default as ResidentProfile } from './ResidentProfile';
+export { default as ResidentIncidents } from './ResidentIncidents';

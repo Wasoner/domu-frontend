@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Home, About, Login, Register, Dashboard, ResidentPortal } from './pages'
+import { Home, About, Login, Register, Dashboard, ResidentPortal, ResidentVisits, ResidentProfile, ResidentIncidents } from './pages'
 import { AppProvider } from './context'
 import { ROUTES } from './constants'
 
@@ -19,6 +19,9 @@ function App() {
 
           {/* Protected Routes - Resident */}
           <Route path={ROUTES.RESIDENT_PORTAL} element={<ResidentPortal />} />
+          <Route path={ROUTES.RESIDENT_EVENTS} element={<ResidentVisits />} />
+          <Route path={ROUTES.RESIDENT_PROFILE} element={<ResidentProfile />} />
+          <Route path={ROUTES.RESIDENT_INCIDENTS} element={<ResidentIncidents />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>

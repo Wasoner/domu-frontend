@@ -37,6 +37,7 @@ export const ROUTES = {
   RESIDENT_SERVICES: '/resident/services',
   RESIDENT_PROFILE: '/resident/profile',
   RESIDENT_SUPPORT: '/resident/support',
+  RESIDENT_INCIDENTS: '/resident/incidents',
 };
 
 /**

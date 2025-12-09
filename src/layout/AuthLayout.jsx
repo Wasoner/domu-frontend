@@ -30,3 +30,5 @@ AuthLayout.defaultProps = {
 
 export default AuthLayout;
 
+
+

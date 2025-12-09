@@ -1,4 +1,4 @@
-import { Button, FeatureCard, ResidentCard, VisitRegistrationPanel } from '../components';
+import { Button, FeatureCard, ResidentCard } from '../components';
 import { Header, MainContent, Footer, AuthLayout } from '../layout';
 import heroLogo from '../assets/LogotipoDOMU.svg';
 import { ROUTES } from '../constants';
@@ -148,8 +148,6 @@ const ResidentHome = ({ user }) => (
         </section>
       </aside>
     </div>
-
-    <VisitRegistrationPanel user={user} />
 
     <div className="floating-event" aria-live="polite">
       <strong>{upcomingEvent.title}</strong>

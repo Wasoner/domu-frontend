@@ -1,126 +1,111 @@
 import { useAppContext } from '../context';
 import { AuthLayout } from '../layout';
-import { VisitRegistrationPanel } from '../components';
 import './ResidentPortal.css';
 
-const residentHighlights = [
+// Datos de ejemplo para notificaciones
+const mockNotifications = [
     {
-        icon: '🏠',
-        title: 'Inicio personalizado',
-        description: 'Resumen de pagos, reservas y mensajes de tu comunidad.',
+        id: 1,
+        type: 'announcement',
+        title: 'Nueva asamblea de copropietarios',
+        message: 'Se convoca a asamblea extraordinaria el próximo viernes 15 de diciembre a las 19:00 hrs.',
+        date: '2024-12-10',
+        priority: 'high'
     },
     {
-        icon: '💳',
-        title: 'Pagos al día',
-        description: 'Accede directo a tus gastos comunes y estados de cuenta.',
+        id: 2,
+        type: 'payment',
+        title: 'Recordatorio de pago',
+        message: 'Tu gasto común de noviembre está próximo a vencer. Fecha límite: 20 de diciembre.',
+        date: '2024-12-08',
+        priority: 'medium'
     },
     {
-        icon: '🤝',
-        title: 'Vida en comunidad',
-        description: 'Eventos, reglamentos y avisos importantes en un solo lugar.',
-    },
-];
-
-const residentLayoutSteps = [
-    {
-        title: '1. Barra superior',
-        description: 'Atajos a soporte, cambio de unidad y botón para cerrar sesión.',
-    },
-    {
-        title: '2. Accesos rápidos',
-        description: 'Tarjetas centrales con pagos, comunicaciones y eventos.',
-    },
-    {
-        title: '3. Actividad reciente',
-        description: 'Timeline con novedades de tu edificio y tickets pendientes.',
-    },
-    {
-        title: '4. Centro de ayuda',
-        description: 'Enlaces útiles y preguntas frecuentes en el pie del portal.',
+        id: 3,
+        type: 'maintenance',
+        title: 'Mantención de ascensores',
+        message: 'Se realizará mantención preventiva de los ascensores el día 18 de diciembre.',
+        date: '2024-12-05',
+        priority: 'low'
     },
 ];
 
 /**
  * Resident Portal Page Component
- * Portal for residents to access their community information
+ * Simplified portal for residents with notifications
  */
 const ResidentPortal = () => {
     const { user } = useAppContext();
 
+    const displayName = user?.firstName
+        ? `${user.firstName} ${user?.lastName || ''}`.trim()
+        : user?.email || 'Residente';
+
+    const getNotificationIcon = (type) => {
+        switch(type) {
+            case 'announcement': return '📢';
+            case 'payment': return '💳';
+            case 'maintenance': return '🔧';
+            default: return '📌';
+        }
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    };
+
     return (
         <AuthLayout user={user}>
-            <article>
-                    <h1>Portal de Residente</h1>
-                    <p>Bienvenido, {user?.email || 'Residente'}</p>
+            <article className="resident-portal">
+                <header className="resident-portal__header">
+                    <h1>Panel Principal</h1>
+                    <p className="resident-portal__welcome">Bienvenido, {displayName}</p>
+                </header>
 
-                    <section className="info-banner" aria-live="polite">
-                        <strong>Tips para orientarte</strong>
-                        <p>
-                            Recorre estos bloques para conocer cómo está distribuido tu portal.
-                            Puedes ocultar esta guía una vez que te familiarices.
-                        </p>
-                    </section>
-
-                    <section className="info-grid" aria-label="Mapa del portal de residente">
-                        {residentHighlights.map((item) => (
-                            <article className="info-card" key={item.title}>
-                                <span className="info-card__icon" aria-hidden="true">
-                                    {item.icon}
-                                </span>
-                                <div>
-                                    <h3>{item.title}</h3>
-                                    <p>{item.description}</p>
-                                </div>
-                            </article>
-                        ))}
-                    </section>
-
-                    <section className="layout-guide">
-                        <h2>¿Cómo está distribuido el portal?</h2>
-                        <ol className="layout-steps">
-                            {residentLayoutSteps.map((step) => (
-                                <li key={step.title}>
-                                    <h4>{step.title}</h4>
-                                    <p>{step.description}</p>
-                                </li>
-                            ))}
-                        </ol>
-                    </section>
-
-                    <section className="services-section">
-                        <h2>Tus servicios</h2>
-                        <div className="services-grid">
-                            <div className="service-card">
-                                <h3>Gastos Comunes</h3>
-                                <p>Consulta y paga tus gastos comunes</p>
-                                <button className="btn btn-primary">
-                                    Ver Gastos
-                                </button>
-                            </div>
-
-                            <div className="service-card">
-                                <h3>Comunicaciones</h3>
-                                <p>Revisa avisos y comunicaciones</p>
-                                <button className="btn btn-primary">
-                                    Ver Comunicaciones
-                                </button>
-                            </div>
-
-                            <div className="service-card">
-                                <h3>Eventos</h3>
-                                <p>Consulta eventos y actividades</p>
-                                <button className="btn btn-primary">
-                                    Ver Eventos
-                                </button>
-                            </div>
+                <div className="resident-portal__grid">
+                    {/* Panel de Notificaciones */}
+                    <section className="resident-portal__panel resident-portal__panel--notifications">
+                        <div className="resident-portal__panel-header">
+                            <span className="resident-portal__panel-icon">🔔</span>
+                            <h2>Notificaciones de la Comunidad</h2>
                         </div>
+                        <div className="resident-portal__notifications-list">
+                            {mockNotifications.length > 0 ? (
+                                mockNotifications.map((notification) => (
+                                    <div 
+                                        key={notification.id} 
+                                        className={`resident-portal__notification resident-portal__notification--${notification.priority}`}
+                                    >
+                                        <div className="resident-portal__notification-header">
+                                            <span className="resident-portal__notification-icon">
+                                                {getNotificationIcon(notification.type)}
+                                            </span>
+                                            <div className="resident-portal__notification-info">
+                                                <h3>{notification.title}</h3>
+                                                <span className="resident-portal__notification-date">
+                                                    {formatDate(notification.date)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p className="resident-portal__notification-message">
+                                            {notification.message}
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="resident-portal__empty-state">
+                                    <p>No hay notificaciones nuevas</p>
+                                </div>
+                            )}
+                        </div>
+                        {mockNotifications.length > 0 && (
+                            <button className="resident-portal__view-all-btn">
+                                Ver todas las notificaciones
+                            </button>
+                        )}
                     </section>
-
-                    <VisitRegistrationPanel user={user} />
-
-                    <div className="under-construction">
-                        <p>🚧 Esta sección está en desarrollo</p>
-                    </div>
+                </div>
             </article>
         </AuthLayout>
     );
