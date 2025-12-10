@@ -115,6 +115,12 @@
   flex-wrap: wrap;
 }
 
+.visit-form__helper {
+  margin-top: 0.5rem;
+  color: var(--color-gray-dark);
+  font-size: 0.9rem;
+}
+
 .visit-form__preview {
   margin-top: 1rem;
   font-size: 0.95rem;
