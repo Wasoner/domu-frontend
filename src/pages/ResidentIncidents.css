@@ -33,6 +33,36 @@
   flex-wrap: wrap;
 }
 
+.resident-incidents__filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.resident-incidents__filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-gray-dark);
+}
+
+.resident-incidents__filter-field input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.resident-incidents__error {
+  color: #b42318;
+  background: rgba(219, 57, 52, 0.1);
+  border: 1px solid rgba(219, 57, 52, 0.4);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
 .resident-incidents__search {
   display: flex;
   align-items: center;

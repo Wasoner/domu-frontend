@@ -321,4 +321,40 @@ export const api = {
       return fetchWrapper('/users/me', { method: 'GET' });
     },
   },
+
+  finance: {
+    getMyCharges: async () => fetchWrapper('/finance/my-charges', { method: 'GET' }),
+  },
+
+  buildings: {
+    createRequest: async (data) => fetchWrapper('/buildings/requests', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  },
+
+  visits: {
+    create: async (data) => fetchWrapper('/visits', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    listMine: async () => fetchWrapper('/visits/my', { method: 'GET' }),
+    checkIn: async (authorizationId) => fetchWrapper(`/visits/${authorizationId}/check-in`, {
+      method: 'POST',
+    }),
+  },
+
+  incidents: {
+    listMine: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.from) query.set('from', params.from);
+      if (params.to) query.set('to', params.to);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/incidents/my${suffix}`, { method: 'GET' });
+    },
+    create: async (data) => fetchWrapper('/incidents', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  },
 };

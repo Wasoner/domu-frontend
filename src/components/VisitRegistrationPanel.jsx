@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { api } from '../services';
 import Button from './Button';
 import './VisitPanel.css';
 
-const VISIT_STORAGE_KEY = 'domu.visit-requests';
 const SUPPORTED_ROLES = ['resident', 'concierge', 'admin'];
 const ROLE_LABELS = {
   resident: 'Residente',
@@ -11,69 +11,13 @@ const ROLE_LABELS = {
   admin: 'Administrador',
 };
 
-const defaultPastVisits = [
-  {
-    id: 'past-1',
-    fullName: 'Carlos Olguín',
-    unit: '1502',
-    time: '2025-11-06T17:40:00',
-  },
-  {
-    id: 'past-2',
-    fullName: 'Raúl Grande',
-    unit: '1502',
-    time: '2025-11-05T22:25:00',
-  },
-  {
-    id: 'past-3',
-    fullName: 'Francisca Villanueva',
-    unit: '1502',
-    time: '2025-10-24T23:18:00',
-  },
-  {
-    id: 'past-4',
-    fullName: 'Tatiana Pastén',
-    unit: '1502',
-    time: '2025-10-13T08:33:00',
-  },
-];
-
-const defaultBlockedVisits = [
-  {
-    id: 'blocked-1',
-    fullName: 'Proveedor genérico',
-    note: 'Restringido por la comunidad (bloqueado el 01/10/2025)',
-  },
-];
-
 const initialFormState = {
   firstName: '',
   paternalLastName: '',
   maternalLastName: '',
   rut: '',
+  validForMinutes: 120,
   unit: '',
-};
-
-const loadStoredVisits = () => {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = window.localStorage.getItem(VISIT_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.warn('[VisitRegistrationPanel] No se pudo leer visitas almacenadas:', error);
-    return [];
-  }
-};
-
-const persistVisits = (visits) => {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(VISIT_STORAGE_KEY, JSON.stringify(visits));
-  } catch (error) {
-    console.warn('[VisitRegistrationPanel] No se pudo guardar visitas:', error);
-  }
 };
 
 const formatDate = (isoString) => {
@@ -91,11 +35,13 @@ const normalizeRut = (rut) => rut.replace(/\./g, '').replace(/\s+/g, '').toUpper
 
 const rutIsValid = (rut) => /^[0-9]{7,8}-[\dK]$/i.test(normalizeRut(rut));
 
-const generateVisitId = () => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `visit-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+const buildVisitorName = (formData) => `${formData.firstName} ${formData.paternalLastName} ${formData.maternalLastName}`.replace(/\s+/g, ' ').trim();
+
+const statusLabel = (status) => {
+  const normalized = (status || 'SCHEDULED').toUpperCase();
+  if (normalized === 'CHECKED_IN') return 'Ingresada';
+  if (normalized === 'EXPIRED') return 'Expirada';
+  return 'Agendada';
 };
 
 const VisitRegistrationPanel = ({ user }) => {
@@ -108,16 +54,34 @@ const VisitRegistrationPanel = ({ user }) => {
   }, [user]);
 
   const [formData, setFormData] = useState(initialFormState);
-  const [upcomingVisits, setUpcomingVisits] = useState(loadStoredVisits);
-  const [pastVisits, setPastVisits] = useState(defaultPastVisits);
-  const [blockedVisits] = useState(defaultBlockedVisits);
+  const [upcomingVisits, setUpcomingVisits] = useState([]);
+  const [pastVisits, setPastVisits] = useState([]);
   const [feedback, setFeedback] = useState(null);
+  const [loadingVisits, setLoadingVisits] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const canRegister = SUPPORTED_ROLES.includes(resolvedRole);
+  const hasUnit = resolvedRole === 'resident' ? Boolean(user?.unitId) : Boolean(formData.unit);
+
+  const fetchVisits = useCallback(async () => {
+    if (!user) return;
+    setLoadingVisits(true);
+    try {
+      const response = await api.visits.listMine();
+      setUpcomingVisits(response?.upcoming || []);
+      setPastVisits(response?.past || []);
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message || 'No pudimos cargar tus visitas.' });
+    } finally {
+      setLoadingVisits(false);
+    }
+  }, [user]);
 
   useEffect(() => {
-    persistVisits(upcomingVisits);
-  }, [upcomingVisits]);
+    if (user) {
+      fetchVisits();
+    }
+  }, [user, fetchVisits]);
 
   useEffect(() => {
     if (!feedback) return undefined;
@@ -143,11 +107,15 @@ const VisitRegistrationPanel = ({ user }) => {
     if (!formData.maternalLastName.trim()) return 'El apellido materno es obligatorio.';
     if (!formData.rut.trim()) return 'El RUT es obligatorio.';
     if (!rutIsValid(formData.rut)) return 'El RUT debe tener el formato 12345678-9.';
-    if (!formData.unit.trim()) return 'Debes indicar la unidad o departamento de destino.';
+    if (!hasUnit) return resolvedRole === 'resident'
+      ? 'No encontramos tu unidad. Actualiza tu perfil o contacta al administrador.'
+      : 'Debes indicar la unidad/departamento para esta visita.';
+    const minutes = Number(formData.validForMinutes);
+    if (Number.isNaN(minutes) || minutes <= 0) return 'La vigencia debe ser mayor a 0 minutos.';
     return null;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const errorMessage = validateForm();
     if (errorMessage) {
@@ -155,44 +123,39 @@ const VisitRegistrationPanel = ({ user }) => {
       return;
     }
 
-    const newVisit = {
-      id: generateVisitId(),
-      firstName: formData.firstName.trim(),
-      paternalLastName: formData.paternalLastName.trim(),
-      maternalLastName: formData.maternalLastName.trim(),
-      rut: normalizeRut(formData.rut),
-      unit: formData.unit.trim().toUpperCase(),
-      createdAt: new Date().toISOString(),
-      createdBy: user?.firstName
-        ? `${user.firstName} ${user?.lastName || ''}`.trim()
-        : user?.email || 'Usuario DOMU',
-      createdByRole: ROLE_LABELS[resolvedRole] || 'Usuario',
-    };
-
-    setUpcomingVisits((prev) => [newVisit, ...prev]);
-    setFeedback({
-      type: 'success',
-      message: `Visita registrada. Recuerda informar a recepción para la unidad ${newVisit.unit}.`,
-    });
-    resetForm();
+    setSubmitting(true);
+    try {
+      await api.visits.create({
+        visitorName: buildVisitorName(formData),
+        visitorDocument: normalizeRut(formData.rut),
+        visitorType: 'VISIT',
+        validForMinutes: Number(formData.validForMinutes),
+        ...(resolvedRole !== 'resident' ? { unitId: Number(formData.unit) } : {}),
+      });
+      setFeedback({
+        type: 'success',
+        message: 'Visita registrada y enviada a conserjería.',
+      });
+      resetForm();
+      fetchVisits();
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message || 'No pudimos registrar la visita.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleCheckIn = (visitId) => {
-    setUpcomingVisits((prev) => {
-      const target = prev.find((visit) => visit.id === visitId);
-      if (!target) return prev;
-      setPastVisits((current) => [
-        {
-          id: `${visitId}-past`,
-          fullName: `${target.firstName} ${target.paternalLastName}`,
-          unit: target.unit,
-          time: new Date().toISOString(),
-        },
-        ...current,
-      ]);
+  const handleCheckIn = async (authorizationId) => {
+    setSubmitting(true);
+    try {
+      await api.visits.checkIn(authorizationId);
       setFeedback({ type: 'success', message: 'Visita marcada como ingresada.' });
-      return prev.filter((visit) => visit.id !== visitId);
-    });
+      fetchVisits();
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message || 'No pudimos marcar el ingreso.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!user) {
@@ -211,7 +174,7 @@ const VisitRegistrationPanel = ({ user }) => {
     );
   }
 
-  if (!canRegister) {
+  if (!canRegister || !hasUnit) {
     return (
       <section className="visit-panel">
         <header className="visit-panel__header">
@@ -221,7 +184,9 @@ const VisitRegistrationPanel = ({ user }) => {
           </div>
         </header>
         <p className="visit-panel__locked">
-          Tu perfil todavía no tiene permiso para anunciar visitas. Contacta al administrador para habilitarlo.
+          {!canRegister
+            ? 'Tu perfil todavía no tiene permiso para anunciar visitas. Contacta al administrador para habilitarlo.'
+            : 'Necesitamos una unidad asociada para enviar la visita. Actualiza tu perfil o pide apoyo al administrador.'}
         </p>
       </section>
     );
@@ -306,30 +271,51 @@ const VisitRegistrationPanel = ({ user }) => {
               </label>
 
               <label className="visit-form__field">
-                <span>Unidad o departamento</span>
+                <span>Vigencia (minutos)</span>
                 <input
-                  type="text"
-                  name="unit"
-                  value={formData.unit}
+                  type="number"
+                  name="validForMinutes"
+                  value={formData.validForMinutes}
                   onChange={handleChange}
-                  placeholder="Ej: 1502"
+                  min="15"
+                  step="15"
                   required
                 />
               </label>
+
+              {resolvedRole !== 'resident' && (
+                <label className="visit-form__field">
+                  <span>Unidad o departamento</span>
+                  <input
+                    type="text"
+                    name="unit"
+                    value={formData.unit}
+                    onChange={handleChange}
+                    placeholder="Ej: 1502"
+                    required
+                  />
+                </label>
+              )}
             </div>
+            <p className="visit-form__helper">
+              {resolvedRole === 'resident'
+                ? 'Usaremos tu unidad asociada automáticamente para autorizar el ingreso.'
+                : 'Indica la unidad del residente para generar la autorización.'}
+            </p>
           </fieldset>
 
           <div className="visit-form__actions">
-            <Button type="submit" variant="primary">
-              Registrar visita
+            <Button type="submit" variant="primary" disabled={submitting}>
+              {submitting ? 'Registrando...' : 'Registrar visita'}
             </Button>
-            <Button type="button" variant="ghost" onClick={resetForm}>
+            <Button type="button" variant="ghost" onClick={resetForm} disabled={submitting}>
               Limpiar
             </Button>
           </div>
 
           <p className="visit-form__preview">
-            Próxima visita: <strong>{fullNamePreview}</strong> {formData.unit && `→ Unidad ${formData.unit}`}
+            Próxima visita: <strong>{fullNamePreview}</strong>
+            {formData.validForMinutes ? ` · Vigente ${formData.validForMinutes} min` : ''}
           </p>
         </form>
 
@@ -337,10 +323,10 @@ const VisitRegistrationPanel = ({ user }) => {
           <article className="visit-board">
             <header>
               <h4>Próximas visitas</h4>
-              <span>{upcomingVisits.length || '0'}</span>
+              <span>{loadingVisits ? '...' : upcomingVisits.length || '0'}</span>
             </header>
             <ul className="visit-board__list">
-              {upcomingVisits.length === 0 && (
+              {upcomingVisits.length === 0 && !loadingVisits && (
                 <li className="visit-board__empty">
                   <strong>¿Aún sin visitas?</strong>
                   <span>Registra desde aquí para avisar al equipo de conserjería.</span>
@@ -348,16 +334,18 @@ const VisitRegistrationPanel = ({ user }) => {
               )}
 
               {upcomingVisits.map((visit) => (
-                <li key={visit.id} className="visit-card">
+                <li key={visit.authorizationId} className="visit-card">
                   <div>
-                    <strong>{`${visit.firstName} ${visit.paternalLastName}`}</strong>
-                    <p>Unidad {visit.unit}</p>
-                    <small>Registrado por {visit.createdByRole} · {visit.createdBy}</small>
+                    <strong>{visit.visitorName}</strong>
+                    <p>Unidad {visit.unitId}</p>
+                    <p>Válida hasta {formatDate(visit.validUntil)}</p>
+                    <small>Estado: {statusLabel(visit.status)}</small>
                   </div>
                   <button
                     type="button"
                     className="visit-card__action"
-                    onClick={() => handleCheckIn(visit.id)}
+                    onClick={() => handleCheckIn(visit.authorizationId)}
+                    disabled={submitting}
                   >
                     Dar ingreso
                   </button>
@@ -373,35 +361,20 @@ const VisitRegistrationPanel = ({ user }) => {
             </header>
             <ul className="visit-board__list">
               {pastVisits.map((visit) => (
-                <li key={visit.id} className="visit-card visit-card--muted">
+                <li key={visit.authorizationId} className="visit-card visit-card--muted">
                   <div>
-                    <strong>{visit.fullName}</strong>
-                    <p>Ingresó a las {formatDate(visit.time)}</p>
-                    <small>Unidad {visit.unit}</small>
+                    <strong>{visit.visitorName}</strong>
+                    <p>Unidad {visit.unitId}</p>
+                    <p>
+                      {visit.checkInAt
+                        ? `Ingresó el ${formatDate(visit.checkInAt)}`
+                        : `Vencida el ${formatDate(visit.validUntil)}`}
+                    </p>
+                    <small>Estado: {statusLabel(visit.status)}</small>
                   </div>
                 </li>
               ))}
             </ul>
-          </article>
-
-          <article className="visit-board">
-            <header>
-              <h4>No autorizadas</h4>
-              <span>{blockedVisits.length}</span>
-            </header>
-            <ul className="visit-board__list">
-              {blockedVisits.map((visit) => (
-                <li key={visit.id} className="visit-card visit-card--alert">
-                  <div>
-                    <strong>{visit.fullName}</strong>
-                    <p>{visit.note}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <Button variant="secondary" type="button">
-              Reportar visita no autorizada
-            </Button>
           </article>
         </div>
       </div>
@@ -416,6 +389,7 @@ VisitRegistrationPanel.propTypes = {
     email: PropTypes.string,
     userType: PropTypes.string,
     roleId: PropTypes.number,
+    unitId: PropTypes.number,
   }),
 };
 

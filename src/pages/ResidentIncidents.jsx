@@ -1,23 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAppContext } from '../context';
 import { AuthLayout } from '../layout';
+import { api } from '../services';
 import './ResidentIncidents.css';
-
-// Datos de ejemplo para incidentes
-const mockIncidents = {
-  reported: [
-    { id: 1, title: 'Fuga en tubería del estacionamiento', date: '2024-12-10', type: 'maintenance' },
-    { id: 2, title: 'Luz fundida en pasillo 3er piso', date: '2024-12-09', type: 'maintenance' },
-  ],
-  inProgress: [
-    { id: 3, title: 'Reparación de ascensor A', date: '2024-12-08', type: 'maintenance' },
-    { id: 4, title: 'Mantención de jardines', date: '2024-12-07', type: 'maintenance' },
-  ],
-  closed: [
-    { id: 5, title: 'Cambio de cerradura puerta principal', date: '2024-12-05', type: 'security' },
-    { id: 6, title: 'Limpieza de ductos de ventilación', date: '2024-12-03', type: 'maintenance' },
-  ],
-};
 
 /**
  * Resident Incidents Page Component
@@ -33,17 +18,67 @@ const ResidentIncidents = () => {
     location: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [incidents, setIncidents] = useState({ reported: [], inProgress: [], closed: [] });
+  const [loading, setLoading] = useState(false);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [error, setError] = useState(null);
+
+  const filteredIncidents = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    const filterList = (list) => list.filter((item) => item.title.toLowerCase().includes(query));
+    return {
+      reported: filterList(incidents.reported),
+      inProgress: filterList(incidents.inProgress),
+      closed: filterList(incidents.closed),
+    };
+  }, [incidents, searchQuery]);
+
+  const fetchIncidents = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.incidents.listMine({
+        from: dateFrom || undefined,
+        to: dateTo || undefined,
+      });
+      setIncidents({
+        reported: response?.reported || [],
+        inProgress: response?.inProgress || [],
+        closed: response?.closed || [],
+      });
+    } catch (err) {
+      setError(err.message || 'No pudimos cargar los incidentes.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchIncidents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const handleReportIncident = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    setTimeout(() => {
-      alert('Incidente reportado exitosamente. El administrador será notificado.');
+    setError(null);
+    try {
+      await api.incidents.create({
+        title: incidentForm.location ? `${incidentForm.type || 'Incidente'} - ${incidentForm.location}` : incidentForm.type || 'Incidente',
+        description: incidentForm.description,
+        category: incidentForm.type || 'other',
+        priority: 'MEDIUM',
+      });
       setIncidentForm({ type: '', description: '', location: '' });
       setShowReportModal(false);
+      fetchIncidents();
+    } catch (err) {
+      setError(err.message || 'No pudimos reportar el incidente.');
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -69,17 +104,32 @@ const ResidentIncidents = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <button className="resident-incidents__filter-btn">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <rect x="3" y="4" width="14" height="2" rx="1" fill="currentColor"/>
-                <rect x="3" y="9" width="14" height="2" rx="1" fill="currentColor"/>
-                <rect x="3" y="14" width="14" height="2" rx="1" fill="currentColor"/>
-              </svg>
-              Filtrar por fecha
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+            <div className="resident-incidents__filters">
+              <label className="resident-incidents__filter-field">
+                <span>Desde</span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+              </label>
+              <label className="resident-incidents__filter-field">
+                <span>Hasta</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+              </label>
+              <button
+                className="resident-incidents__filter-btn"
+                onClick={fetchIncidents}
+                type="button"
+                disabled={loading}
+              >
+                Aplicar filtro
+              </button>
+            </div>
             <button 
               className="resident-incidents__report-btn"
               onClick={() => setShowReportModal(true)}
@@ -88,6 +138,8 @@ const ResidentIncidents = () => {
             </button>
           </div>
         </header>
+
+        {error && <p className="resident-incidents__error">{error}</p>}
 
         <div className="resident-incidents__panels">
           {/* Panel Reportados */}
@@ -99,13 +151,14 @@ const ResidentIncidents = () => {
               <h3>¿Algo no funciona como debe?</h3>
               <p>Aquí verás los incidentes nuevos de tu comunidad</p>
             </div>
-            {mockIncidents.reported.length > 0 && (
+            {loading && <p>Cargando...</p>}
+            {!loading && filteredIncidents.reported.length > 0 && (
               <div className="resident-incidents__panel-list">
-                {mockIncidents.reported.map((incident) => (
+                {filteredIncidents.reported.map((incident) => (
                   <div key={incident.id} className="resident-incidents__incident-item">
                     <span className="resident-incidents__incident-title">{incident.title}</span>
                     <span className="resident-incidents__incident-date">
-                      {new Date(incident.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      {new Date(incident.createdAt || incident.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
                 ))}
@@ -123,13 +176,14 @@ const ResidentIncidents = () => {
               <h3>Trabajos en desarrollo</h3>
               <p>Conoce aquí los incidentes que están en proceso de ser solucionados</p>
             </div>
-            {mockIncidents.inProgress.length > 0 && (
+            {loading && <p>Cargando...</p>}
+            {!loading && filteredIncidents.inProgress.length > 0 && (
               <div className="resident-incidents__panel-list">
-                {mockIncidents.inProgress.map((incident) => (
+                {filteredIncidents.inProgress.map((incident) => (
                   <div key={incident.id} className="resident-incidents__incident-item">
                     <span className="resident-incidents__incident-title">{incident.title}</span>
                     <span className="resident-incidents__incident-date">
-                      {new Date(incident.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      {new Date(incident.createdAt || incident.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
                 ))}
@@ -146,13 +200,14 @@ const ResidentIncidents = () => {
               <h3>Trabajos concluidos</h3>
               <p>Los incidentes que tu administración considere listos los visualizarás acá</p>
             </div>
-            {mockIncidents.closed.length > 0 && (
+            {loading && <p>Cargando...</p>}
+            {!loading && filteredIncidents.closed.length > 0 && (
               <div className="resident-incidents__panel-list">
-                {mockIncidents.closed.map((incident) => (
+                {filteredIncidents.closed.map((incident) => (
                   <div key={incident.id} className="resident-incidents__incident-item">
                     <span className="resident-incidents__incident-title">{incident.title}</span>
                     <span className="resident-incidents__incident-date">
-                      {new Date(incident.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      {new Date(incident.createdAt || incident.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
                 ))}
