@@ -168,7 +168,7 @@ export const api = {
           try {
             const errorData = await response.json();
             errorMessage = errorData.message || errorData.error || errorMessage;
-          } catch (e) {
+          } catch {
             const text = await response.text();
             console.error('[Login Error] Respuesta del servidor:', text);
           }
@@ -285,7 +285,7 @@ export const api = {
             } else {
               errorMessage = errorData.message || errorData.error || errorMessage;
             }
-          } catch (e) {
+          } catch {
             // Si no se puede parsear el error
             const text = await response.text();
             console.error('[Register Error] Respuesta del servidor:', text);
@@ -342,6 +342,30 @@ export const api = {
     checkIn: async (authorizationId) => fetchWrapper(`/visits/${authorizationId}/check-in`, {
       method: 'POST',
     }),
+    history: async (query = '') => {
+      const suffix = query ? `?q=${encodeURIComponent(query)}` : '';
+      return fetchWrapper(`/visits/history${suffix}`, { method: 'GET' });
+    },
+    contacts: {
+      create: async (data) => fetchWrapper('/visit-contacts', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+      list: async (query = '', limit) => {
+        const params = new URLSearchParams();
+        if (query) params.set('q', query);
+        if (limit) params.set('limit', String(limit));
+        const suffix = params.toString() ? `?${params.toString()}` : '';
+        return fetchWrapper(`/visit-contacts${suffix}`, { method: 'GET' });
+      },
+      delete: async (contactId) => fetchWrapper(`/visit-contacts/${contactId}`, {
+        method: 'DELETE',
+      }),
+      register: async (contactId, data = {}) => fetchWrapper(`/visit-contacts/${contactId}/register`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    },
   },
 
   incidents: {

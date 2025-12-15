@@ -22,12 +22,14 @@ export const AppProvider = ({ children }) => {
     const token = localStorage.getItem('authToken');
     const userType = localStorage.getItem('userType');
     const userEmail = localStorage.getItem('userEmail');
+    const selectedBuildingId = localStorage.getItem('selectedBuildingId');
     
     if (token && userEmail) {
       return {
         email: userEmail,
         userType: userType || 'resident',
         isAuthenticated: true,
+        selectedBuildingId: selectedBuildingId ? Number(selectedBuildingId) : undefined,
       };
     }
     return null;
@@ -69,6 +71,9 @@ export const AppProvider = ({ children }) => {
       ? {
           ...userData,
           userType: resolveUserType(userData),
+          selectedBuildingId: userData.selectedBuildingId || userData.activeBuildingId || userData.activeBuildingId === 0
+            ? userData.activeBuildingId
+            : (user?.selectedBuildingId || undefined),
         }
       : null;
 
@@ -76,7 +81,19 @@ export const AppProvider = ({ children }) => {
     if (normalizedUser) {
       localStorage.setItem('userEmail', normalizedUser.email || '');
       localStorage.setItem('userType', normalizedUser.userType || 'resident');
+      if (normalizedUser.selectedBuildingId) {
+        localStorage.setItem('selectedBuildingId', normalizedUser.selectedBuildingId);
+      }
     }
+  };
+
+  const selectBuilding = (buildingId) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, selectedBuildingId: buildingId };
+      localStorage.setItem('selectedBuildingId', buildingId ?? '');
+      return next;
+    });
   };
 
   // Función para cerrar sesión
@@ -88,6 +105,7 @@ export const AppProvider = ({ children }) => {
   const value = {
     user,
     setUser: updateUser,
+    selectBuilding,
     logout,
     theme,
     setTheme,
