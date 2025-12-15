@@ -164,6 +164,17 @@
   transition: background-color 0.15s ease;
 }
 
+.auth-header__dropdown-item--muted {
+  color: #94a3b8;
+  cursor: default;
+}
+
+.auth-header__dropdown-item--active {
+  background: #f0fdfa;
+  font-weight: 600;
+  color: #0f172a;
+}
+
 .auth-header__dropdown-item:hover {
   background-color: #f1f5f9;
 }

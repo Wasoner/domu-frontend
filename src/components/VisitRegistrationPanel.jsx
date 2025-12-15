@@ -72,13 +72,10 @@ const VisitRegistrationPanel = ({ user }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [upcomingVisits, setUpcomingVisits] = useState([]);
   const [pastVisits, setPastVisits] = useState([]);
-  const [historyResults, setHistoryResults] = useState([]);
-  const [historySearch, setHistorySearch] = useState('');
   const [contacts, setContacts] = useState([]);
   const [contactSearch, setContactSearch] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [loadingVisits, setLoadingVisits] = useState(false);
-  const [loadingHistory, setLoadingHistory] = useState(false);
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [saveContact, setSaveContact] = useState(false);
@@ -121,26 +118,12 @@ const VisitRegistrationPanel = ({ user }) => {
     }
   }, [user]);
 
-  const fetchHistory = useCallback(async (searchTerm = '') => {
-    if (!user) return;
-    setLoadingHistory(true);
-    try {
-      const response = await api.visits.history(searchTerm);
-      setHistoryResults(response || []);
-    } catch (error) {
-      setFeedback({ type: 'error', message: error.message || 'No pudimos cargar el historial de visitas.' });
-    } finally {
-      setLoadingHistory(false);
-    }
-  }, [user]);
-
   useEffect(() => {
     if (user) {
       fetchVisits();
-      fetchHistory();
       fetchContacts();
     }
-  }, [user, fetchVisits, fetchHistory, fetchContacts]);
+  }, [user, fetchVisits, fetchContacts]);
 
   useEffect(() => {
     if (!feedback) return undefined;
@@ -158,15 +141,6 @@ const VisitRegistrationPanel = ({ user }) => {
 
   const resetForm = () => {
     setFormData(initialFormState);
-  };
-
-  const handleHistorySearchChange = (event) => {
-    setHistorySearch(event.target.value);
-  };
-
-  const handleHistorySubmit = async (event) => {
-    event.preventDefault();
-    fetchHistory(historySearch);
   };
 
   const handleSaveContactToggle = (event) => {
@@ -264,10 +238,6 @@ const VisitRegistrationPanel = ({ user }) => {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleDeleteHistory = (visit) => {
-    setHistoryResults((prev) => prev.filter((item) => item.authorizationId !== visit.authorizationId));
   };
 
   const handleDeleteContact = async (contact) => {
@@ -534,75 +504,7 @@ const VisitRegistrationPanel = ({ user }) => {
           <article className="visit-board visit-board--history">
             <header className="visit-board__header">
               <div>
-                <h4>Visitas registradas</h4>
-                <p className="visit-board__helper">Busca por nombre o RUT y carga en el formulario</p>
-              </div>
-              <form className="visit-history__form" onSubmit={handleHistorySubmit}>
-                <input
-                  type="search"
-                  className="visit-history__input"
-                  name="historySearch"
-                  value={historySearch}
-                  onChange={handleHistorySearchChange}
-                  placeholder="Ej: María o 12345678-9"
-                  aria-label="Buscar visitas previas"
-                />
-                <Button type="submit" variant="secondary" disabled={loadingHistory}>
-                  {loadingHistory ? 'Buscando...' : 'Buscar'}
-                </Button>
-              </form>
-            </header>
-            <ul className="visit-board__list">
-              {loadingHistory && (
-                <li className="visit-board__empty">Buscando visitas registradas...</li>
-              )}
-              {!loadingHistory && historyResults.length === 0 && (
-                <li className="visit-board__empty">
-                  <strong>Sin resultados</strong>
-                  <span>Intenta otro nombre o RUT para buscar visitas anteriores.</span>
-                </li>
-              )}
-              {historyResults.slice(0, 5).map((visit) => (
-                <li key={`${visit.authorizationId}-${visit.visitId}`} className="visit-card visit-card--muted">
-                  <button
-                    type="button"
-                    className="visit-card__delete"
-                    aria-label="Eliminar visita registrada"
-                    onClick={() => handleDeleteHistory(visit)}
-                    disabled={submitting}
-                  >
-                    🗑️
-                  </button>
-                  <div>
-                    <strong>{visit.visitorName}</strong>
-                    {visit.visitorDocument && <p>RUT {visit.visitorDocument}</p>}
-                    <p>Unidad {visit.unitId}</p>
-                    <p>
-                      {visit.checkInAt
-                        ? `Ingresó el ${formatDate(visit.checkInAt)}`
-                        : `Vencida el ${formatDate(visit.validUntil)}`}
-                    </p>
-                    <small>Estado: {statusLabel(visit.status)}</small>
-                  </div>
-                  <div className="visit-card__actions">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => handleReRegister(visit)}
-                      disabled={submitting}
-                    >
-                      Cargar en formulario
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article className="visit-board visit-board--history">
-            <header className="visit-board__header">
-              <div>
-                <h4>Contactos</h4>
+                <h4>Visitas guardadas</h4>
                 <p className="visit-board__helper">Frecuentes / plantillas (máx. 5)</p>
               </div>
               <form className="visit-history__form" onSubmit={handleContactSearchSubmit}>
@@ -622,11 +524,11 @@ const VisitRegistrationPanel = ({ user }) => {
             </header>
             <ul className="visit-board__list">
               {loadingContacts && (
-                <li className="visit-board__empty">Buscando contactos...</li>
+                <li className="visit-board__empty">Buscando visitas guardadas...</li>
               )}
               {!loadingContacts && contacts.length === 0 && (
                 <li className="visit-board__empty">
-                  <strong>Sin contactos</strong>
+                  <strong>Sin visitas guardadas</strong>
                   <span>Guarda desde el formulario con “Guardar como contacto”.</span>
                 </li>
               )}
