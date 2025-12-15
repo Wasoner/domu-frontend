@@ -1,33 +1,31 @@
 .resident-visits {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
 }
 
 .resident-visits__intro {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
 }
 
 .resident-visits__eyebrow {
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-gray);
-  margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-gray);
+    margin: 0;
 }
 
 .resident-visits__subtitle {
-  max-width: 720px;
-  color: var(--color-gray-dark);
-  margin: 0;
+    max-width: 720px;
+    color: var(--color-gray-dark);
+    margin: 0;
 }
 
 @media (max-width: 768px) {
-  .resident-visits {
-    gap: 1rem;
-  }
+    .resident-visits {
+        gap: 1rem;
+    }
 }
-
-

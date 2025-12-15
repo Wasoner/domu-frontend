@@ -78,9 +78,9 @@ const AuthHeader = ({ user }) => {
   return (
     <header className="auth-header" role="banner">
       <div className="auth-header__left">
-        <img 
-          src={logo} 
-          alt="Logo DOMU" 
+        <img
+          src={logo}
+          alt="Logo DOMU"
           className="auth-header__logo auth-header__logo--clickable"
           onClick={handleLogoClick}
           role="button"
@@ -95,21 +95,21 @@ const AuthHeader = ({ user }) => {
         />
         <div className="auth-header__brand">
           <span className="auth-header__brand-name">Comunidad DOMU</span>
-          <div 
+          <div
             className="auth-header__building-selector"
             ref={buildingRef}
             onClick={() => setShowBuildingDropdown(!showBuildingDropdown)}
           >
             <span className="auth-header__unit-number">{unitLabel}</span>
             <span className="auth-header__building-name">Edificio Orompello</span>
-            <svg 
+            <svg
               className={`auth-header__chevron ${showBuildingDropdown ? 'auth-header__chevron--open' : ''}`}
-              width="12" 
-              height="12" 
-              viewBox="0 0 12 12" 
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
               fill="none"
             >
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {showBuildingDropdown && (
               <div className="auth-header__dropdown">
@@ -123,16 +123,16 @@ const AuthHeader = ({ user }) => {
       </div>
 
       <div className="auth-header__right">
-        <div 
+        <div
           className="auth-header__icon-button"
           ref={helpRef}
           onClick={() => setShowHelpDropdown(!showHelpDropdown)}
           aria-label="Ayuda"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M7.5 7.5C7.5 6.11929 8.61929 5 10 5C11.3807 5 12.5 6.11929 12.5 7.5C12.5 8.38071 12.0523 9.14286 11.4 9.6C10.7477 10.0571 10.5 10.6193 10.5 11V11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="10" cy="13.5" r="0.75" fill="currentColor"/>
+            <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M7.5 7.5C7.5 6.11929 8.61929 5 10 5C11.3807 5 12.5 6.11929 12.5 7.5C12.5 8.38071 12.0523 9.14286 11.4 9.6C10.7477 10.0571 10.5 10.6193 10.5 11V11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="10" cy="13.5" r="0.75" fill="currentColor" />
           </svg>
           {showHelpDropdown && (
             <div className="auth-header__dropdown auth-header__dropdown--right">
@@ -143,15 +143,15 @@ const AuthHeader = ({ user }) => {
           )}
         </div>
 
-        <div 
+        <div
           className="auth-header__icon-button"
           ref={notificationsRef}
           onClick={() => setShowNotificationsDropdown(!showNotificationsDropdown)}
           aria-label="Notificaciones"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10 3C7.23858 3 5 5.23858 5 8V11.5858C5 12.1162 4.78929 12.625 4.41421 13L3 14.4142V15H17V14.4142L15.5858 13C15.2107 12.625 15 12.1162 15 11.5858V8C15 5.23858 12.7614 3 10 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M7 15V16C7 17.6569 8.34315 19 10 19C11.6569 19 13 17.6569 13 16V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M10 3C7.23858 3 5 5.23858 5 8V11.5858C5 12.1162 4.78929 12.625 4.41421 13L3 14.4142V15H17V14.4142L15.5858 13C15.2107 12.625 15 12.1162 15 11.5858V8C15 5.23858 12.7614 3 10 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M7 15V16C7 17.6569 8.34315 19 10 19C11.6569 19 13 17.6569 13 16V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="auth-header__badge">9+</span>
           {showNotificationsDropdown && (
@@ -165,15 +165,15 @@ const AuthHeader = ({ user }) => {
           )}
         </div>
 
-        <div 
+        <div
           className="auth-header__icon-button"
           ref={profileRef}
           onClick={() => setShowProfileDropdown(!showProfileDropdown)}
           aria-label="Perfil"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M5 17C5 14.2386 7.23858 12 10 12C12.7614 12 15 14.2386 15 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M5 17C5 14.2386 7.23858 12 10 12C12.7614 12 15 14.2386 15 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
           {showProfileDropdown && (
             <div className="auth-header__dropdown auth-header__dropdown--right">
@@ -186,14 +186,14 @@ const AuthHeader = ({ user }) => {
                   )}
                 </div>
               </div>
-              <div 
+              <div
                 className="auth-header__dropdown-item"
                 onClick={handleProfileClick}
               >
                 Mi perfil
               </div>
               <div className="auth-header__dropdown-item">Configuración</div>
-              <div 
+              <div
                 className="auth-header__dropdown-item auth-header__dropdown-item--danger"
                 onClick={handleLogout}
               >
