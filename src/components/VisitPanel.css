@@ -115,6 +115,14 @@
   flex-wrap: wrap;
 }
 
+.visit-form__save-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-gray-dark);
+  font-size: 0.95rem;
+}
+
 .visit-form__helper {
   margin-top: 0.5rem;
   color: var(--color-gray-dark);
@@ -146,6 +154,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.visit-board__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.visit-board__helper {
+  margin: 0.15rem 0 0;
+  color: var(--color-gray-dark);
+  font-size: 0.9rem;
 }
 
 .visit-board header span {
@@ -180,6 +202,29 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
+  position: relative;
+}
+
+.visit-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.visit-card__delete {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.visit-card__delete:hover {
+  opacity: 1;
 }
 
 .visit-card strong {
@@ -217,6 +262,33 @@
 .visit-card--alert {
   background: rgba(255, 234, 229, 0.8);
   border: 1px solid rgba(219, 57, 52, 0.35);
+}
+
+.visit-history__form {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.visit-history__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.visit-history__input {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.65rem 0.85rem;
+  min-width: 220px;
+}
+
+.visit-history__input:focus {
+  outline: none;
+  border-color: var(--color-turquoise);
+  box-shadow: 0 0 0 2px rgba(83, 164, 151, 0.2);
 }
 
 .visit-panel__locked {

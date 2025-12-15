@@ -18,6 +18,7 @@ const initialFormState = {
   rut: '',
   validForMinutes: 120,
   unit: '',
+  validFrom: '',
 };
 
 const formatDate = (isoString) => {
@@ -44,6 +45,21 @@ const statusLabel = (status) => {
   return 'Agendada';
 };
 
+const parseNameParts = (fullName) => {
+  const parts = (fullName || '').split(/\s+/).filter(Boolean);
+  const firstName = parts.shift() || '';
+  const paternalLastName = parts.shift() || '';
+  const maternalLastName = parts.join(' ');
+  return { firstName, paternalLastName, maternalLastName };
+};
+
+const toIsoOrUndefined = (value) => {
+  if (!value) return undefined;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date.toISOString();
+};
+
 const VisitRegistrationPanel = ({ user }) => {
   const resolvedRole = useMemo(() => {
     if (!user) return undefined;
@@ -56,9 +72,16 @@ const VisitRegistrationPanel = ({ user }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [upcomingVisits, setUpcomingVisits] = useState([]);
   const [pastVisits, setPastVisits] = useState([]);
+  const [historyResults, setHistoryResults] = useState([]);
+  const [historySearch, setHistorySearch] = useState('');
+  const [contacts, setContacts] = useState([]);
+  const [contactSearch, setContactSearch] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [loadingVisits, setLoadingVisits] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [loadingContacts, setLoadingContacts] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [saveContact, setSaveContact] = useState(false);
 
   const canRegister = SUPPORTED_ROLES.includes(resolvedRole);
   const hasUnit = resolvedRole === 'resident' ? Boolean(user?.unitId) : Boolean(formData.unit);
@@ -77,11 +100,47 @@ const VisitRegistrationPanel = ({ user }) => {
     }
   }, [user]);
 
+  const persistContact = async (contact) => {
+    try {
+      await api.visits.contacts.create(contact);
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message || 'No pudimos guardar el contacto.' });
+    }
+  };
+
+  const fetchContacts = useCallback(async (searchTerm = '') => {
+    if (!user) return;
+    setLoadingContacts(true);
+    try {
+      const response = await api.visits.contacts.list(searchTerm || '', 5);
+      setContacts(response || []);
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message || 'No pudimos cargar contactos.' });
+    } finally {
+      setLoadingContacts(false);
+    }
+  }, [user]);
+
+  const fetchHistory = useCallback(async (searchTerm = '') => {
+    if (!user) return;
+    setLoadingHistory(true);
+    try {
+      const response = await api.visits.history(searchTerm);
+      setHistoryResults(response || []);
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message || 'No pudimos cargar el historial de visitas.' });
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user) {
       fetchVisits();
+      fetchHistory();
+      fetchContacts();
     }
-  }, [user, fetchVisits]);
+  }, [user, fetchVisits, fetchHistory, fetchContacts]);
 
   useEffect(() => {
     if (!feedback) return undefined;
@@ -101,6 +160,41 @@ const VisitRegistrationPanel = ({ user }) => {
     setFormData(initialFormState);
   };
 
+  const handleHistorySearchChange = (event) => {
+    setHistorySearch(event.target.value);
+  };
+
+  const handleHistorySubmit = async (event) => {
+    event.preventDefault();
+    fetchHistory(historySearch);
+  };
+
+  const handleSaveContactToggle = (event) => {
+    setSaveContact(event.target.checked);
+  };
+
+  const handleContactSearchChange = (event) => {
+    setContactSearch(event.target.value);
+  };
+
+  const handleContactSearchSubmit = async (event) => {
+    event.preventDefault();
+    fetchContacts(contactSearch);
+  };
+
+  const handleReRegister = (visit) => {
+    const parsed = parseNameParts(visit.visitorName);
+    setFormData((prev) => ({
+      ...prev,
+      ...parsed,
+      rut: visit.visitorDocument || '',
+      unit: resolvedRole !== 'resident' ? (visit.unitId || '') : prev.unit,
+      validFrom: '',
+      validForMinutes: 120,
+    }));
+    setFeedback({ type: 'success', message: `Listo para re-registrar a ${visit.visitorName}` });
+  };
+
   const validateForm = () => {
     if (!formData.firstName.trim()) return 'El nombre es obligatorio.';
     if (!formData.paternalLastName.trim()) return 'El apellido paterno es obligatorio.';
@@ -112,6 +206,10 @@ const VisitRegistrationPanel = ({ user }) => {
       : 'Debes indicar la unidad/departamento para esta visita.';
     const minutes = Number(formData.validForMinutes);
     if (Number.isNaN(minutes) || minutes <= 0) return 'La vigencia debe ser mayor a 0 minutos.';
+    if (formData.validFrom) {
+      const startDate = new Date(formData.validFrom);
+      if (Number.isNaN(startDate.getTime())) return 'La fecha de inicio no es válida.';
+    }
     return null;
   };
 
@@ -125,13 +223,23 @@ const VisitRegistrationPanel = ({ user }) => {
 
     setSubmitting(true);
     try {
-      await api.visits.create({
+      const payload = {
         visitorName: buildVisitorName(formData),
         visitorDocument: normalizeRut(formData.rut),
         visitorType: 'VISIT',
         validForMinutes: Number(formData.validForMinutes),
+        ...(formData.validFrom ? { validFrom: toIsoOrUndefined(formData.validFrom) } : {}),
         ...(resolvedRole !== 'resident' ? { unitId: Number(formData.unit) } : {}),
-      });
+      };
+      await api.visits.create(payload);
+      if (saveContact) {
+        await persistContact({
+          visitorName: buildVisitorName(formData),
+          visitorDocument: normalizeRut(formData.rut),
+          unitId: resolvedRole !== 'resident' ? Number(formData.unit) || undefined : user?.unitId || undefined,
+        });
+        fetchContacts(contactSearch);
+      }
       setFeedback({
         type: 'success',
         message: 'Visita registrada y enviada a conserjería.',
@@ -156,6 +264,32 @@ const VisitRegistrationPanel = ({ user }) => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDeleteHistory = (visit) => {
+    setHistoryResults((prev) => prev.filter((item) => item.authorizationId !== visit.authorizationId));
+  };
+
+  const handleDeleteContact = async (contact) => {
+    try {
+      await api.visits.contacts.delete(contact.id);
+      fetchContacts(contactSearch);
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message || 'No pudimos eliminar el contacto.' });
+    }
+  };
+
+  const handleLoadContact = (contact) => {
+    const parsed = parseNameParts(contact.visitorName);
+    setFormData((prev) => ({
+      ...prev,
+      ...parsed,
+      rut: contact.visitorDocument || '',
+      unit: resolvedRole !== 'resident' ? (contact.unitId || '') : prev.unit,
+      validFrom: '',
+      validForMinutes: 120,
+    }));
+    setFeedback({ type: 'success', message: `Contacto cargado: ${contact.visitorName}` });
   };
 
   if (!user) {
@@ -283,6 +417,17 @@ const VisitRegistrationPanel = ({ user }) => {
                 />
               </label>
 
+              <label className="visit-form__field">
+                <span>Fecha y hora de inicio</span>
+                <input
+                  type="datetime-local"
+                  name="validFrom"
+                  value={formData.validFrom}
+                  onChange={handleChange}
+                  aria-label="Fecha y hora de inicio de la visita"
+                />
+              </label>
+
               {resolvedRole !== 'resident' && (
                 <label className="visit-form__field">
                   <span>Unidad o departamento</span>
@@ -311,6 +456,15 @@ const VisitRegistrationPanel = ({ user }) => {
             <Button type="button" variant="ghost" onClick={resetForm} disabled={submitting}>
               Limpiar
             </Button>
+              <label className="visit-form__save-contact">
+                <input
+                  type="checkbox"
+                  name="saveContact"
+                  checked={saveContact}
+                  onChange={handleSaveContactToggle}
+                />
+                Guardar como contacto
+              </label>
           </div>
 
           <p className="visit-form__preview">
@@ -357,10 +511,10 @@ const VisitRegistrationPanel = ({ user }) => {
           <article className="visit-board">
             <header>
               <h4>Visitas pasadas</h4>
-              <span>{pastVisits.length}</span>
+              <span>{Math.min(pastVisits.length, 5)}</span>
             </header>
             <ul className="visit-board__list">
-              {pastVisits.map((visit) => (
+              {pastVisits.slice(0, 5).map((visit) => (
                 <li key={visit.authorizationId} className="visit-card visit-card--muted">
                   <div>
                     <strong>{visit.visitorName}</strong>
@@ -371,6 +525,137 @@ const VisitRegistrationPanel = ({ user }) => {
                         : `Vencida el ${formatDate(visit.validUntil)}`}
                     </p>
                     <small>Estado: {statusLabel(visit.status)}</small>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="visit-board visit-board--history">
+            <header className="visit-board__header">
+              <div>
+                <h4>Visitas registradas</h4>
+                <p className="visit-board__helper">Busca por nombre o RUT y carga en el formulario</p>
+              </div>
+              <form className="visit-history__form" onSubmit={handleHistorySubmit}>
+                <input
+                  type="search"
+                  className="visit-history__input"
+                  name="historySearch"
+                  value={historySearch}
+                  onChange={handleHistorySearchChange}
+                  placeholder="Ej: María o 12345678-9"
+                  aria-label="Buscar visitas previas"
+                />
+                <Button type="submit" variant="secondary" disabled={loadingHistory}>
+                  {loadingHistory ? 'Buscando...' : 'Buscar'}
+                </Button>
+              </form>
+            </header>
+            <ul className="visit-board__list">
+              {loadingHistory && (
+                <li className="visit-board__empty">Buscando visitas registradas...</li>
+              )}
+              {!loadingHistory && historyResults.length === 0 && (
+                <li className="visit-board__empty">
+                  <strong>Sin resultados</strong>
+                  <span>Intenta otro nombre o RUT para buscar visitas anteriores.</span>
+                </li>
+              )}
+              {historyResults.slice(0, 5).map((visit) => (
+                <li key={`${visit.authorizationId}-${visit.visitId}`} className="visit-card visit-card--muted">
+                  <button
+                    type="button"
+                    className="visit-card__delete"
+                    aria-label="Eliminar visita registrada"
+                    onClick={() => handleDeleteHistory(visit)}
+                    disabled={submitting}
+                  >
+                    🗑️
+                  </button>
+                  <div>
+                    <strong>{visit.visitorName}</strong>
+                    {visit.visitorDocument && <p>RUT {visit.visitorDocument}</p>}
+                    <p>Unidad {visit.unitId}</p>
+                    <p>
+                      {visit.checkInAt
+                        ? `Ingresó el ${formatDate(visit.checkInAt)}`
+                        : `Vencida el ${formatDate(visit.validUntil)}`}
+                    </p>
+                    <small>Estado: {statusLabel(visit.status)}</small>
+                  </div>
+                  <div className="visit-card__actions">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => handleReRegister(visit)}
+                      disabled={submitting}
+                    >
+                      Cargar en formulario
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="visit-board visit-board--history">
+            <header className="visit-board__header">
+              <div>
+                <h4>Contactos</h4>
+                <p className="visit-board__helper">Frecuentes / plantillas (máx. 5)</p>
+              </div>
+              <form className="visit-history__form" onSubmit={handleContactSearchSubmit}>
+                <input
+                  type="search"
+                  className="visit-history__input"
+                  name="contactSearch"
+                  value={contactSearch}
+                  onChange={handleContactSearchChange}
+                  placeholder="Ej: Juan o 12345678-9"
+                  aria-label="Buscar contactos"
+                />
+                <Button type="submit" variant="secondary" disabled={loadingContacts}>
+                  {loadingContacts ? 'Buscando...' : 'Buscar'}
+                </Button>
+              </form>
+            </header>
+            <ul className="visit-board__list">
+              {loadingContacts && (
+                <li className="visit-board__empty">Buscando contactos...</li>
+              )}
+              {!loadingContacts && contacts.length === 0 && (
+                <li className="visit-board__empty">
+                  <strong>Sin contactos</strong>
+                  <span>Guarda desde el formulario con “Guardar como contacto”.</span>
+                </li>
+              )}
+              {contacts.slice(0, 5).map((contact) => (
+                <li key={contact.id} className="visit-card visit-card--muted">
+                  <button
+                    type="button"
+                    className="visit-card__delete"
+                    aria-label="Eliminar contacto"
+                    onClick={() => handleDeleteContact(contact)}
+                    disabled={submitting}
+                  >
+                    🗑️
+                  </button>
+                  <div>
+                    <strong>{contact.visitorName}</strong>
+                    {contact.visitorDocument && <p>RUT {contact.visitorDocument}</p>}
+                    {contact.unitId && <p>Unidad {contact.unitId}</p>}
+                    {contact.alias && <p>Alias: {contact.alias}</p>}
+                  </div>
+                  <div className="visit-card__actions">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => handleLoadContact(contact)}
+                      disabled={submitting}
+                    >
+                      Cargar en formulario
+                    </Button>
                   </div>
                 </li>
               ))}
