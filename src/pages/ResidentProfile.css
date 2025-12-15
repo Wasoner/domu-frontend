@@ -1,106 +1,105 @@
 .resident-profile {
-  max-width: 900px;
-  margin: 0 auto;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .resident-profile__header {
-  margin-bottom: 2rem;
-  position: relative;
+    margin-bottom: 2rem;
+    position: relative;
 }
 
 .resident-profile__back-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  margin-bottom: 1rem;
-  background: #f1f5f9;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-  color: #334155;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    background: #f1f5f9;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    color: #334155;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .resident-profile__back-button:hover {
-  background: #e2e8f0;
-  color: #1e293b;
-  border-color: rgba(0, 0, 0, 0.12);
+    background: #e2e8f0;
+    color: #1e293b;
+    border-color: rgba(0, 0, 0, 0.12);
 }
 
 .resident-profile__back-button:active {
-  transform: scale(0.98);
+    transform: scale(0.98);
 }
 
 .resident-profile__back-button svg {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 .resident-profile__header h1 {
-  margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .resident-profile__subtitle {
-  color: var(--color-gray-dark);
-  font-size: 1rem;
+    color: var(--color-gray-dark);
+    font-size: 1rem;
 }
 
 .resident-profile__content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .resident-profile__card {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .resident-profile__card h2 {
-  font-size: 1.25rem;
-  margin-bottom: 1.25rem;
-  color: var(--color-black);
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+    color: var(--color-black);
 }
 
 .resident-profile__info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
 }
 
 .resident-profile__info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .resident-profile__info-item label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-gray-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-gray-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .resident-profile__info-item p {
-  font-size: 1rem;
-  color: var(--color-black);
-  margin: 0;
+    font-size: 1rem;
+    color: var(--color-black);
+    margin: 0;
 }
 
 @media (max-width: 768px) {
-  .resident-profile__info-grid {
-    grid-template-columns: 1fr;
-  }
+    .resident-profile__info-grid {
+        grid-template-columns: 1fr;
+    }
 
-  .resident-profile__card {
-    padding: 1rem;
-  }
+    .resident-profile__card {
+        padding: 1rem;
+    }
 }
-
