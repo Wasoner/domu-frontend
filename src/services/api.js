@@ -38,6 +38,7 @@ const fetchWrapper = async (url, options = {}) => {
 
     // Preparar headers - asegurar que Content-Type esté correctamente configurado
     const headers = new Headers();
+    const isFormData = options.body instanceof FormData;
 
     // Agregar headers del options primero
     if (options.headers) {
@@ -46,8 +47,8 @@ const fetchWrapper = async (url, options = {}) => {
       });
     }
 
-    // Si hay body y no hay Content-Type definido, agregarlo
-    if (options.body && !headers.has('Content-Type') && !headers.has('content-type')) {
+    // Si hay body y no hay Content-Type definido, agregarlo (solo para JSON)
+    if (options.body && !headers.has('Content-Type') && !headers.has('content-type') && !isFormData) {
       headers.set('Content-Type', 'application/json');
     }
 
@@ -58,7 +59,20 @@ const fetchWrapper = async (url, options = {}) => {
 
     // Log para debugging (solo en desarrollo)
     if (import.meta.env.DEV) {
-      const bodyForLog = options.body ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : undefined;
+      let bodyForLog = undefined;
+      if (options.body) {
+        if (isFormData) {
+          bodyForLog = '[FormData]';
+        } else if (typeof options.body === 'string') {
+          try {
+            bodyForLog = JSON.parse(options.body);
+          } catch {
+            bodyForLog = options.body;
+          }
+        } else {
+          bodyForLog = options.body;
+        }
+      }
       console.log(`[API] ${options.method || 'GET'} ${API_BASE_URL}${url}`, {
         headers: Object.fromEntries(headers.entries()),
         body: bodyForLog,
@@ -327,10 +341,42 @@ export const api = {
   },
 
   buildings: {
-    createRequest: async (data) => fetchWrapper('/buildings/requests', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    createRequest: async (data) => {
+      const formData = new FormData();
+      const {
+        documentFile,
+        proofText,
+        floors,
+        unitsCount,
+        latitude,
+        longitude,
+        ...rest
+      } = data || {};
+
+      const payload = {
+        ...rest,
+        floors: floors ?? null,
+        unitsCount: unitsCount ?? null,
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
+        proofText: (proofText && String(proofText).trim()) || 'Documento de acreditación adjunto',
+      };
+
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          formData.append(key, value);
+        }
+      });
+
+      if (documentFile) {
+        formData.append('document', documentFile);
+      }
+
+      return fetchWrapper('/buildings/requests', {
+        method: 'POST',
+        body: formData,
+      });
+    },
   },
 
   visits: {
