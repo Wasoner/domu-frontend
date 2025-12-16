@@ -9,7 +9,7 @@ import './Register.css';
 
 /**
  * Register Page Component
- * Handles user registration for both administrators and residents
+ * Handles user registration for residents and concierge profiles
  */
 const Register = () => {
     const navigate = useNavigate();
@@ -91,15 +91,9 @@ const Register = () => {
             // Preparar datos para enviar al backend según lo que espera RegistrationRequest
             // El backend espera: firstName, lastName, email, password, phone, documentNumber, 
             // birthDate, resident, unitId (número), roleId (número)
-            const roleMapping = {
-                admin: 1,
-                resident: 2,
-                concierge: 3,
-            };
-
             const derivedRoleId = formData.roleId
                 ? parseInt(formData.roleId, 10)
-                : roleMapping[formData.userType] || 2;
+                : (formData.userType === 'concierge' ? 3 : 2);
 
             const registerData = {
                 firstName: formData.firstName.trim(),
@@ -143,11 +137,7 @@ const Register = () => {
                 // Si el backend retorna un token, navegar automáticamente
                 if (response.token) {
                     setTimeout(() => {
-                        if (formData.userType === 'admin') {
-                            navigate(ROUTES.DASHBOARD);
-                        } else {
-                            navigate(ROUTES.RESIDENT_PORTAL);
-                        }
+                        navigate(ROUTES.RESIDENT_PORTAL);
                     }, 1500);
                 } else {
                     // Si no hay token, redirigir al login
@@ -209,7 +199,6 @@ const Register = () => {
                             >
                                 <option value="resident">Residente</option>
                                 <option value="concierge">Conserje</option>
-                                <option value="admin">Administrador</option>
                             </select>
                         </div>
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button } from '../components';
+import { Button, LocationPicker } from '../components';
 import { Header, MainContent, Footer, AuthLayout } from '../layout';
 import heroLogo from '../assets/LogotipoDOMU.svg';
 import { ROUTES } from '../constants';
@@ -60,6 +60,35 @@ const upcomingEvent = {
   title: 'Próximo evento',
   description: 'Gestión de siniestros: aprende cómo llevar el proceso de manera eficiente.',
 };
+
+const COMMUNITY_FORM_STORAGE_KEY = 'communityFormDraft';
+const COMMUNITY_DOC_NAME_KEY = 'communityDocName';
+
+const communityFormDefaults = {
+  name: '',
+  towerLabel: '',
+  address: '',
+  commune: '',
+  city: '',
+  postalCode: '',
+  adminPhone: '',
+  adminEmail: '',
+  adminName: '',
+  adminDocument: '',
+  floors: 4,
+  unitsCount: 8,
+  latitude: '',
+  longitude: '',
+  proofText: '',
+};
+
+const getDefaultCommunityStatus = () => ({
+  loading: false,
+  message: null,
+  error: null,
+  success: false,
+  status: null,
+});
 
 const formatCurrency = (value) => {
   const safe = Number.isFinite(value) ? value : 0;
@@ -254,23 +283,30 @@ const ResidentHome = ({ user }) => {
 const Home = () => {
   const { user, isAuthenticated, isLoading } = useAppContext();
   const [showCommunityModal, setShowCommunityModal] = useState(false);
-  const [communityForm, setCommunityForm] = useState({
-    name: '',
-    towerLabel: '',
-    address: '',
-    commune: '',
-    city: '',
-    adminPhone: '',
-    adminEmail: '',
-    adminName: '',
-    adminDocument: '',
-    floors: 4,
-    unitsCount: 8,
-    latitude: '',
-    longitude: '',
-    proofText: '',
+  const [step, setStep] = useState(1);
+  const [communityForm, setCommunityForm] = useState(() => {
+    const stored = localStorage.getItem(COMMUNITY_FORM_STORAGE_KEY);
+    if (stored) {
+      try {
+        return { ...communityFormDefaults, ...JSON.parse(stored) };
+      } catch (error) {
+        console.warn('[Community form] No se pudo parsear el borrador guardado', error);
+      }
+    }
+    return communityFormDefaults;
   });
-  const [communityStatus, setCommunityStatus] = useState({ loading: false, message: null, error: null });
+  const [documentFile, setDocumentFile] = useState(null);
+  const [documentName, setDocumentName] = useState(() => localStorage.getItem(COMMUNITY_DOC_NAME_KEY) || '');
+  const [communityStatus, setCommunityStatus] = useState(getDefaultCommunityStatus);
+
+  useEffect(() => {
+    localStorage.setItem(COMMUNITY_FORM_STORAGE_KEY, JSON.stringify(communityForm));
+    if (documentName) {
+      localStorage.setItem(COMMUNITY_DOC_NAME_KEY, documentName);
+    } else {
+      localStorage.removeItem(COMMUNITY_DOC_NAME_KEY);
+    }
+  }, [communityForm, documentName]);
 
   if (isLoading) {
     return (
@@ -294,9 +330,29 @@ const Home = () => {
     return <ResidentHome user={user} />;
   }
 
+  const resetCommunityState = () => {
+    setStep(1);
+    setCommunityForm(communityFormDefaults);
+    setCommunityStatus(getDefaultCommunityStatus());
+    setDocumentFile(null);
+    setDocumentName('');
+    localStorage.removeItem(COMMUNITY_FORM_STORAGE_KEY);
+    localStorage.removeItem(COMMUNITY_DOC_NAME_KEY);
+  };
+
   const handleCreateCommunity = () => {
-    setCommunityStatus({ loading: false, message: null, error: null });
+    setCommunityStatus(getDefaultCommunityStatus());
+    setStep(1);
     setShowCommunityModal(true);
+  };
+
+  const handleOverlayClose = () => {
+    setShowCommunityModal(false);
+  };
+
+  const handleCloseAndReset = () => {
+    setShowCommunityModal(false);
+    resetCommunityState();
   };
 
   const handleResidentLogin = () => {
@@ -314,42 +370,61 @@ const Home = () => {
   const handleProofFile = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setCommunityForm((prev) => ({ ...prev, proofText: reader.result?.toString() || '' }));
-    };
-    reader.readAsDataURL(file);
+    setDocumentFile(file);
+    setDocumentName(file.name);
+    setCommunityForm((prev) => ({
+      ...prev,
+      proofText: prev.proofText?.trim() ? prev.proofText : `Documento adjunto: ${file.name}`,
+    }));
+  };
+
+  const handleLocationSelect = ({ lat, lng, address, postcode, city, state }) => {
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      setCommunityForm((prev) => ({
+        ...prev,
+        latitude: lat.toFixed(6),
+        longitude: lng.toFixed(6),
+        address: address || prev.address,
+        city: city || prev.city,
+        commune: state || prev.commune,
+        postalCode: postcode || prev.postalCode,
+      }));
+    }
   };
 
   const handleCommunitySubmit = async (event) => {
     event.preventDefault();
-    if (!api.auth.isAuthenticated()) {
-      setCommunityStatus({ loading: false, message: null, error: 'Inicia sesión como administrador para enviar la solicitud.' });
-      window.location.href = ROUTES.LOGIN;
+    if (!documentFile) {
+      setCommunityStatus({ ...getDefaultCommunityStatus(), error: 'Adjunta el documento de propiedad (PDF o imagen).' });
       return;
     }
-    if (!communityForm.proofText) {
-      setCommunityStatus({ loading: false, message: null, error: 'Adjunta el documento de propiedad (PDF en base64).' });
-      return;
-    }
-    setCommunityStatus({ loading: true, message: null, error: null });
+    setCommunityStatus({ ...getDefaultCommunityStatus(), loading: true });
     try {
       const payload = {
         ...communityForm,
-        floors: Number(communityForm.floors) || null,
-        unitsCount: Number(communityForm.unitsCount) || null,
+        documentFile,
+        floors: communityForm.floors ? Number(communityForm.floors) : null,
+        unitsCount: communityForm.unitsCount ? Number(communityForm.unitsCount) : null,
         latitude: communityForm.latitude ? Number(communityForm.latitude) : null,
         longitude: communityForm.longitude ? Number(communityForm.longitude) : null,
+        proofText: communityForm.proofText?.trim() || `Documento adjunto: ${documentFile.name}`,
       };
       const response = await api.buildings.createRequest(payload);
       setCommunityStatus({
-        loading: false,
-        message: `Solicitud enviada. Estado: ${response?.status || 'PENDING'}. Un administrador revisará el documento.`,
-        error: null,
+        ...getDefaultCommunityStatus(),
+        success: true,
+        message: '¡Solicitud enviada!',
+        status: response?.status || 'PENDING',
       });
+      // Mantenemos el borrador para continuidad; el admin puede seguir editando o enviar otra solicitud
     } catch (error) {
-      setCommunityStatus({ loading: false, message: null, error: error.message });
+      setCommunityStatus({ ...getDefaultCommunityStatus(), error: error.message });
     }
+  };
+
+  const handleNewCommunityRequest = () => {
+    resetCommunityState();
+    setShowCommunityModal(true);
   };
 
   const features = [
@@ -510,177 +585,221 @@ const Home = () => {
       <Footer />
 
       {showCommunityModal && (
-        <div className="modal-overlay" role="dialog" aria-modal="true">
-          <div className="community-modal">
+        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={handleOverlayClose}>
+          <div className="community-modal" onClick={(e) => e.stopPropagation()}>
             <header className="community-modal__header">
               <div>
-                <p className="eyebrow">Paso 1: Solicitud</p>
-                <h3>Crear mi comunidad</h3>
-                <small>Adjunta el documento que respalda la propiedad del edificio.</small>
+                <p className="eyebrow">{communityStatus.success ? 'Solicitud enviada' : 'Solicitud de comunidad'}</p>
+                <h3>{communityStatus.success ? '¡Listo! Hemos recibido tu solicitud' : 'Crear mi comunidad'}</h3>
+                <small>
+                  {communityStatus.success
+                    ? 'Revisaremos tu documentación y te contactaremos apenas un administrador la valide.'
+                    : 'Adjunta el documento que respalda la propiedad del edificio.'}
+                </small>
               </div>
-              <button type="button" className="close-button" onClick={() => setShowCommunityModal(false)}>
+              {!communityStatus.success && (
+                <div className="stepper">
+                  <span className={step === 1 ? 'step-current' : 'step-done'}>Paso 1</span>
+                  <span className="step-separator">›</span>
+                  <span className={step === 2 ? 'step-current' : 'step-upcoming'}>Paso 2</span>
+                </div>
+              )}
+              <button type="button" className="close-button" onClick={handleCloseAndReset}>
                 ✕
               </button>
             </header>
-
-            <form className="community-form" onSubmit={handleCommunitySubmit}>
-              <div className="form-notebook">
-                <div className="form-page">
-                  <p className="eyebrow">Administrador</p>
-                  <label>
-                    Nombre completo
-                    <input
-                      type="text"
-                      value={communityForm.adminName}
-                      onChange={(e) => setCommunityForm({ ...communityForm, adminName: e.target.value })}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Documento (RUT/Pasaporte)
-                    <input
-                      type="text"
-                      value={communityForm.adminDocument}
-                      onChange={(e) => setCommunityForm({ ...communityForm, adminDocument: e.target.value })}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Teléfono admin
-                    <input
-                      type="text"
-                      value={communityForm.adminPhone}
-                      onChange={(e) => setCommunityForm({ ...communityForm, adminPhone: e.target.value })}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Email admin
-                    <input
-                      type="email"
-                      value={communityForm.adminEmail}
-                      onChange={(e) => setCommunityForm({ ...communityForm, adminEmail: e.target.value })}
-                      required
-                    />
-                  </label>
+            {communityStatus.success ? (
+              <div className="community-success" role="status" aria-live="polite">
+                <div className="community-success__icon" aria-hidden="true">✔</div>
+                <h4>{communityStatus.message || '¡Solicitud enviada!'}</h4>
+                <p className="community-success__note">
+                  Revisaremos tus documentos y te avisaremos {communityForm.adminEmail ? `al correo ${communityForm.adminEmail}` : 'al correo registrado'} cuando un administrador los apruebe.
+                </p>
+                <div className="community-success__actions">
+                  <Button type="button" variant="primary" onClick={handleCloseAndReset}>
+                    Volver al inicio
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={handleNewCommunityRequest}>
+                    Enviar otra solicitud
+                  </Button>
                 </div>
+              </div>
+            ) : (
+              <form className="community-form community-modal__content" onSubmit={handleCommunitySubmit}>
+                {step === 1 && (
+                  <div className="form-notebook">
+                    <div className="form-page">
+                      <p className="eyebrow">Administrador</p>
+                      <label>
+                        Nombre completo
+                        <input
+                          type="text"
+                          value={communityForm.adminName}
+                          onChange={(e) => setCommunityForm({ ...communityForm, adminName: e.target.value })}
+                          required
+                        />
+                      </label>
+                      <label>
+                        Documento (RUT/Pasaporte)
+                        <input
+                          type="text"
+                          value={communityForm.adminDocument}
+                          onChange={(e) => setCommunityForm({ ...communityForm, adminDocument: e.target.value })}
+                          required
+                        />
+                      </label>
+                      <label>
+                        Teléfono admin
+                        <input
+                          type="text"
+                          value={communityForm.adminPhone}
+                          onChange={(e) => setCommunityForm({ ...communityForm, adminPhone: e.target.value })}
+                          required
+                        />
+                      </label>
+                      <label>
+                        Email admin
+                        <input
+                          type="email"
+                          value={communityForm.adminEmail}
+                          onChange={(e) => setCommunityForm({ ...communityForm, adminEmail: e.target.value })}
+                          required
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
 
-                <div className="form-divider" aria-hidden="true" />
+                {step === 2 && (
+                  <div className="form-notebook">
+                    <div className="form-page">
+                      <p className="eyebrow">Edificio / Torre</p>
+                      <label>
+                        Nombre del condominio
+                        <input
+                          type="text"
+                          value={communityForm.name}
+                          onChange={(e) => setCommunityForm({ ...communityForm, name: e.target.value })}
+                          required
+                        />
+                      </label>
+                      <label>
+                        Torre (ej: 1822)
+                        <input
+                          type="text"
+                          value={communityForm.towerLabel}
+                          onChange={(e) => setCommunityForm({ ...communityForm, towerLabel: e.target.value })}
+                        />
+                      </label>
+                      <label>
+                        Dirección (aprox del mapa)
+                        <input
+                          type="text"
+                          value={communityForm.address}
+                          onChange={(e) => setCommunityForm({ ...communityForm, address: e.target.value })}
+                          required
+                        />
+                      </label>
+                      <div className="form-grid">
+                        <label>
+                          Comuna
+                          <input
+                            type="text"
+                            value={communityForm.commune}
+                            onChange={(e) => setCommunityForm({ ...communityForm, commune: e.target.value })}
+                          />
+                        </label>
+                        <label>
+                          Ciudad
+                          <input
+                            type="text"
+                            value={communityForm.city}
+                            onChange={(e) => setCommunityForm({ ...communityForm, city: e.target.value })}
+                          />
+                        </label>
+                      </div>
+                      <div className="form-grid">
+                        <label>
+                          Código postal
+                          <input
+                            type="text"
+                            value={communityForm.postalCode}
+                            onChange={(e) => setCommunityForm({ ...communityForm, postalCode: e.target.value })}
+                          />
+                        </label>
+                        <div />
+                      </div>
+                      <div className="form-grid">
+                        <label>
+                          Pisos
+                          <input
+                            type="number"
+                            min="1"
+                            value={communityForm.floors}
+                            onChange={(e) => setCommunityForm({ ...communityForm, floors: e.target.value })}
+                          />
+                        </label>
+                        <label>
+                          Deptos totales
+                          <input
+                            type="number"
+                            min="1"
+                            value={communityForm.unitsCount}
+                            onChange={(e) => setCommunityForm({ ...communityForm, unitsCount: e.target.value })}
+                          />
+                        </label>
+                      </div>
+                    </div>
 
-                <div className="form-page">
-                  <p className="eyebrow">Edificio / Torre</p>
-                  <label>
-                    Nombre del condominio
-                    <input
-                      type="text"
-                      value={communityForm.name}
-                      onChange={(e) => setCommunityForm({ ...communityForm, name: e.target.value })}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Torre (ej: 1822)
-                    <input
-                      type="text"
-                      value={communityForm.towerLabel}
-                      onChange={(e) => setCommunityForm({ ...communityForm, towerLabel: e.target.value })}
-                    />
-                  </label>
-                  <label>
-                    Dirección
-                    <input
-                      type="text"
-                      value={communityForm.address}
-                      onChange={(e) => setCommunityForm({ ...communityForm, address: e.target.value })}
-                      required
-                    />
-                  </label>
-                  <div className="form-grid">
-                    <label>
-                      Comuna
-                      <input
-                        type="text"
-                        value={communityForm.commune}
-                        onChange={(e) => setCommunityForm({ ...communityForm, commune: e.target.value })}
+                    <div className="form-page">
+                      <p className="eyebrow">Ubicación en mapa</p>
+                      <LocationPicker
+                        latitude={communityForm.latitude}
+                        longitude={communityForm.longitude}
+                        onSelect={handleLocationSelect}
                       />
-                    </label>
-                    <label>
-                      Ciudad
-                      <input
-                        type="text"
-                        value={communityForm.city}
-                        onChange={(e) => setCommunityForm({ ...communityForm, city: e.target.value })}
-                      />
-                    </label>
+                    </div>
                   </div>
-                  <div className="form-grid">
-                    <label>
-                      Pisos
-                      <input
-                        type="number"
-                        min="1"
-                        value={communityForm.floors}
-                        onChange={(e) => setCommunityForm({ ...communityForm, floors: e.target.value })}
-                      />
-                    </label>
-                    <label>
-                      Deptos totales
-                      <input
-                        type="number"
-                        min="1"
-                        value={communityForm.unitsCount}
-                        onChange={(e) => setCommunityForm({ ...communityForm, unitsCount: e.target.value })}
-                      />
-                    </label>
-                  </div>
-                  <div className="form-grid">
-                    <label>
-                      Latitud
-                      <input
-                        type="number"
-                        step="0.000001"
-                        value={communityForm.latitude}
-                        onChange={(e) => setCommunityForm({ ...communityForm, latitude: e.target.value })}
-                        placeholder="-33.4489"
-                      />
-                    </label>
-                    <label>
-                      Longitud
-                      <input
-                        type="number"
-                        step="0.000001"
-                        value={communityForm.longitude}
-                        onChange={(e) => setCommunityForm({ ...communityForm, longitude: e.target.value })}
-                        placeholder="-70.6693"
-                      />
-                    </label>
-                  </div>
-                  <div className="map-placeholder">
-                    <p>Ubicación exacta (próxima iteración con mapa interactivo)</p>
-                    <Button type="button" variant="ghost" disabled>
-                      Seleccionar en mapa
+                )}
+
+                <label className="file-input">
+                  Documento (PDF o imagen)
+                  <input type="file" accept=".pdf,image/*" onChange={handleProofFile} />
+                </label>
+                {documentName && (
+                  <p className="info-text">
+                    Archivo seleccionado: {documentName}
+                    {!documentFile && ' (vuelve a adjuntarlo para enviarlo)'}
+                  </p>
+                )}
+
+                {communityStatus.error && <p className="error-text">{communityStatus.error}</p>}
+                {!communityStatus.success && communityStatus.message && (
+                  <p className="success-text">{communityStatus.message}</p>
+                )}
+
+                <div className="community-modal__actions">
+                  <Button type="button" variant="ghost" onClick={handleOverlayClose}>
+                    Cancelar
+                  </Button>
+                  {step === 2 && (
+                    <Button type="button" variant="secondary" onClick={() => setStep(1)}>
+                      Volver
                     </Button>
-                  </div>
+                  )}
+                  {step === 1 && (
+                    <Button type="button" variant="primary" onClick={() => setStep(2)}>
+                      Siguiente
+                    </Button>
+                  )}
+                  {step === 2 && (
+                    <Button type="submit" variant="primary" disabled={communityStatus.loading}>
+                      {communityStatus.loading ? 'Enviando...' : 'Enviar solicitud'}
+                    </Button>
+                  )}
                 </div>
-              </div>
-
-              <label className="file-input">
-                Documento (PDF en base64 o imagen)
-                <input type="file" accept=".pdf,image/*" onChange={handleProofFile} />
-              </label>
-
-              {communityStatus.error && <p className="error-text">{communityStatus.error}</p>}
-              {communityStatus.message && <p className="success-text">{communityStatus.message}</p>}
-
-              <div className="community-modal__actions">
-                <Button type="button" variant="ghost" onClick={() => setShowCommunityModal(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" variant="primary" disabled={communityStatus.loading}>
-                  {communityStatus.loading ? 'Enviando...' : 'Enviar solicitud'}
-                </Button>
-              </div>
-            </form>
+              </form>
+            )}
           </div>
         </div>
       )}
