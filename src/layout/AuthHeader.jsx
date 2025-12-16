@@ -8,7 +8,7 @@ import './AuthHeader.css';
 
 const AuthHeader = ({ user }) => {
   const navigate = useNavigate();
-  const { logout } = useAppContext();
+  const { logout, selectBuilding } = useAppContext();
   const [showBuildingDropdown, setShowBuildingDropdown] = useState(false);
   const [showHelpDropdown, setShowHelpDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
@@ -22,9 +22,11 @@ const AuthHeader = ({ user }) => {
   const displayName = user?.firstName
     ? `${user.firstName} ${user?.lastName || ''}`.trim()
     : user?.email || 'Usuario Domu';
-  const unitLabel = user?.unitId
-    ? user.unitId
-    : '1502';
+  const buildingOptions = user?.buildings || [];
+  const activeBuildingId = user?.selectedBuildingId || user?.activeBuildingId;
+  const selectedBuilding = buildingOptions.find((b) => b.id === activeBuildingId) || buildingOptions[0];
+  const buildingName = selectedBuilding?.name || 'Sin edificio';
+  const unitLabel = user?.unitId ? user.unitId : selectedBuilding?.id || '—';
   const roleLabel = user?.userType === 'admin'
     ? 'Administrador'
     : user?.userType === 'concierge'
@@ -101,8 +103,8 @@ const AuthHeader = ({ user }) => {
             onClick={() => setShowBuildingDropdown(!showBuildingDropdown)}
           >
             <span className="auth-header__unit-number">{unitLabel}</span>
-            <span className="auth-header__building-name">Edificio Orompello</span>
-            <svg
+            <span className="auth-header__building-name">{buildingName}</span>
+            <svg 
               className={`auth-header__chevron ${showBuildingDropdown ? 'auth-header__chevron--open' : ''}`}
               width="12"
               height="12"
@@ -113,9 +115,22 @@ const AuthHeader = ({ user }) => {
             </svg>
             {showBuildingDropdown && (
               <div className="auth-header__dropdown">
-                <div className="auth-header__dropdown-item">Edificio Orompello</div>
-                <div className="auth-header__dropdown-item">Edificio Central</div>
-                <div className="auth-header__dropdown-item">Edificio Norte</div>
+                {buildingOptions.length === 0 && (
+                  <div className="auth-header__dropdown-item auth-header__dropdown-item--muted">Sin edificios</div>
+                )}
+                {buildingOptions.map((b) => (
+                  <div
+                    key={b.id}
+                    className={`auth-header__dropdown-item ${b.id === selectedBuilding?.id ? 'auth-header__dropdown-item--active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectBuilding(b.id);
+                      setShowBuildingDropdown(false);
+                    }}
+                  >
+                    {b.name}
+                  </div>
+                ))}
               </div>
             )}
           </div>

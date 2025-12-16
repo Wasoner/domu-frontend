@@ -4,3 +4,4 @@
  */
 export { default as Button } from './Button';
 export { default as VisitRegistrationPanel } from './VisitRegistrationPanel';
+export { default as LocationPicker } from './LocationPicker';
