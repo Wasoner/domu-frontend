@@ -17,7 +17,6 @@ const Login = () => {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        userType: 'resident',
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -85,22 +84,6 @@ const Login = () => {
                                 {error}
                             </div>
                         )}
-
-                        <div className="form-group">
-                            <label htmlFor="userType">Tipo de usuario</label>
-                            <select
-                                id="userType"
-                                name="userType"
-                                value={formData.userType}
-                                onChange={handleChange}
-                                required
-                                disabled={loading}
-                            >
-                                <option value="resident">Residente</option>
-                                <option value="concierge">Conserje</option>
-                                <option value="admin">Administrador</option>
-                            </select>
-                        </div>
 
                         <div className="form-group">
                             <label htmlFor="email">Email</label>

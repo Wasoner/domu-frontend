@@ -435,8 +435,8 @@ const Home = () => {
     },
     {
       icon: '📱',
-      title: 'App móvil',
-      description: 'Gestiona tu comunidad desde cualquier lugar con nuestra aplicación móvil.'
+      title: 'Portal web responsivo',
+      description: 'Gestiona tu comunidad desde cualquier dispositivo con nuestro portal web optimizado para celulares, tablets y computadores.'
     },
     {
       icon: '📢',
@@ -476,7 +476,7 @@ const Home = () => {
         'Pagos de gastos comunes online',
         'Comunicación directa con administración',
         'Reserva de espacios comunes',
-        'Acceso desde app móvil'
+        'Acceso desde portal web responsivo'
       ]
     },
     {
@@ -503,7 +503,7 @@ const Home = () => {
                 Software para la administración de <strong>edificios y condominios</strong>
               </h1>
               <p className="home-hero__subtitle">
-                Administra edificios con DOMU: el software y la aplicación para tu comunidad. 
+                Administra edificios con DOMU: el software y el portal web responsivo para tu comunidad.
                 Gastos Comunes en línea y mucho más.
               </p>
               <div className="home-hero__actions">
@@ -598,14 +598,24 @@ const Home = () => {
                 </small>
               </div>
               {!communityStatus.success && (
-                <div className="stepper">
+                <div className="stepper" aria-label={`Paso ${step} de 2`}>
                   <span className={step === 1 ? 'step-current' : 'step-done'}>Paso 1</span>
                   <span className="step-separator">›</span>
                   <span className={step === 2 ? 'step-current' : 'step-upcoming'}>Paso 2</span>
                 </div>
               )}
-              <button type="button" className="close-button" onClick={handleCloseAndReset}>
-                ✕
+              <button
+                type="button"
+                className="close-button"
+                aria-label="Cerrar panel"
+                onClick={handleCloseAndReset}
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                  <path
+                    d="M5.28 4.22 10 8.94l4.72-4.72 1.06 1.06L11.06 10l4.72 4.72-1.06 1.06L10 11.06l-4.72 4.72-1.06-1.06L8.94 10 4.22 5.28z"
+                    fill="currentColor"
+                  />
+                </svg>
               </button>
             </header>
             {communityStatus.success ? (
