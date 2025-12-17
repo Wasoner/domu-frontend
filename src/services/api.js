@@ -452,4 +452,52 @@ export const api = {
       });
     },
   },
+
+  adminUsers: {
+    create: async (data) => {
+      const payload = {
+        unitId: data.unitId ? Number(data.unitId) : null,
+        roleId: Number(data.roleId),
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        birthDate: data.birthDate || null,
+        email: String(data.email || '').trim(),
+        phone: String(data.phone || '').trim(),
+        documentNumber: String(data.documentNumber || '').trim(),
+        resident: Boolean(data.resident),
+        password: String(data.password || ''),
+      };
+      if (Number.isNaN(payload.roleId)) {
+        throw new Error('roleId inválido');
+      }
+      return fetchWrapper('/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+  },
+
+  users: {
+    updateProfile: async (data) => {
+      const payload = {
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        phone: String(data.phone || '').trim(),
+        documentNumber: String(data.documentNumber || '').trim(),
+      };
+      return fetchWrapper('/users/me/profile', {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    changePassword: async (currentPassword, newPassword) => {
+      return fetchWrapper('/users/me/password', {
+        method: 'POST',
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+    },
+  },
 };

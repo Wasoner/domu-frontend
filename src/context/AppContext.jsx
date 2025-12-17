@@ -23,7 +23,7 @@ export const AppProvider = ({ children }) => {
     const userType = localStorage.getItem('userType');
     const userEmail = localStorage.getItem('userEmail');
     const selectedBuildingId = localStorage.getItem('selectedBuildingId');
-    
+
     if (token && userEmail) {
       return {
         email: userEmail,
@@ -69,12 +69,13 @@ export const AppProvider = ({ children }) => {
   const updateUser = (userData) => {
     const normalizedUser = userData
       ? {
-          ...userData,
-          userType: resolveUserType(userData),
-          selectedBuildingId: userData.selectedBuildingId || userData.activeBuildingId || userData.activeBuildingId === 0
-            ? userData.activeBuildingId
-            : (user?.selectedBuildingId || undefined),
-        }
+        ...userData,
+        userType: resolveUserType(userData),
+        isAuthenticated: true,
+        selectedBuildingId: userData.selectedBuildingId || userData.activeBuildingId || userData.activeBuildingId === 0
+          ? userData.activeBuildingId
+          : (user?.selectedBuildingId || undefined),
+      }
       : null;
 
     setUser(normalizedUser);

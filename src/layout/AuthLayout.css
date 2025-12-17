@@ -23,6 +23,12 @@
   gap: 1.5rem;
 }
 
+.auth-layout__loading {
+  padding: 2rem;
+  text-align: center;
+  color: #4b5563;
+}
+
 @media (max-width: 1024px) {
   .auth-layout__body {
     padding: 1.5rem;
@@ -34,6 +40,3 @@
     padding: 1rem;
   }
 }
-
-
-
