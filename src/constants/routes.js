@@ -16,6 +16,7 @@ export const ROUTES = {
 
   // Protected routes - Admin
   DASHBOARD: '/dashboard',
+  ADMIN_CREATE_USER: '/dashboard/users/create',
   COMMUNITIES: '/dashboard/communities',
   COMMUNITY_DETAIL: '/dashboard/communities/:id',
   RESIDENTS: '/dashboard/residents',

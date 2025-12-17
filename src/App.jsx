@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Home, About, Login, Register, AdminInviteRegister, Dashboard, ResidentPortal, ResidentVisits, ResidentProfile, ResidentIncidents } from './pages'
+import { Home, About, Login, Register, AdminInviteRegister, Dashboard, AdminCreateUser, ResidentPortal, ResidentVisits, ResidentProfile, ResidentIncidents } from './pages'
 import { AppProvider } from './context'
 import { ROUTES } from './constants'
 
@@ -17,6 +17,7 @@ function App() {
 
           {/* Protected Routes - Admin */}
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+          <Route path={ROUTES.ADMIN_CREATE_USER} element={<AdminCreateUser />} />
 
           {/* Protected Routes - Resident */}
           <Route path={ROUTES.RESIDENT_PORTAL} element={<ResidentPortal />} />

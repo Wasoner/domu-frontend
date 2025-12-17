@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAppContext } from '../context';
-import { AuthLayout } from '../layout';
+import { ProtectedLayout } from '../layout';
 import { api } from '../services';
 import './ResidentIncidents.css';
 
@@ -82,7 +82,7 @@ const ResidentIncidents = () => {
   };
 
   return (
-    <AuthLayout user={user}>
+    <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
       <article className="resident-incidents">
         <header className="resident-incidents__header">
           <div className="resident-incidents__header-left">
@@ -94,8 +94,8 @@ const ResidentIncidents = () => {
           <div className="resident-incidents__header-right">
             <div className="resident-incidents__search">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="m15 15-3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" />
+                <path d="m15 15-3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
               <input
                 type="text"
@@ -130,7 +130,7 @@ const ResidentIncidents = () => {
                 Aplicar filtro
               </button>
             </div>
-            <button 
+            <button
               className="resident-incidents__report-btn"
               onClick={() => setShowReportModal(true)}
             >
@@ -222,7 +222,7 @@ const ResidentIncidents = () => {
             <div className="resident-incidents__modal" onClick={(e) => e.stopPropagation()}>
               <div className="resident-incidents__modal-header">
                 <h2>Reportar Incidente</h2>
-                <button 
+                <button
                   className="resident-incidents__modal-close"
                   onClick={() => setShowReportModal(false)}
                 >
@@ -269,15 +269,15 @@ const ResidentIncidents = () => {
                   />
                 </div>
                 <div className="resident-incidents__modal-actions">
-                  <button 
+                  <button
                     type="button"
                     className="resident-incidents__cancel-btn"
                     onClick={() => setShowReportModal(false)}
                   >
                     Cancelar
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="resident-incidents__submit-btn"
                     disabled={isSubmitting}
                   >
@@ -289,7 +289,7 @@ const ResidentIncidents = () => {
           </div>
         )}
       </article>
-    </AuthLayout>
+    </ProtectedLayout>
   );
 };
 

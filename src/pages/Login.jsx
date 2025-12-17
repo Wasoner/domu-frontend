@@ -46,6 +46,7 @@ const Login = () => {
             setUser({
                 email: formData.email,
                 userType: userType,
+                isAuthenticated: true,
                 ...response.user,
             });
 
