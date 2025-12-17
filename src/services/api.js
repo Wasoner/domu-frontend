@@ -427,4 +427,29 @@ export const api = {
       body: JSON.stringify(data),
     }),
   },
+
+  adminInvites: {
+    getInfo: async (code) => {
+      if (!code) {
+        throw new Error('Código de invitación no proporcionado');
+      }
+      return fetchWrapper(`/admin-invites/${encodeURIComponent(code)}`, { method: 'GET' });
+    },
+    register: async (code, data) => {
+      if (!code) {
+        throw new Error('Código de invitación no proporcionado');
+      }
+      const payload = {
+        firstName: data.firstName?.trim() || '',
+        lastName: data.lastName?.trim() || '',
+        phone: data.phone?.trim() || '',
+        documentNumber: data.documentNumber?.trim() || '',
+        password: data.password || '',
+      };
+      return fetchWrapper(`/admin-invites/${encodeURIComponent(code)}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+  },
 };
