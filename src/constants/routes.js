@@ -9,6 +9,7 @@ export const ROUTES = {
   ABOUT: '/about',
   LOGIN: '/login',
   REGISTER: '/register',
+  ADMIN_INVITE: '/registrar-admin',
   FEATURES: '/features',
   PRICING: '/pricing',
   CONTACT: '/contact',
@@ -44,7 +45,16 @@ export const ROUTES = {
  * Route categories for navigation and access control
  */
 export const ROUTE_CATEGORIES = {
-  PUBLIC: [ROUTES.HOME, ROUTES.ABOUT, ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.FEATURES, ROUTES.PRICING, ROUTES.CONTACT],
+  PUBLIC: [
+    ROUTES.HOME,
+    ROUTES.ABOUT,
+    ROUTES.LOGIN,
+    ROUTES.REGISTER,
+    ROUTES.ADMIN_INVITE,
+    ROUTES.FEATURES,
+    ROUTES.PRICING,
+    ROUTES.CONTACT,
+  ],
   ADMIN: [
     ROUTES.DASHBOARD,
     ROUTES.COMMUNITIES,
