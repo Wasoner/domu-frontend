@@ -68,6 +68,7 @@ const VisitRegistrationPanel = ({ user }) => {
     if (user.roleId === 3) return 'concierge';
     return 'resident';
   }, [user]);
+  const displayRole = ROLE_LABELS[resolvedRole] || 'Usuario';
 
   const [formData, setFormData] = useState(initialFormState);
   const [upcomingVisits, setUpcomingVisits] = useState([]);
@@ -264,34 +265,56 @@ const VisitRegistrationPanel = ({ user }) => {
 
   if (!user) {
     return (
-      <section className="visit-panel">
+      <section className="visit-panel visit-panel--compact">
         <header className="visit-panel__header">
           <div>
             <p className="visit-panel__eyebrow">Registro de visitas</p>
             <h3>Inicia sesión para anunciar accesos</h3>
           </div>
+          <div className="visit-panel__role-pill">Acceso privado</div>
         </header>
-        <p className="visit-panel__locked">
-          Necesitas estar autenticado para registrar visitas y notificar a conserjería.
-        </p>
+
+        <div className="visit-panel__locked-card" role="alert">
+          <div className="visit-panel__locked-icon" aria-hidden="true">🔒</div>
+          <div>
+            <p className="visit-panel__locked-title">Sesión requerida</p>
+            <p className="visit-panel__locked-text">
+              Necesitas iniciar sesión para registrar visitas y notificar a conserjería.
+            </p>
+            <p className="visit-panel__helper">
+              Solo usuarios autorizados pueden generar preavisos de ingreso.
+            </p>
+          </div>
+        </div>
       </section>
     );
   }
 
   if (!canRegister || !hasUnit) {
     return (
-      <section className="visit-panel">
+      <section className="visit-panel visit-panel--compact">
         <header className="visit-panel__header">
           <div>
             <p className="visit-panel__eyebrow">Registro de visitas</p>
             <h3>Acceso restringido</h3>
           </div>
+          <div className="visit-panel__role-pill">Permiso requerido</div>
         </header>
-        <p className="visit-panel__locked">
-          {!canRegister
-            ? 'Tu perfil todavía no tiene permiso para anunciar visitas. Contacta al administrador para habilitarlo.'
-            : 'Necesitamos una unidad asociada para enviar la visita. Actualiza tu perfil o pide apoyo al administrador.'}
-        </p>
+
+        <div className="visit-panel__locked-card" role="alert">
+          <div className="visit-panel__locked-icon" aria-hidden="true">🚫</div>
+          <div>
+            <p className="visit-panel__locked-title">No podemos registrar todavía</p>
+            <p className="visit-panel__locked-text">
+              {!canRegister
+                ? 'Tu perfil no tiene permisos para anunciar visitas. Contacta al administrador para habilitarlo.'
+                : 'Necesitamos una unidad asociada para enviar la visita. Actualiza tu perfil o solicita apoyo al administrador.'}
+            </p>
+            <p className="visit-panel__helper">
+              Sugerencia: completa tu perfil de residente o abre un ticket al área de administración.
+            </p>
+          </div>
+        </div>
       </section>
     );
   }
@@ -311,9 +334,27 @@ const VisitRegistrationPanel = ({ user }) => {
           </span>
         </div>
         <div className="visit-panel__role-pill">
-          Registrando como <strong>{ROLE_LABELS[resolvedRole]}</strong>
+          Registrando como <strong>{displayRole}</strong>
         </div>
       </header>
+
+      <div className="visit-panel__callouts" aria-hidden="true">
+        <div className="visit-callout">
+          <p>Próximas</p>
+          <strong>{loadingVisits ? '...' : upcomingVisits.length || 0}</strong>
+          <span>visitas agendadas</span>
+        </div>
+        <div className="visit-callout">
+          <p>Guardadas</p>
+          <strong>{loadingContacts ? '...' : Math.min(contacts.length, 5)}</strong>
+          <span>plantillas listas</span>
+        </div>
+        <div className="visit-callout">
+          <p>Rol actual</p>
+          <strong>{displayRole}</strong>
+          <span>flujo ajustado a permisos</span>
+        </div>
+      </div>
 
       {feedback && (
         <div className={`visit-panel__feedback visit-panel__feedback--${feedback.type}`} role="status">
@@ -426,15 +467,15 @@ const VisitRegistrationPanel = ({ user }) => {
             <Button type="button" variant="ghost" onClick={resetForm} disabled={submitting}>
               Limpiar
             </Button>
-              <label className="visit-form__save-contact">
-                <input
-                  type="checkbox"
-                  name="saveContact"
-                  checked={saveContact}
-                  onChange={handleSaveContactToggle}
-                />
-                Guardar como contacto
-              </label>
+            <label className="visit-form__save-contact">
+              <input
+                type="checkbox"
+                name="saveContact"
+                checked={saveContact}
+                onChange={handleSaveContactToggle}
+              />
+              Guardar como contacto
+            </label>
           </div>
 
           <p className="visit-form__preview">
