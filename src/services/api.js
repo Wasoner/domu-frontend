@@ -426,6 +426,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+    updateStatus: async (incidentId, status) => fetchWrapper(`/incidents/${incidentId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
   },
 
   adminInvites: {

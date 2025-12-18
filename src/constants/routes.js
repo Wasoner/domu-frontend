@@ -26,6 +26,7 @@ export const ROUTES = {
   ANNOUNCEMENTS: '/dashboard/announcements',
   EVENTS: '/dashboard/events',
   REPORTS: '/dashboard/reports',
+  ADMIN_INCIDENTS: '/dashboard/incidents',
   SETTINGS: '/dashboard/settings',
 
   // Protected routes - Resident

@@ -16,7 +16,7 @@ const filterSectionsByRole = (sections, role) => {
     .filter((section) => section.items && section.items.length > 0);
 };
 
-const ProtectedLayout = ({ children, allowedRoles }) => {
+const ProtectedLayout = ({ children, allowedRoles, bodyActions }) => {
   const location = useLocation();
   const { user, isLoading, isAuthenticated } = useAppContext();
   const userRole = user?.userType;
@@ -41,7 +41,7 @@ const ProtectedLayout = ({ children, allowedRoles }) => {
   }
 
   return (
-    <AuthLayout user={user} navSections={navSections}>
+    <AuthLayout user={user} navSections={navSections} bodyActions={bodyActions}>
       {children}
     </AuthLayout>
   );
@@ -50,10 +50,14 @@ const ProtectedLayout = ({ children, allowedRoles }) => {
 ProtectedLayout.propTypes = {
   children: PropTypes.node.isRequired,
   allowedRoles: PropTypes.arrayOf(PropTypes.string),
+  bodyActions: PropTypes.node,
 };
 
 ProtectedLayout.defaultProps = {
   allowedRoles: null,
+  bodyActions: null,
 };
 
 export default ProtectedLayout;
+
+

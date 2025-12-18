@@ -40,7 +40,7 @@ const Sidebar = ({ navSections }) => {
                     {item.to ? (
                       <NavLink
                         to={item.to}
-                        end={item.exact}
+                        end={item.exact !== undefined ? item.exact : true}
                         title={item.label}
                         className={({ isActive }) =>
                           `app-sidebar__link ${isActive ? 'is-active' : ''}`
