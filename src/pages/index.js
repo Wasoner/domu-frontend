@@ -14,3 +14,4 @@ export { default as ResidentVisits } from './ResidentVisits';
 export { default as ResidentProfile } from './ResidentProfile';
 export { default as ResidentIncidents } from './ResidentIncidents';
 export { default as AdminIncidentsBoard } from './AdminIncidentsBoard';
+export { default as Votaciones } from './Votaciones';

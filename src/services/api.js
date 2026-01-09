@@ -20,12 +20,14 @@ const getAuthToken = () => {
 const roleIdToUserType = (roleId) => {
   if (roleId === 1) return 'admin';
   if (roleId === 3) return 'concierge';
+  if (roleId === 4) return 'staff';
   return 'resident';
 };
 
 const userTypeToRoleId = (userType) => {
   if (userType === 'admin') return 1;
   if (userType === 'concierge') return 3;
+  if (userType === 'staff') return 4;
   return 2;
 };
 
@@ -430,6 +432,37 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ status }),
     }),
+  },
+
+  polls: {
+    list: async (status) => {
+      const params = status ? `?status=${encodeURIComponent(status)}` : '';
+      return fetchWrapper(`/polls${params}`, { method: 'GET' });
+    },
+    get: async (pollId) => fetchWrapper(`/polls/${pollId}`, { method: 'GET' }),
+    create: async (data) => fetchWrapper('/polls', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    vote: async (pollId, optionId) => fetchWrapper(`/polls/${pollId}/votes`, {
+      method: 'POST',
+      body: JSON.stringify({ optionId }),
+    }),
+    close: async (pollId) => fetchWrapper(`/polls/${pollId}/close`, { method: 'PATCH' }),
+    exportCsv: async (pollId) => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/polls/${pollId}/export`, {
+        method: 'GET',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Accept: 'text/csv',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('No pudimos exportar la votación');
+      }
+      return response.text();
+    },
   },
 
   adminInvites: {

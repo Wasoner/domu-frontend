@@ -13,6 +13,7 @@ const resolveUserType = (userData) => {
   if (userData.userType) return userData.userType;
   if (userData.roleId === 1) return 'admin';
   if (userData.roleId === 3) return 'concierge';
+  if (userData.roleId === 4) return 'staff';
   return 'resident';
 };
 

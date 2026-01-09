@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Home, About, Login, Register, AdminInviteRegister, Dashboard, AdminCreateUser, ResidentPortal, ResidentVisits, ResidentProfile, ResidentIncidents, AdminIncidentsBoard } from './pages'
+import { Home, About, Login, Register, AdminInviteRegister, Dashboard, AdminCreateUser, ResidentPortal, ResidentVisits, ResidentProfile, ResidentIncidents, AdminIncidentsBoard, Votaciones } from './pages'
 import { AppProvider } from './context'
 import { ROUTES } from './constants'
 
@@ -25,6 +25,7 @@ function App() {
           <Route path={ROUTES.RESIDENT_EVENTS} element={<ResidentVisits />} />
           <Route path={ROUTES.RESIDENT_PROFILE} element={<ResidentProfile />} />
           <Route path={ROUTES.RESIDENT_INCIDENTS} element={<ResidentIncidents />} />
+          <Route path={ROUTES.VOTINGS} element={<Votaciones />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>
