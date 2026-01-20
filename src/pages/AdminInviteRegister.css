@@ -82,8 +82,8 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: var(--color-turquoise);
+  box-shadow: 0 0 0 3px rgba(83, 164, 151, 0.18);
 }
 
 .field-hint {
@@ -99,7 +99,7 @@
 .link-button {
   background: none;
   border: none;
-  color: #2563eb;
+  color: var(--color-turquoise);
   cursor: pointer;
   font-weight: 600;
   padding: 0;

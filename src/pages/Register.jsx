@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Header, MainContent, Footer } from '../layout';
-import { Button } from '../components';
+import { Button, Seo, Spinner } from '../components';
 import { ROUTES } from '../constants';
 import { api } from '../services';
 import { useAppContext } from '../context';
@@ -169,6 +169,12 @@ const Register = () => {
 
     return (
         <div className="register-page">
+            <Seo
+                title="Crear cuenta en Domu | Registro de residentes y conserjes"
+                description="Regístrate en Domu para administrar tu comunidad, registrar visitas y mantener al día los gastos comunes."
+                canonicalPath="/register"
+                noindex
+            />
             <Header />
             <MainContent>
                 <div className="register-container fade-in">
@@ -402,7 +408,7 @@ const Register = () => {
                             variant="primary"
                             disabled={loading}
                         >
-                            {loading ? 'Registrando...' : 'Crear Cuenta'}
+                            {loading ? <Spinner size="sm" inline label="Registrando..." /> : 'Crear Cuenta'}
                         </Button>
                     </form>
 

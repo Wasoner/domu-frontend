@@ -41,6 +41,8 @@ export const ROUTES = {
   RESIDENT_PROFILE: '/resident/profile',
   RESIDENT_SUPPORT: '/resident/support',
   RESIDENT_INCIDENTS: '/resident/incidents',
+  RESIDENT_AMENITIES: '/resident/amenities',
+  VOTINGS: '/votaciones',
 };
 
 /**
@@ -63,9 +65,11 @@ export const ROUTE_CATEGORIES = {
     ROUTES.RESIDENTS,
     ROUTES.COMMON_CHARGES,
     ROUTES.PAYMENTS,
+    ROUTES.VOTINGS,
     ROUTES.ANNOUNCEMENTS,
     ROUTES.EVENTS,
     ROUTES.REPORTS,
+    ROUTES.ADMIN_AMENITIES,
     ROUTES.SETTINGS,
   ],
   RESIDENT: [
@@ -78,6 +82,8 @@ export const ROUTE_CATEGORIES = {
     ROUTES.RESIDENT_SERVICES,
     ROUTES.RESIDENT_PROFILE,
     ROUTES.RESIDENT_SUPPORT,
+    ROUTES.RESIDENT_AMENITIES,
+    ROUTES.VOTINGS,
   ],
 };
 

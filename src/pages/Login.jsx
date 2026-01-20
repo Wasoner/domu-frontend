@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Header, MainContent, Footer } from '../layout';
-import { Button } from '../components';
+import { Button, Seo, Spinner } from '../components';
 import { ROUTES } from '../constants';
 import { api } from '../services';
 import { useAppContext } from '../context';
@@ -74,88 +74,103 @@ const Login = () => {
 
     return (
         <div className="login-page">
+            <Seo
+                title="Ingresar a Domu | Portal seguro para residentes y administradores"
+                description="Accede al portal seguro de Domu para gestionar tu comunidad, revisar gastos comunes y administrar residentes."
+                canonicalPath="/login"
+                noindex
+            />
             <Header />
             <MainContent>
-                <div className="login-container fade-in">
-                    <h1>Iniciar Sesión</h1>
-
-                    <form onSubmit={handleSubmit} className="login-form" aria-label="Formulario de inicio de sesión">
-                        {error && (
-                            <div className="error-message" role="alert">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="form-group">
-                            <label htmlFor="email">Email</label>
-                            <input
-                                id="email"
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                placeholder="tu@email.com"
-                                required
-                                disabled={loading}
-                            />
+                {loading ? (
+                    <div className="login-loading" aria-busy="true">
+                        <div className="login-loading-panel">
+                            <Spinner size="lg" label="Iniciando sesión..." />
+                            <p className="login-loading-text">Estamos validando tus credenciales</p>
                         </div>
+                    </div>
+                ) : (
+                    <div className="login-container fade-in">
+                        <h1>Iniciar Sesión</h1>
 
-                        <div className="form-group">
-                            <label htmlFor="password">Contraseña</label>
-                            <div className="password-input-wrapper">
+                        <form onSubmit={handleSubmit} className="login-form" aria-label="Formulario de inicio de sesión">
+                            {error && (
+                                <div className="error-message" role="alert">
+                                    {error}
+                                </div>
+                            )}
+
+                            <div className="form-group">
+                                <label htmlFor="email">Email</label>
                                 <input
-                                    id="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    name="password"
-                                    value={formData.password}
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
                                     onChange={handleChange}
-                                    placeholder="••••••••"
+                                    placeholder="tu@email.com"
                                     required
                                     disabled={loading}
                                 />
-                                <button
-                                    type="button"
-                                    className="password-toggle"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    disabled={loading}
-                                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                                >
-                                    {showPassword ? (
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <path d="M10 3C5 3 1.73 7.11 1 10c.73 2.89 4 7 9 7s8.27-4.11 9-7c-.73-2.89-4-7-9-7z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            <path d="M10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    ) : (
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <path d="M1 1l18 18M8.18 8.18a3 3 0 0 0 3.64 3.64M8.18 8.18L4.29 4.29m7.53 7.53l3.88 3.88M3.27 3.27L1.59 4.95m14.14 14.14l1.68-1.68M7.05 7.05L4.29 4.29m7.53 7.53l3.88 3.88" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            <path d="M10 3C5 3 1.73 7.11 1 10c.73 2.89 4 7 9 7 1.5 0 2.91-.35 4.15-.95l-2.5-2.5a3 3 0 0 1-3.3-3.3L5.05 5.85C3.35 6.91 2.5 8.5 2.5 10c0 2.21 1.79 4 4 4 1.5 0 2.91-.35 4.15-.95" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    )}
-                                </button>
                             </div>
-                        </div>
 
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            disabled={loading}
-                        >
-                            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-                        </Button>
-                    </form>
+                            <div className="form-group">
+                                <label htmlFor="password">Contraseña</label>
+                                <div className="password-input-wrapper">
+                                    <input
+                                        id="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        placeholder="••••••••"
+                                        required
+                                        disabled={loading}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="password-toggle"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        disabled={loading}
+                                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                    >
+                                        {showPassword ? (
+                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                <path d="M10 3C5 3 1.73 7.11 1 10c.73 2.89 4 7 9 7s8.27-4.11 9-7c-.73-2.89-4-7-9-7z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        ) : (
+                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                <path d="M1 1l18 18M8.18 8.18a3 3 0 0 0 3.64 3.64M8.18 8.18L4.29 4.29m7.53 7.53l3.88 3.88M3.27 3.27L1.59 4.95m14.14 14.14l1.68-1.68M7.05 7.05L4.29 4.29m7.53 7.53l3.88 3.88" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M10 3C5 3 1.73 7.11 1 10c.73 2.89 4 7 9 7 1.5 0 2.91-.35 4.15-.95l-2.5-2.5a3 3 0 0 1-3.3-3.3L5.05 5.85C3.35 6.91 2.5 8.5 2.5 10c0 2.21 1.79 4 4 4 1.5 0 2.91-.35 4.15-.95" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
 
-                    <div className="login-footer">
-                        <p>
-                            ¿No tienes una cuenta?{' '}
-                            <Link to={ROUTES.REGISTER} className="link-register">
-                                Regístrate aquí
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                disabled={loading}
+                            >
+                                {loading ? <Spinner size="sm" inline label="Iniciando..." /> : 'Iniciar Sesión'}
+                            </Button>
+                        </form>
+
+                        <div className="login-footer">
+                            <p>
+                                ¿No tienes una cuenta?{' '}
+                                <Link to={ROUTES.REGISTER} className="link-register">
+                                    Regístrate aquí
+                                </Link>
+                            </p>
+                            <Link to={ROUTES.HOME} className="link-back">
+                                ← Volver al inicio
                             </Link>
-                        </p>
-                        <Link to={ROUTES.HOME} className="link-back">
-                            ← Volver al inicio
-                        </Link>
+                        </div>
                     </div>
-                </div>
+                )}
             </MainContent>
             <Footer />
         </div>

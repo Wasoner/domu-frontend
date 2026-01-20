@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Header, MainContent, Footer } from '../layout';
-import { Button } from '../components';
+import { Button, Seo, Spinner } from '../components';
 import { ROUTES } from '../constants';
 import { api } from '../services';
 import './AdminInviteRegister.css';
@@ -108,6 +108,12 @@ const AdminInviteRegister = () => {
 
   return (
     <div className="admin-invite-page">
+      <Seo
+        title="Invitación de administrador | Domu"
+        description="Completa tu registro seguro para administrar comunidades en Domu."
+        canonicalPath="/admin-invite"
+        noindex
+      />
       <Header />
       <MainContent>
         <div className="admin-invite-card fade-in">
@@ -231,7 +237,7 @@ const AdminInviteRegister = () => {
               </div>
 
               <Button type="submit" variant="primary" disabled={submitting}>
-                {submitting ? 'Creando cuenta…' : 'Crear cuenta'}
+                {submitting ? <Spinner size="sm" inline label="Creando cuenta…" /> : 'Crear cuenta'}
               </Button>
 
               <p className="admin-invite-back">

@@ -25,6 +25,8 @@ function App() {
           <Route path={ROUTES.RESIDENT_EVENTS} element={<ResidentVisits />} />
           <Route path={ROUTES.RESIDENT_PROFILE} element={<ResidentProfile />} />
           <Route path={ROUTES.RESIDENT_INCIDENTS} element={<ResidentIncidents />} />
+          <Route path={ROUTES.RESIDENT_AMENITIES} element={<ResidentAmenities />} />
+          <Route path={ROUTES.VOTINGS} element={<Votaciones />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>
