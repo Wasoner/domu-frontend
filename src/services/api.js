@@ -537,4 +537,77 @@ export const api = {
       });
     },
   },
+
+  amenities: {
+    list: async () => fetchWrapper('/amenities', { method: 'GET' }),
+    listAll: async () => fetchWrapper('/amenities/all', { method: 'GET' }),
+    get: async (amenityId) => fetchWrapper(`/amenities/${amenityId}`, { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        buildingId: data.buildingId ? Number(data.buildingId) : null,
+        name: String(data.name || '').trim(),
+        description: data.description?.trim() || null,
+        maxCapacity: data.maxCapacity ? Number(data.maxCapacity) : null,
+        costPerSlot: data.costPerSlot ? Number(data.costPerSlot) : 0,
+        rules: data.rules?.trim() || null,
+        imageUrl: data.imageUrl?.trim() || null,
+        status: data.status || 'ACTIVE',
+      };
+      return fetchWrapper('/amenities', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (amenityId, data) => {
+      const payload = {
+        name: String(data.name || '').trim(),
+        description: data.description?.trim() || null,
+        maxCapacity: data.maxCapacity ? Number(data.maxCapacity) : null,
+        costPerSlot: data.costPerSlot ? Number(data.costPerSlot) : 0,
+        rules: data.rules?.trim() || null,
+        imageUrl: data.imageUrl?.trim() || null,
+        status: data.status || 'ACTIVE',
+      };
+      return fetchWrapper(`/amenities/${amenityId}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (amenityId) => fetchWrapper(`/amenities/${amenityId}`, { method: 'DELETE' }),
+    getAvailability: async (amenityId, date) => {
+      const dateParam = date ? `?date=${date}` : '';
+      return fetchWrapper(`/amenities/${amenityId}/availability${dateParam}`, { method: 'GET' });
+    },
+    reserve: async (amenityId, data) => {
+      const payload = {
+        timeSlotId: Number(data.timeSlotId),
+        reservationDate: data.reservationDate,
+        notes: data.notes?.trim() || null,
+      };
+      return fetchWrapper(`/amenities/${amenityId}/reserve`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    getReservations: async (amenityId) => fetchWrapper(`/amenities/${amenityId}/reservations`, { method: 'GET' }),
+    configureTimeSlots: async (amenityId, slots) => {
+      const payload = {
+        slots: slots.map((slot) => ({
+          dayOfWeek: Number(slot.dayOfWeek),
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          active: slot.active !== false,
+        })),
+      };
+      return fetchWrapper(`/amenities/${amenityId}/time-slots`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+  },
+
+  reservations: {
+    listMine: async () => fetchWrapper('/reservations/my', { method: 'GET' }),
+    cancel: async (reservationId) => fetchWrapper(`/reservations/${reservationId}`, { method: 'DELETE' }),
+  },
 };

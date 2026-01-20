@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, LocationPicker } from '../components';
+import { Button, LocationPicker, Seo, Spinner } from '../components';
 import { Header, MainContent, Footer, AuthLayout } from '../layout';
 import heroLogo from '../assets/LogotipoDOMU.svg';
 import { ROUTES } from '../constants';
@@ -170,7 +170,7 @@ const ResidentHome = ({ user }) => {
               )}
             </header>
 
-            {loadingCharges && <p>Cargando gastos...</p>}
+            {loadingCharges && <Spinner size="sm" inline label="Cargando gastos..." />}
             {chargesError && !loadingCharges && (
               <p className="error-text">No pudimos cargar tus gastos: {chargesError}</p>
             )}
@@ -298,6 +298,29 @@ const Home = () => {
   const [documentFile, setDocumentFile] = useState(null);
   const [documentName, setDocumentName] = useState(() => localStorage.getItem(COMMUNITY_DOC_NAME_KEY) || '');
   const [communityStatus, setCommunityStatus] = useState(getDefaultCommunityStatus);
+  const currentOrigin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://domu.app';
+  const homeStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Domu',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web, Android, iOS',
+    url: `${currentOrigin}/`,
+    description:
+      'Software para la administración de edificios y condominios con pagos de gastos comunes en línea, comunicación y control de accesos.',
+    inLanguage: 'es',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'CLP',
+      availability: 'https://schema.org/PreOrder',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Domu',
+      url: `${currentOrigin}/`,
+    },
+  };
 
   useEffect(() => {
     localStorage.setItem(COMMUNITY_FORM_STORAGE_KEY, JSON.stringify(communityForm));
@@ -314,7 +337,7 @@ const Home = () => {
         <Header />
         <MainContent>
           <div className="home-loader" role="status">
-            Preparando tu portal...
+            <Spinner label="Preparando tu portal..." />
           </div>
         </MainContent>
         <Footer />
@@ -492,10 +515,17 @@ const Home = () => {
 
   return (
     <div className="home-page fade-in">
+      <Seo
+        title="Domu | Software de administración de edificios y condominios"
+        description="Administra edificios y condominios con Domu: gastos comunes en línea, comunicación con residentes y control de accesos desde un portal web responsivo."
+        keywords="domu, gastos comunes en línea, software condominios, administración de edificios, portal residentes, control de accesos"
+        canonicalPath="/"
+        structuredData={homeStructuredData}
+      />
       <Header />
 
       {/* Hero Section */}
-      <section className="home-hero">
+      <section className="home-hero animated-section">
         <div className="container">
           <div className="home-hero__content">
             <div className="home-hero__text">
@@ -524,7 +554,7 @@ const Home = () => {
 
       <MainContent>
         {/* Features Section */}
-        <section className="home-features">
+        <section className="home-features animated-section">
           <div className="container">
             <div className="home-section__header">
               <h2>Funcionalidades principales</h2>
@@ -543,7 +573,7 @@ const Home = () => {
         </section>
 
         {/* Benefits Section */}
-        <section className="home-benefits">
+        <section className="home-benefits animated-section">
           <div className="container">
             <div className="home-section__header">
               <h2>El software DOMU está pensado para cada integrante del condominio</h2>
@@ -564,7 +594,7 @@ const Home = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="home-cta">
+        <section className="home-cta animated-section">
           <div className="container">
             <div className="home-cta__content">
               <h2>¿Listo para mejorar la gestión de tu comunidad?</h2>

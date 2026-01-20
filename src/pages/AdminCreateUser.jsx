@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
+import { Seo, Spinner } from '../components';
 import { api } from '../services';
 import './AdminCreateUser.css';
 
@@ -104,6 +105,12 @@ const AdminCreateUser = () => {
 
   return (
     <ProtectedLayout allowedRoles={['admin']}>
+      <Seo
+        title="Crear usuarios internos | Domu"
+        description="Panel privado para crear cuentas de conserjes y funcionarios en Domu."
+        canonicalPath="/admin/create-user"
+        noindex
+      />
       <section className="admin-create-user">
         <header className="admin-create-user__header">
           <div>
@@ -222,7 +229,7 @@ const AdminCreateUser = () => {
 
             <div className="form-actions">
               <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Creando usuario...' : 'Crear usuario'}
+                {loading ? <Spinner size="sm" inline label="Creando usuario..." /> : 'Crear usuario'}
               </button>
               <p className="helper-text">
                 Se creará con contraseña por defecto 1234567890. Pídele que la cambie en su perfil.

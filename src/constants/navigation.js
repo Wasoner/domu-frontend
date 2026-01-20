@@ -15,6 +15,7 @@ export const NAV_SECTIONS = [
       { label: 'Dashboard', icon: '📊', to: ROUTES.DASHBOARD, roles: ['admin', 'concierge'], exact: true },
       { label: 'Crear usuarios', icon: '➕', to: ROUTES.ADMIN_CREATE_USER, roles: ['admin'], exact: true },
       { label: 'Incidentes', icon: '🚨', to: ROUTES.ADMIN_INCIDENTS, roles: ['admin', 'concierge'], exact: true },
+      { label: 'Áreas comunes', icon: '🏊', to: ROUTES.ADMIN_AMENITIES, roles: ['admin', 'concierge'], exact: true },
       { label: 'Comunidades', icon: '🏢', roles: ['admin'] },
 
       { label: 'Residentes', icon: '👥', roles: ['admin'] },
@@ -39,6 +40,7 @@ export const NAV_SECTIONS = [
       { label: 'Visitas', icon: '🧑‍🤝‍🧑', to: ROUTES.RESIDENT_EVENTS, roles: ['resident', 'concierge', 'admin'], exact: true },
       { label: 'Incidentes', icon: '🚨', to: ROUTES.RESIDENT_INCIDENTS, roles: ['resident', 'staff'], exact: true },
       { label: 'Votaciones', icon: '🗳️', to: ROUTES.VOTINGS, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
+      { label: 'Reservas', icon: '📅', to: ROUTES.RESIDENT_AMENITIES, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
       { label: 'Mi perfil', icon: '🙍‍♂️', to: ROUTES.RESIDENT_PROFILE, roles: ['resident', 'staff'], exact: true },
     ],
 
