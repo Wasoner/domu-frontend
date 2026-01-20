@@ -434,37 +434,6 @@ export const api = {
     }),
   },
 
-  polls: {
-    list: async (status) => {
-      const params = status ? `?status=${encodeURIComponent(status)}` : '';
-      return fetchWrapper(`/polls${params}`, { method: 'GET' });
-    },
-    get: async (pollId) => fetchWrapper(`/polls/${pollId}`, { method: 'GET' }),
-    create: async (data) => fetchWrapper('/polls', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-    vote: async (pollId, optionId) => fetchWrapper(`/polls/${pollId}/votes`, {
-      method: 'POST',
-      body: JSON.stringify({ optionId }),
-    }),
-    close: async (pollId) => fetchWrapper(`/polls/${pollId}/close`, { method: 'PATCH' }),
-    exportCsv: async (pollId) => {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/polls/${pollId}/export`, {
-        method: 'GET',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          Accept: 'text/csv',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('No pudimos exportar la votación');
-      }
-      return response.text();
-    },
-  },
-
   adminInvites: {
     getInfo: async (code) => {
       if (!code) {

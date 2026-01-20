@@ -2,36 +2,46 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
-import { Seo, Spinner } from '../components';
+import { VisitRegistrationPanel } from '../components';
 import { api } from '../services';
 import { ROUTES } from '../constants';
 import './Dashboard.css';
 
-const adminActions = [
+const priorityWidgets = [
     {
         icon: '💳',
-        title: 'Pagos y cobranzas',
-        description: 'Revisa estados de pago y conciliaciones.',
-        to: ROUTES.PAYMENTS,
+        title: 'Cobranzas pendientes',
+        metric: '12',
+        helper: 'Revisa pagos vencidos de esta semana.',
+        action: 'Ir a pagos',
     },
     {
-        icon: '👥',
-        title: 'Residentes',
-        description: 'Administra perfiles y unidades.',
-        to: ROUTES.RESIDENTS,
+        icon: '🚨',
+        title: 'Tickets urgentes',
+        metric: '5',
+        helper: 'Incidentes críticos en progreso.',
+        action: 'Ver incidentes',
+    },
+    {
+        icon: '🛂',
+        title: 'Visitas de hoy',
+        metric: '8',
+        helper: 'Preavisos registrados para conserjería.',
+        action: 'Ver accesos',
     },
 ];
 
-const CATEGORY_LABELS = {
-    security: 'Seguridad',
-    maintenance: 'Mantenimiento',
-    noise: 'Ruido',
-    cleaning: 'Limpieza',
-    access: 'Accesos',
-    concierge: 'Conserjería',
-    general: 'General',
-    other: 'Otros',
-};
+const quickShortcuts = [
+    { label: 'Comunidades', detail: 'Estado y ocupación', icon: '🏢' },
+    { label: 'Residentes', detail: 'Contactos y unidades', icon: '👥' },
+    { label: 'Reportes', detail: 'Finanzas y tickets', icon: '📈' },
+];
+
+const nextActions = [
+    'Confirmar pagos vencidos antes de las 12:00.',
+    'Priorizar tickets con SLA < 4h.',
+    'Coordinar accesos programados y avisar a conserjería.',
+];
 
 const Dashboard = () => {
     const { user } = useAppContext();
@@ -43,12 +53,6 @@ const Dashboard = () => {
         if (!user) return 'Administrador';
         return user.firstName || user.email || 'Administrador';
     }, [user]);
-
-    const computeSignature = useCallback((items) => {
-        return items
-            .map((item) => `${item.id}-${item.status}-${item.createdAt}`)
-            .join('|');
-    }, []);
 
     const fetchIncidentFeed = useCallback(async () => {
         if (!user) return;
@@ -69,25 +73,14 @@ const Dashboard = () => {
                 }))
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .slice(0, 8);
-            setIncidentFeed((prev) => {
-                const previousSignature = computeSignature(prev);
-                const nextSignature = computeSignature(flatten);
-                if (previousSignature !== nextSignature) {
-                    setLastUpdated(new Date());
-                }
-                return flatten;
-            });
+            setIncidentFeed(flatten);
+            setLastUpdated(new Date());
         } catch (error) {
             console.error('No pudimos cargar incidentes en tiempo real', error);
         } finally {
             setLoadingIncidents(false);
         }
-    }, [user, computeSignature]);
-
-    const getCategoryLabel = useCallback((category) => {
-        const key = (category || 'general').toString().trim().toLowerCase();
-        return CATEGORY_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1);
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         fetchIncidentFeed();
@@ -97,12 +90,6 @@ const Dashboard = () => {
 
     return (
         <ProtectedLayout allowedRoles={['admin', 'concierge']}>
-            <Seo
-                title="Dashboard administrativo | Domu"
-                description="Panel privado para administrar comunidades, incidentes y accesos en Domu."
-                canonicalPath="/dashboard"
-                noindex
-            />
             <article className="dashboard-page" aria-label="Resumen administrativo">
                 <header className="dashboard-hero">
                     <div>
@@ -118,88 +105,127 @@ const Dashboard = () => {
                     </div>
                 </header>
 
-                <section className="admin-actions" aria-label="Accesos rápidos">
-                    <div className="admin-actions__header">
-                        <h2>Accesos rápidos</h2>
-                        <p>Herramientas esenciales para operar el día a día.</p>
-                    </div>
-                    <div className="admin-actions__grid">
-                        {adminActions.map((action) => (
-                            <Link to={action.to} key={action.title} className="admin-action-card">
-                                <span className="admin-action-card__icon" aria-hidden="true">
-                                    {action.icon}
+                <section className="widget-grid" aria-label="Prioridades del día">
+                    {priorityWidgets.map((widget) => (
+                        <article className="widget-card" key={widget.title}>
+                            <div className="widget-card__top">
+                                <span className="widget-card__icon" aria-hidden="true">
+                                    {widget.icon}
                                 </span>
-                                <div>
-                                    <h3>{action.title}</h3>
-                                    <p>{action.description}</p>
-                                </div>
-                                <span className="admin-action-card__cta">Entrar</span>
-                            </Link>
-                        ))}
-                    </div>
+                                <p className="widget-card__action">{widget.action}</p>
+                            </div>
+                            <h3>{widget.title}</h3>
+                            <div className="widget-card__metric">{widget.metric}</div>
+                            <p className="widget-card__helper">{widget.helper}</p>
+                        </article>
+                    ))}
                 </section>
 
-                <section className="admin-activity" aria-label="Actividad reciente de incidentes">
-                    <header className="admin-activity__header">
+                <section className="realtime-panel" aria-label="Incidentes en tiempo real">
+                    <div className="realtime-panel__header">
                         <div>
-                            <p className="admin-activity__eyebrow">Actividad</p>
+                            <p className="realtime-panel__eyebrow">Tiempo real</p>
                             <h2>Incidentes recientes</h2>
-                            <p className="admin-activity__helper">
-                                Últimos movimientos reportados.
+                            <p className="realtime-panel__helper">
+                                Se actualiza automáticamente cuando cualquier usuario reporta.
                             </p>
                         </div>
-                        <div className="admin-activity__actions">
-                            <Link to={ROUTES.ADMIN_INCIDENTS} className="admin-activity__cta">
-                                Ver panel completo
+                        <div className="realtime-panel__actions">
+                            <Link to={ROUTES.RESIDENT_INCIDENTS} className="realtime-panel__cta">
+                                Ir al panel completo
                             </Link>
+                            <button
+                                type="button"
+                                className="realtime-panel__refresh"
+                                onClick={fetchIncidentFeed}
+                                disabled={loadingIncidents}
+                            >
+                                {loadingIncidents ? 'Actualizando...' : 'Actualizar ahora'}
+                            </button>
                             {lastUpdated && (
-                                <span className="admin-activity__timestamp">
-                                    {lastUpdated.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
+                                <span className="realtime-panel__timestamp">
+                                    Última sync: {lastUpdated.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             )}
                         </div>
-                    </header>
+                    </div>
 
-                    <div className="admin-activity__list" role="list">
+                    <div className="realtime-panel__list" role="list">
                         {loadingIncidents && incidentFeed.length === 0 && (
-                            <div className="admin-activity__empty">
-                                <Spinner label="Cargando incidentes..." />
-                            </div>
+                            <div className="realtime-panel__empty">Cargando incidentes...</div>
                         )}
                         {!loadingIncidents && incidentFeed.length === 0 && (
-                            <div className="admin-activity__empty">
-                                Sin novedades por ahora.
+                            <div className="realtime-panel__empty">
+                                Sin incidentes recientes. Todo en orden.
                             </div>
                         )}
-                        {incidentFeed.slice(0, 4).map((incident, index) => (
+                        {incidentFeed.map((incident, index) => (
                             <div
                                 key={incident.id || `${incident.title}-${index}`}
-                                className="admin-activity__item"
+                                className="realtime-panel__item"
                                 role="listitem"
                             >
-                                <div className="admin-activity__item-meta">
-                                    <span className="admin-activity__category">
-                                        {getCategoryLabel(incident.category)}
+                                <div className="realtime-panel__item-top">
+                                    <span className="realtime-panel__category">
+                                        {incident.category}
                                     </span>
-                                    <span className={`admin-activity__status admin-activity__status--${incident.status.toLowerCase()}`}>
+                                    <span className={`realtime-panel__status realtime-panel__status--${incident.status.toLowerCase()}`}>
                                         {incident.status === 'REPORTED' && 'Reportado'}
                                         {incident.status === 'IN_PROGRESS' && 'En progreso'}
                                         {incident.status === 'CLOSED' && 'Cerrado'}
                                     </span>
-                                    <span className="admin-activity__time">
-                                        {incident.createdAt
-                                            ? new Date(incident.createdAt).toLocaleString('es-CL', {
-                                                day: '2-digit',
-                                                month: 'short',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })
-                                            : 'Sin fecha'}
-                                    </span>
                                 </div>
+                                <p className="realtime-panel__title">{incident.title}</p>
+                                <span className="realtime-panel__time">
+                                    {incident.createdAt
+                                        ? new Date(incident.createdAt).toLocaleString('es-CL', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })
+                                        : 'Sin fecha'}
+                                </span>
+                                {index < incidentFeed.length - 1 && <div className="realtime-panel__divider" aria-hidden="true" />}
                             </div>
                         ))}
                     </div>
+                </section>
+
+                <section className="split-panels" aria-label="Atajos y próximos pasos">
+                    <div className="panel panel--shortcuts">
+                        <div className="panel__header">
+                            <h2>Atajos clave</h2>
+                            <p>Solo lo necesario para comenzar el día.</p>
+                        </div>
+                        <ul className="shortcut-list">
+                            {quickShortcuts.map((item) => (
+                                <li key={item.label} className="shortcut-item">
+                                    <span aria-hidden="true">{item.icon}</span>
+                                    <div>
+                                        <strong>{item.label}</strong>
+                                        <p>{item.detail}</p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="panel panel--actions">
+                        <div className="panel__header">
+                            <h2>Prioridades inmediatas</h2>
+                            <p>Checklist rápida antes de abrir el correo.</p>
+                        </div>
+                        <ol className="actions-list">
+                            {nextActions.map((task) => (
+                                <li key={task}>{task}</li>
+                            ))}
+                        </ol>
+                    </div>
+                </section>
+
+                <section aria-label="Registro rápido de visitas">
+                    <VisitRegistrationPanel user={user} />
                 </section>
             </article>
         </ProtectedLayout>
