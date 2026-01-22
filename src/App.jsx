@@ -1,5 +1,33 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Home, About, Login, Register, AdminInviteRegister, Dashboard, AdminCreateUser, ResidentPortal, ResidentVisits, ResidentProfile, ResidentIncidents, AdminIncidentsBoard } from './pages'
+import {
+  Home,
+  About,
+  Login,
+  Register,
+  AdminInviteRegister,
+  Dashboard,
+  AdminCreateUser,
+  AdminIncidentsBoard,
+  ResidentPortal,
+  ResidentVisits,
+  ResidentProfile,
+  ResidentIncidents,
+  ResidentAmenities,
+  ResidentCartola,
+  ResidentChargesDetail,
+  ResidentParcels,
+  ResidentMeters,
+  ResidentPublications,
+  ResidentExpenses,
+  ResidentFunds,
+  ResidentLibrary,
+  Votaciones,
+  UserTypeConserjeria,
+  UserTypeAdministrador,
+  UserTypeComite,
+  UserTypeResidente,
+  UserTypeFuncionarios,
+} from './pages'
 import { AppProvider } from './context'
 import { ROUTES } from './constants'
 

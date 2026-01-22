@@ -1,5 +1,7 @@
 .about-page {
-  min-height: calc(100vh - 140px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
 }
 
 .about-page h1 {

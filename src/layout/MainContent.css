@@ -1,7 +1,7 @@
 .app-main {
-  min-height: calc(100vh - 140px);
-  display: block;
-  padding: 3rem 0;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0;
   position: relative;
 }
 
