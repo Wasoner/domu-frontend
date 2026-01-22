@@ -10,24 +10,11 @@ const columns = [
   { key: 'closed', title: 'Cerrados', status: 'CLOSED' },
 ];
 
-const CATEGORY_LABELS = {
-  security: 'Seguridad',
-  maintenance: 'Mantenimiento',
-  noise: 'Ruido',
-  cleaning: 'Limpieza',
-  access: 'Accesos',
-  concierge: 'Conserjería',
-  general: 'General',
-  other: 'Otros',
-};
-
 const AdminIncidentsBoard = () => {
   const { user } = useAppContext();
   const [kanban, setKanban] = useState({ reported: [], inProgress: [], closed: [] });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [draggingIncident, setDraggingIncident] = useState(null);
-  const [dragOverStatus, setDragOverStatus] = useState(null);
 
   const roleLabel = useMemo(() => {
     if (!user) return 'Administrador';
@@ -56,40 +43,6 @@ const AdminIncidentsBoard = () => {
   useEffect(() => {
     fetchKanban();
   }, [fetchKanban]);
-
-  const getCategoryLabel = useCallback((category) => {
-    const key = (category || 'general').toString().trim().toLowerCase();
-    return CATEGORY_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1);
-  }, []);
-
-  const handleDragStart = (incident) => (event) => {
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', String(incident.id));
-    setDraggingIncident(incident);
-  };
-
-  const handleDragOver = (status) => (event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-    setDragOverStatus(status);
-  };
-
-  const handleDragLeave = () => {
-    setDragOverStatus(null);
-  };
-
-  const handleDrop = (status) => (event) => {
-    event.preventDefault();
-    setDragOverStatus(null);
-    if (!draggingIncident) return;
-    if (draggingIncident.status === status) return;
-    moveIncident(draggingIncident, status);
-  };
-
-  const handleDragEnd = () => {
-    setDraggingIncident(null);
-    setDragOverStatus(null);
-  };
 
   const moveIncident = async (incident, targetStatus) => {
     if (!incident?.id) return;
@@ -140,13 +93,7 @@ const AdminIncidentsBoard = () => {
         <section className="kanban kanban--page" aria-label="Tablero de incidentes">
           <div className="kanban__columns">
             {columns.map((column) => (
-                <div
-                  className={`kanban__column ${dragOverStatus === column.status ? 'kanban__column--drag-over' : ''}`}
-                  key={column.key}
-                  onDragOver={handleDragOver(column.status)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop(column.status)}
-                >
+              <div className="kanban__column" key={column.key}>
                 <div className="kanban__column-header">
                   <h3>{column.title}</h3>
                   <span className="kanban__badge">{kanban[column.key].length}</span>
@@ -156,17 +103,10 @@ const AdminIncidentsBoard = () => {
                     <div className="kanban__empty">Sin incidentes en esta columna.</div>
                   )}
                   {kanban[column.key].map((incident) => (
-                    <div
-                      className={`kanban__card ${draggingIncident?.id === incident.id ? 'kanban__card--dragging' : ''}`}
-                      key={incident.id}
-                      role="listitem"
-                      draggable
-                      onDragStart={handleDragStart(incident)}
-                      onDragEnd={handleDragEnd}
-                    >
+                    <div className="kanban__card" key={incident.id} role="listitem">
                       <p className="kanban__title">{incident.title}</p>
                       <div className="kanban__meta">
-                        <span className="kanban__chip">{getCategoryLabel(incident.category)}</span>
+                        <span className="kanban__chip">{incident.category || 'general'}</span>
                         <span className="kanban__time">
                           {incident.createdAt
                             ? new Date(incident.createdAt).toLocaleString('es-CL', {
