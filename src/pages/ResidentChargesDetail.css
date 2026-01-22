@@ -1,0 +1,162 @@
+.resident-charges-detail {
+  padding: 2rem;
+}
+
+.resident-charges-detail__header {
+  margin-bottom: 2rem;
+}
+
+.resident-charges-detail__header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.resident-charges-detail__subtitle {
+  color: var(--color-gray-dark);
+  font-size: 0.9375rem;
+}
+
+.resident-charges-detail__error {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.5rem;
+}
+
+.resident-charges-detail__loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-gray-dark);
+}
+
+.resident-charges-detail__controls {
+  margin-bottom: 2rem;
+}
+
+.resident-charges-detail__select-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 280px;
+}
+
+.resident-charges-detail__select-label span {
+  font-weight: 600;
+  color: var(--color-gray-dark);
+}
+
+.resident-charges-detail__select {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  background: var(--color-bg-primary);
+}
+
+.resident-charges-detail__total-card {
+  background: var(--color-bg-accent);
+  border: 1px solid var(--color-turquoise);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.resident-charges-detail__total-icon {
+  font-size: 2.5rem;
+}
+
+.resident-charges-detail__total-card p {
+  font-size: 0.9375rem;
+  color: var(--color-gray-dark);
+  margin-bottom: 0.25rem;
+}
+
+.resident-charges-detail__total-card strong {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+.resident-charges-detail__breakdown h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.resident-charges-detail__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resident-charges-detail__item {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+}
+
+.resident-charges-detail__concept {
+  font-weight: 500;
+  color: var(--color-black);
+}
+
+.resident-charges-detail__amount {
+  font-weight: 700;
+  color: var(--color-turquoise);
+}
+
+.resident-charges-detail__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  background: var(--color-border-light);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.resident-charges-detail__bar-fill {
+  height: 100%;
+  background: var(--color-turquoise);
+  border-radius: 3px;
+  transition: width var(--transition-slow);
+}
+
+.resident-charges-detail__empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+.resident-charges-detail__empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.resident-charges-detail__empty p {
+  color: var(--color-gray-dark);
+}
+
+@media (max-width: 768px) {
+  .resident-charges-detail {
+    padding: 1.5rem;
+  }
+
+  .resident-charges-detail__total-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}

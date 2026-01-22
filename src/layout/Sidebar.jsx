@@ -24,9 +24,6 @@ const Sidebar = ({ navSections }) => {
             <span />
             <span />
           </span>
-          <span className="app-sidebar__toggle-text">
-            {isCollapsed ? 'Expandir' : 'Contraer'}
-          </span>
         </button>
       </div>
       <div className="app-sidebar__inner">

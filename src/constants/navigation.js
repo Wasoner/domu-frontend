@@ -5,7 +5,13 @@ import { ROUTES } from './routes';
 export const NAV_SECTIONS = [
 
   {
-
+    title: 'Inicio',
+    roles: ['resident', 'staff'],
+    items: [
+      { label: 'Panel principal', icon: '🏠', to: ROUTES.RESIDENT_PORTAL, roles: ['resident', 'staff'], exact: true },
+    ],
+  },
+  {
     title: 'Administración',
 
     roles: ['admin', 'concierge'],
