@@ -14,6 +14,13 @@ export const ROUTES = {
   PRICING: '/pricing',
   CONTACT: '/contact',
 
+  // Soluciones - Landing pages por tipo de usuario
+  SOLUCIONES_CONSERJERIA: '/soluciones/conserjeria',
+  SOLUCIONES_ADMINISTRADOR: '/soluciones/administrador',
+  SOLUCIONES_COMITE: '/soluciones/comite',
+  SOLUCIONES_RESIDENTE: '/soluciones/residente',
+  SOLUCIONES_FUNCIONARIOS: '/soluciones/funcionarios',
+
   // Protected routes - Admin
   DASHBOARD: '/dashboard',
   ADMIN_CREATE_USER: '/dashboard/users/create',
@@ -44,6 +51,18 @@ export const ROUTES = {
   RESIDENT_INCIDENTS: '/resident/incidents',
   RESIDENT_AMENITIES: '/resident/amenities',
   VOTINGS: '/votaciones',
+
+  // Propiedad - Resident
+  RESIDENT_CARTOLA: '/resident/cartola',
+  RESIDENT_CHARGES_DETAIL_VIEW: '/resident/gasto-comun',
+  RESIDENT_PARCELS: '/resident/encomiendas',
+  RESIDENT_METERS: '/resident/medidores',
+
+  // Comunidad - Resident
+  RESIDENT_PUBLICATIONS: '/resident/publicaciones',
+  RESIDENT_EXPENSES: '/resident/egresos',
+  RESIDENT_FUNDS: '/resident/fondos',
+  RESIDENT_LIBRARY: '/resident/biblioteca',
 };
 
 /**
@@ -59,6 +78,11 @@ export const ROUTE_CATEGORIES = {
     ROUTES.FEATURES,
     ROUTES.PRICING,
     ROUTES.CONTACT,
+    ROUTES.SOLUCIONES_CONSERJERIA,
+    ROUTES.SOLUCIONES_ADMINISTRADOR,
+    ROUTES.SOLUCIONES_COMITE,
+    ROUTES.SOLUCIONES_RESIDENTE,
+    ROUTES.SOLUCIONES_FUNCIONARIOS,
   ],
   ADMIN: [
     ROUTES.DASHBOARD,
@@ -85,6 +109,14 @@ export const ROUTE_CATEGORIES = {
     ROUTES.RESIDENT_SUPPORT,
     ROUTES.RESIDENT_AMENITIES,
     ROUTES.VOTINGS,
+    ROUTES.RESIDENT_CARTOLA,
+    ROUTES.RESIDENT_CHARGES_DETAIL_VIEW,
+    ROUTES.RESIDENT_PARCELS,
+    ROUTES.RESIDENT_METERS,
+    ROUTES.RESIDENT_PUBLICATIONS,
+    ROUTES.RESIDENT_EXPENSES,
+    ROUTES.RESIDENT_FUNDS,
+    ROUTES.RESIDENT_LIBRARY,
   ],
 };
 

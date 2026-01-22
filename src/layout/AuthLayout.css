@@ -1,6 +1,6 @@
 .auth-layout {
   min-height: 100vh;
-  background: #f5f7fb;
+  background: var(--color-bg-secondary);
   color: var(--color-black);
 }
 
@@ -26,7 +26,7 @@
 .auth-layout__loading {
   padding: 2rem;
   text-align: center;
-  color: #4b5563;
+  color: var(--color-gray-dark);
 }
 
 @media (max-width: 1024px) {

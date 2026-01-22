@@ -17,3 +17,20 @@ export { default as AdminIncidentsBoard } from './AdminIncidentsBoard';
 export { default as Votaciones } from './Votaciones';
 export { default as AdminAmenities } from './AdminAmenities';
 export { default as ResidentAmenities } from './ResidentAmenities';
+
+// Soluciones - Landing pages por tipo de usuario
+export { default as UserTypeConserjeria } from './UserTypeConserjeria';
+export { default as UserTypeAdministrador } from './UserTypeAdministrador';
+export { default as UserTypeComite } from './UserTypeComite';
+export { default as UserTypeResidente } from './UserTypeResidente';
+export { default as UserTypeFuncionarios } from './UserTypeFuncionarios';
+
+// Nuevas páginas de residente (Propiedad y Comunidad)
+export { default as ResidentCartola } from './ResidentCartola';
+export { default as ResidentChargesDetail } from './ResidentChargesDetail';
+export { default as ResidentParcels } from './ResidentParcels';
+export { default as ResidentMeters } from './ResidentMeters';
+export { default as ResidentPublications } from './ResidentPublications';
+export { default as ResidentExpenses } from './ResidentExpenses';
+export { default as ResidentFunds } from './ResidentFunds';
+export { default as ResidentLibrary } from './ResidentLibrary';

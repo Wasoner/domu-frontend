@@ -1,5 +1,5 @@
 .app-footer {
-  background: white;
+  background: var(--color-bg-primary);
   padding: 2rem 0;
   text-align: center;
   margin-top: auto;

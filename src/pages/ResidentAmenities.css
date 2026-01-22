@@ -4,11 +4,11 @@
 }
 
 .resident-amenities__header {
-  background: #fff;
-  border-radius: 18px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-lg);
 }
 
 .resident-amenities__eyebrow {
@@ -25,38 +25,38 @@
 }
 
 .resident-amenities__error {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--color-error-bg);
+  color: var(--color-error);
   padding: 0.75rem 1rem;
-  border-radius: 10px;
-  border: 1px solid rgba(185, 28, 28, 0.2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-error);
 }
 
 .resident-amenities__tabs {
   display: flex;
   gap: 0.5rem;
-  background: #fff;
-  border-radius: 14px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
   padding: 0.4rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.04);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
 }
 
 .tab {
   flex: 1;
   background: transparent;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 0.65rem 1rem;
   cursor: pointer;
   color: var(--color-gray-dark);
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
 }
 
 .tab--active {
-  background: var(--color-primary, #53a497);
-  color: #fff;
+  background: var(--color-turquoise);
+  color: var(--color-white);
 }
 
 /* Amenities Grid */
@@ -68,21 +68,21 @@
 
 .amenities-grid__empty {
   grid-column: 1 / -1;
-  background: #fff;
-  border-radius: 18px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
   padding: 2rem;
   text-align: center;
   color: var(--color-gray-dark);
-  border: 1px dashed rgba(0, 0, 0, 0.1);
+  border: 1px dashed var(--color-border-medium);
 }
 
 /* Amenity Preview Card */
 .amenity-preview {
-  background: #fff;
-  border-radius: 18px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
 }
@@ -90,7 +90,7 @@
 .amenity-preview__image {
   height: 160px;
   overflow: hidden;
-  background: #f1f5f9;
+  background: var(--color-bg-tertiary);
 }
 
 .amenity-preview__image img {
@@ -129,7 +129,7 @@
 }
 
 .amenity-preview__free {
-  color: #166534;
+  color: var(--color-success);
   font-weight: 600;
 }
 
@@ -140,42 +140,42 @@
 
 .amenity-preview__rules summary {
   cursor: pointer;
-  color: var(--color-primary, #53a497);
+  color: var(--color-turquoise);
   font-weight: 500;
 }
 
 .amenity-preview__rules p {
   margin: 0.5rem 0 0;
   padding: 0.75rem;
-  background: #f8fafc;
-  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
   line-height: 1.5;
 }
 
 .amenity-preview__reserve {
   margin-top: auto;
-  background: var(--color-primary, #53a497);
-  color: #fff;
+  background: var(--color-turquoise);
+  color: var(--color-white);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 0.75rem 1.25rem;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
-  transition: background 0.2s ease;
+  transition: background var(--transition-normal);
 }
 
 .amenity-preview__reserve:hover {
-  background: #3f897f;
+  opacity: 0.9;
 }
 
 /* My Reservations */
 .my-reservations {
-  background: #fff;
-  border-radius: 18px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-lg);
   display: grid;
   gap: 0.75rem;
 }
@@ -191,7 +191,7 @@
   font-size: 1rem;
   color: var(--color-black);
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .my-reservations__section-title--past {
@@ -206,9 +206,9 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #f8fafc;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
   flex-wrap: wrap;
 }
 
@@ -250,31 +250,31 @@
 
 .status-badge {
   padding: 0.3rem 0.7rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.75rem;
   font-weight: 600;
 }
 
 .status-badge--confirmed {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--color-success-bg);
+  color: var(--color-success);
 }
 
 .status-badge--cancelled {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-error-bg);
+  color: var(--color-error);
 }
 
 .status-badge--completed {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: var(--color-info-bg);
+  color: var(--color-info);
 }
 
 .btn-cancel {
   background: none;
-  border: 1px solid rgba(185, 28, 28, 0.25);
-  color: #b91c1c;
-  border-radius: 8px;
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  border-radius: var(--radius-sm);
   padding: 0.4rem 0.75rem;
   cursor: pointer;
   font-size: 0.85rem;
@@ -293,13 +293,13 @@
 }
 
 .modal__card {
-  background: #fff;
-  border-radius: 18px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-xl);
 }
 
 .modal__header {
@@ -307,7 +307,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .modal__header h2 {
@@ -344,8 +344,8 @@
 
 .reserve-form__field input,
 .reserve-form__field textarea {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
   padding: 0.65rem 0.85rem;
   font-size: 0.95rem;
   font-family: inherit;
@@ -375,33 +375,33 @@
 }
 
 .slot-btn {
-  background: #f8fafc;
-  border: 2px solid rgba(0, 0, 0, 0.08);
-  border-radius: 10px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
   padding: 0.65rem 0.5rem;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
 }
 
 .slot-btn:hover:not(:disabled) {
-  border-color: var(--color-primary, #53a497);
+  border-color: var(--color-turquoise);
 }
 
 .slot-btn--selected {
-  background: var(--color-primary, #53a497);
-  border-color: var(--color-primary, #53a497);
-  color: #fff;
+  background: var(--color-turquoise);
+  border-color: var(--color-turquoise);
+  color: var(--color-white);
 }
 
 .slot-btn--unavailable {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #fee2e2;
-  border-color: rgba(185, 28, 28, 0.15);
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
 }
 
 .slot-btn__time {
@@ -411,24 +411,24 @@
 
 .slot-btn__reserved {
   font-size: 0.75rem;
-  color: #b91c1c;
+  color: var(--color-error);
 }
 
 .slot-btn--selected .slot-btn__time {
-  color: #fff;
+  color: var(--color-white);
 }
 
 .reserve-form__summary {
-  background: #f0fdf4;
-  border-radius: 10px;
+  background: var(--color-success-bg);
+  border-radius: var(--radius-sm);
   padding: 0.85rem;
-  border: 1px solid rgba(22, 101, 52, 0.15);
+  border: 1px solid var(--color-success);
 }
 
 .reserve-form__summary p {
   margin: 0;
   font-size: 0.95rem;
-  color: #166534;
+  color: var(--color-success);
 }
 
 .reserve-form__actions {
@@ -439,17 +439,17 @@
 }
 
 .reserve-form__actions button {
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #f8fafc;
-  border-radius: 10px;
+  border: 1px solid var(--color-border-medium);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
   padding: 0.65rem 1.1rem;
   cursor: pointer;
   color: var(--color-gray-dark);
 }
 
 .reserve-form__actions button.primary {
-  background: var(--color-primary, #53a497);
-  color: #fff;
+  background: var(--color-turquoise);
+  color: var(--color-white);
   border-color: transparent;
 }
 

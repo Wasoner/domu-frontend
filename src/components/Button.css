@@ -1,13 +1,13 @@
 .btn {
   padding: 0.75rem 1.5rem;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   font-size: 0.95rem;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
   cursor: pointer;
   border: 2px solid transparent;
   font-family: inherit;
@@ -15,8 +15,8 @@
 
 .btn-primary {
   background: var(--color-orange);
-  color: white;
-  box-shadow: 0 4px 12px rgba(241, 107, 50, 0.3);
+  color: var(--color-white);
+  box-shadow: var(--shadow-orange);
 }
 
 .btn-primary:hover {
@@ -26,8 +26,8 @@
 
 .btn-secondary {
   background: var(--color-turquoise);
-  color: white;
-  box-shadow: 0 4px 12px rgba(83, 164, 151, 0.3);
+  color: var(--color-white);
+  box-shadow: var(--shadow-turquoise);
 }
 
 .btn-secondary:hover {
@@ -38,20 +38,20 @@
 .btn-ghost {
   background: transparent;
   color: var(--color-gray-dark);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border-medium);
   font-weight: 500;
 }
 
 .btn-ghost:hover {
-  background: rgba(83, 164, 151, 0.05);
+  background: var(--color-bg-accent);
   border-color: var(--color-turquoise);
   color: var(--color-turquoise);
   transform: translateY(-1px);
 }
 
 .btn-danger {
-  background: var(--color-orange);
-  color: white;
+  background: var(--color-error);
+  color: var(--color-white);
 }
 
 .btn:active {
@@ -60,7 +60,7 @@
 
 .btn:focus,
 .btn:focus-visible {
-  outline: 3px solid rgba(83, 164, 151, 0.4);
+  outline: 3px solid var(--color-border-focus);
   outline-offset: 2px;
 }
 
@@ -68,5 +68,16 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Size variants */
+.btn--small {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+}
+
+.btn--large {
+  padding: 1rem 2rem;
+  font-size: 1.0625rem;
 }
 
