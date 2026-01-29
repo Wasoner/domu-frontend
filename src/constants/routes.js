@@ -24,6 +24,8 @@ export const ROUTES = {
   // Protected routes - Admin
   DASHBOARD: '/dashboard',
   ADMIN_CREATE_USER: '/dashboard/users/create',
+  ADMIN_RESIDENTS: '/dashboard/residents',
+  ADMIN_HOUSING_UNITS: '/dashboard/unidades',
   COMMUNITIES: '/dashboard/communities',
   COMMUNITY_DETAIL: '/dashboard/communities/:id',
   RESIDENTS: '/dashboard/residents',

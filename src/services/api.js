@@ -17,6 +17,13 @@ const getAuthToken = () => {
   return localStorage.getItem('authToken');
 };
 
+/**
+ * Get selected building ID from localStorage
+ */
+const getSelectedBuildingId = () => {
+  return localStorage.getItem('selectedBuildingId');
+};
+
 const roleIdToUserType = (roleId) => {
   if (roleId === 1) return 'admin';
   if (roleId === 3) return 'concierge';
@@ -57,6 +64,19 @@ const fetchWrapper = async (url, options = {}) => {
     // Agregar token de autenticación si existe
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    // Agregar Building ID seleccionado para filtrar datos por comunidad
+    const selectedBuildingId = getSelectedBuildingId();
+    if (selectedBuildingId) {
+      headers.set('X-Building-Id', selectedBuildingId);
+      if (import.meta.env.DEV) {
+        console.log('[API] Agregando header X-Building-Id:', selectedBuildingId, 'para endpoint:', url);
+      }
+    } else {
+      if (import.meta.env.DEV) {
+        console.warn('[API] No hay selectedBuildingId en localStorage para endpoint:', url);
+      }
     }
 
     // Log para debugging (solo en desarrollo)
@@ -221,6 +241,7 @@ export const api = {
       localStorage.removeItem('authToken');
       localStorage.removeItem('userType');
       localStorage.removeItem('userEmail');
+      localStorage.removeItem('selectedBuildingId');
     },
 
     /**
@@ -481,6 +502,7 @@ export const api = {
         body: JSON.stringify(payload),
       });
     },
+    getResidents: async () => fetchWrapper('/admin/residents', { method: 'GET' }),
   },
 
   users: {
@@ -578,5 +600,55 @@ export const api = {
   reservations: {
     listMine: async () => fetchWrapper('/reservations/my', { method: 'GET' }),
     cancel: async (reservationId) => fetchWrapper(`/reservations/${reservationId}`, { method: 'DELETE' }),
+  },
+
+  housingUnits: {
+    list: async () => fetchWrapper('/admin/housing-units', { method: 'GET' }),
+    getById: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        number: String(data.number || '').trim(),
+        tower: String(data.tower || '').trim(),
+        floor: String(data.floor || '').trim(),
+        aliquotPercentage: data.aliquotPercentage ? Number(data.aliquotPercentage) : null,
+        squareMeters: data.squareMeters ? Number(data.squareMeters) : null,
+      };
+      return fetchWrapper('/admin/housing-units', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (id, data) => {
+      const payload = {
+        number: String(data.number || '').trim(),
+        tower: String(data.tower || '').trim(),
+        floor: String(data.floor || '').trim(),
+        aliquotPercentage: data.aliquotPercentage ? Number(data.aliquotPercentage) : null,
+        squareMeters: data.squareMeters ? Number(data.squareMeters) : null,
+      };
+      return fetchWrapper(`/admin/housing-units/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'DELETE' }),
+    linkResident: async (unitId, userId) => {
+      try {
+        const response = await fetchWrapper(`/admin/housing-units/${unitId}/residents`, {
+          method: 'POST',
+          body: JSON.stringify({ userId: Number(userId) }),
+        });
+        // 204 No Content es una respuesta exitosa
+        return response;
+      } catch (error) {
+        // Re-lanzar el error para que el componente pueda manejarlo
+        throw error;
+      }
+    },
+    unlinkResident: async (unitId, userId) => {
+      return fetchWrapper(`/admin/housing-units/${unitId}/residents/${userId}`, {
+        method: 'DELETE',
+      });
+    },
   },
 };

@@ -96,39 +96,82 @@ const AuthHeader = ({ user }) => {
           aria-label="Volver al panel principal"
         />
         <div className="auth-header__brand">
-          <span className="auth-header__brand-name">Comunidad DOMU</span>
           <div
-            className="auth-header__building-selector"
+            className={`auth-header__building-selector ${showBuildingDropdown ? 'auth-header__building-selector--open' : ''}`}
             ref={buildingRef}
-            onClick={() => setShowBuildingDropdown(!showBuildingDropdown)}
+            onClick={() => buildingOptions.length > 0 && setShowBuildingDropdown(!showBuildingDropdown)}
+            role="button"
+            aria-expanded={showBuildingDropdown}
+            aria-haspopup="listbox"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                buildingOptions.length > 0 && setShowBuildingDropdown(!showBuildingDropdown);
+              }
+            }}
           >
-            <span className="auth-header__unit-number">{unitLabel}</span>
-            <span className="auth-header__building-name">{buildingName}</span>
-            <svg 
-              className={`auth-header__chevron ${showBuildingDropdown ? 'auth-header__chevron--open' : ''}`}
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-            >
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            {showBuildingDropdown && (
-              <div className="auth-header__dropdown">
-                {buildingOptions.length === 0 && (
-                  <div className="auth-header__dropdown-item auth-header__dropdown-item--muted">Sin edificios</div>
-                )}
+            <div className="auth-header__building-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M3 21V8L12 3L21 8V21H15V14H9V21H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="auth-header__building-info">
+              <span className="auth-header__building-name">{buildingName}</span>
+              {selectedBuilding?.address && (
+                <span className="auth-header__building-address">{selectedBuilding.address}</span>
+              )}
+            </div>
+            {buildingOptions.length > 1 && (
+              <svg
+                className={`auth-header__chevron ${showBuildingDropdown ? 'auth-header__chevron--open' : ''}`}
+                width="14"
+                height="14"
+                viewBox="0 0 12 12"
+                fill="none"
+              >
+                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+            {showBuildingDropdown && buildingOptions.length > 0 && (
+              <div className="auth-header__dropdown auth-header__dropdown--buildings" role="listbox">
+                <div className="auth-header__dropdown-header">
+                  <span>Seleccionar comunidad</span>
+                  <span className="auth-header__dropdown-count">{buildingOptions.length}</span>
+                </div>
                 {buildingOptions.map((b) => (
                   <div
                     key={b.id}
-                    className={`auth-header__dropdown-item ${b.id === selectedBuilding?.id ? 'auth-header__dropdown-item--active' : ''}`}
+                    className={`auth-header__building-option ${b.id === selectedBuilding?.id ? 'auth-header__building-option--active' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       selectBuilding(b.id);
                       setShowBuildingDropdown(false);
                     }}
+                    role="option"
+                    aria-selected={b.id === selectedBuilding?.id}
                   >
-                    {b.name}
+                    <div className="auth-header__building-option-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 21V8L12 3L21 8V21H15V14H9V21H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                    <div className="auth-header__building-option-info">
+                      <span className="auth-header__building-option-name">{b.name}</span>
+                      {b.address && (
+                        <span className="auth-header__building-option-address">{b.address}</span>
+                      )}
+                      {b.commune && (
+                        <span className="auth-header__building-option-commune">{b.commune}{b.city ? `, ${b.city}` : ''}</span>
+                      )}
+                    </div>
+                    {b.id === selectedBuilding?.id && (
+                      <span className="auth-header__building-option-check">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M5 12L10 17L20 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
