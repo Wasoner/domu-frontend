@@ -22,7 +22,8 @@ export const NAV_SECTIONS = [
       { label: 'Incidentes', icon: '🚨', to: ROUTES.ADMIN_INCIDENTS, roles: ['admin', 'concierge'], exact: true },
       { label: 'Comunidades', icon: '🏢', roles: ['admin'] },
 
-      { label: 'Residentes', icon: '👥', roles: ['admin'] },
+      { label: 'Residentes', icon: '👥', to: ROUTES.ADMIN_RESIDENTS, roles: ['admin', 'concierge'], exact: true },
+      { label: 'Unidades', icon: '🏠', to: ROUTES.ADMIN_HOUSING_UNITS, roles: ['admin'], exact: true },
 
       { label: 'Gastos comunes', icon: '💳', roles: ['admin'] },
 

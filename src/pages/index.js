@@ -10,6 +10,8 @@ export { default as AdminInviteRegister } from './AdminInviteRegister';
 export { default as Dashboard } from './Dashboard';
 export { default as AdminCreateUser } from './AdminCreateUser';
 export { default as AdminIncidentsBoard } from './AdminIncidentsBoard';
+export { default as AdminResidents } from './AdminResidents';
+export { default as AdminHousingUnits } from './AdminHousingUnits';
 export { default as AdminAmenities } from './AdminAmenities';
 
 // Resident pages

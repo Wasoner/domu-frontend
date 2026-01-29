@@ -8,6 +8,8 @@ import {
   Dashboard,
   AdminCreateUser,
   AdminIncidentsBoard,
+  AdminResidents,
+  AdminHousingUnits,
   ResidentPortal,
   ResidentVisits,
   ResidentProfile,
@@ -54,6 +56,8 @@ function App() {
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.ADMIN_CREATE_USER} element={<AdminCreateUser />} />
           <Route path={ROUTES.ADMIN_INCIDENTS} element={<AdminIncidentsBoard />} />
+          <Route path={ROUTES.ADMIN_RESIDENTS} element={<AdminResidents />} />
+          <Route path={ROUTES.ADMIN_HOUSING_UNITS} element={<AdminHousingUnits />} />
 
           {/* Protected Routes - Resident */}
           <Route path={ROUTES.RESIDENT_PORTAL} element={<ResidentPortal />} />
