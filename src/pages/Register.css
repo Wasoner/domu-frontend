@@ -1,17 +1,18 @@
 .register-page {
-  min-height: calc(100vh - 140px);
-  background: linear-gradient(135deg, rgba(83, 164, 151, 0.03) 0%, rgba(83, 164, 151, 0.01) 100%);
-  padding: 2rem 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
 }
 
 .register-container {
   max-width: 700px;
   margin: 2rem auto;
   padding: 3rem 2.5rem;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
 }
 
 .register-container h1 {
@@ -63,11 +64,11 @@
 .form-group select {
   width: 100%;
   padding: 0.875rem 1.125rem;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
   font-size: 0.9375rem;
-  transition: all 0.2s ease;
-  background: #ffffff;
+  transition: all var(--transition-normal);
+  background: var(--color-bg-primary);
   color: var(--color-black);
   font-family: inherit;
   box-sizing: border-box;
@@ -82,15 +83,15 @@
 .form-group select:focus {
   outline: none;
   border-color: var(--color-turquoise);
-  box-shadow: 0 0 0 3px rgba(83, 164, 151, 0.1);
+  box-shadow: 0 0 0 3px var(--color-bg-accent);
 }
 
 .form-group input:disabled,
 .form-group select:disabled {
-  background-color: #f8fafc;
+  background-color: var(--color-bg-secondary);
   cursor: not-allowed;
   opacity: 0.6;
-  border-color: rgba(0, 0, 0, 0.05);
+  border-color: var(--color-border-light);
 }
 
 .password-input-wrapper {
@@ -114,7 +115,7 @@
   align-items: center;
   justify-content: center;
   color: var(--color-gray-dark);
-  transition: color 0.2s ease;
+  transition: color var(--transition-normal);
   z-index: 1;
 }
 
@@ -180,11 +181,11 @@
 
 .error-message {
   padding: 1rem 1.25rem;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-left: 4px solid #ef4444;
-  border-radius: 8px;
-  color: #dc2626;
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error);
+  border-left: 4px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  color: var(--color-error);
   font-weight: 500;
   font-size: 0.9375rem;
   text-align: left;
@@ -203,11 +204,11 @@
 
 .success-message {
   padding: 1rem 1.25rem;
-  background-color: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-left: 4px solid #22c55e;
-  border-radius: 8px;
-  color: #16a34a;
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success);
+  border-left: 4px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  color: var(--color-success);
   font-weight: 500;
   font-size: 0.9375rem;
   text-align: left;
@@ -228,7 +229,7 @@
   margin-top: 2rem;
   text-align: center;
   padding-top: 2rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .register-footer p {
@@ -241,11 +242,10 @@
   color: var(--color-turquoise);
   font-weight: 600;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--transition-normal);
 }
 
 .link-login:hover {
-  color: #4a9387;
   text-decoration: underline;
 }
 
@@ -258,7 +258,7 @@
   font-weight: 500;
   font-size: 0.9375rem;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--transition-normal);
 }
 
 .link-back:hover {
@@ -305,4 +305,3 @@
     gap: 1.5rem;
   }
 }
-

@@ -1,0 +1,116 @@
+.admin-invite-page {
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  color: var(--color-black);
+}
+
+.admin-invite-card {
+  max-width: 720px;
+  margin: 40px auto;
+  padding: 32px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-invite-card h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.admin-invite-subtitle {
+  margin: 0 0 20px;
+  color: var(--color-gray-dark);
+}
+
+.admin-invite-message {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.admin-invite-message.error {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.admin-invite-message.success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.admin-invite-loading {
+  color: var(--color-gray-dark);
+}
+
+.admin-invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--color-black);
+}
+
+.form-group input {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-bg-tertiary);
+  font-size: 15px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-turquoise);
+  box-shadow: 0 0 0 3px var(--color-bg-accent);
+}
+
+.field-hint {
+  color: var(--color-gray);
+  font-size: 13px;
+}
+
+.admin-invite-back {
+  margin-top: 12px;
+  color: var(--color-gray-dark);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--color-turquoise);
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0;
+}
+
+.link-button:disabled {
+  cursor: not-allowed;
+  color: var(--color-gray);
+}
+
+@media (max-width: 640px) {
+  .admin-invite-card {
+    margin: 24px 12px;
+    padding: 24px 18px;
+  }
+}

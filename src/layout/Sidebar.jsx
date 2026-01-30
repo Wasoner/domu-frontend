@@ -1,39 +1,9 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
-import { ROUTES } from '../constants';
 import './Sidebar.css';
 
-const navSections = [
-  {
-    title: 'Inicio',
-    items: [
-      { label: 'Panel principal', icon: '🏠', to: ROUTES.RESIDENT_PORTAL, exact: true },
-      { label: 'Visitas', icon: '🧑‍🤝‍🧑', to: ROUTES.RESIDENT_EVENTS },
-    ],
-  },
-  {
-    title: 'Propiedad',
-    items: [
-      { label: 'Cartola', icon: '📄' },
-      { label: 'Detalle gasto común', icon: '💳' },
-      { label: 'Encomiendas', icon: '📦' },
-      { label: 'Medidores', icon: '⚡' },
-    ],
-  },
-  {
-    title: 'Comunidad',
-    items: [
-      { label: 'Publicaciones', icon: '📰' },
-      { label: 'Votaciones', icon: '🗳️' },
-      { label: 'Egresos', icon: '💸' },
-      { label: 'Incidentes', icon: '🚨', to: ROUTES.RESIDENT_INCIDENTS },
-      { label: 'Fondos', icon: '🏦' },
-      { label: 'Biblioteca', icon: '📚' },
-    ],
-  },
-];
-
-const Sidebar = () => {
+const Sidebar = ({ navSections }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
@@ -54,9 +24,6 @@ const Sidebar = () => {
             <span />
             <span />
           </span>
-          <span className="app-sidebar__toggle-text">
-            {isCollapsed ? 'Expandir' : 'Contraer'}
-          </span>
         </button>
       </div>
       <div className="app-sidebar__inner">
@@ -70,7 +37,7 @@ const Sidebar = () => {
                     {item.to ? (
                       <NavLink
                         to={item.to}
-                        end={item.exact}
+                        end={item.exact !== undefined ? item.exact : true}
                         title={item.label}
                         className={({ isActive }) =>
                           `app-sidebar__link ${isActive ? 'is-active' : ''}`
@@ -102,6 +69,26 @@ const Sidebar = () => {
       </div>
     </aside>
   );
+};
+
+Sidebar.propTypes = {
+  navSections: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      items: PropTypes.arrayOf(
+        PropTypes.shape({
+          label: PropTypes.string.isRequired,
+          icon: PropTypes.string,
+          to: PropTypes.string,
+          exact: PropTypes.bool,
+        })
+      ),
+    })
+  ),
+};
+
+Sidebar.defaultProps = {
+  navSections: [],
 };
 
 export default Sidebar;

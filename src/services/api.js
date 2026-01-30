@@ -17,15 +17,24 @@ const getAuthToken = () => {
   return localStorage.getItem('authToken');
 };
 
+/**
+ * Get selected building ID from localStorage
+ */
+const getSelectedBuildingId = () => {
+  return localStorage.getItem('selectedBuildingId');
+};
+
 const roleIdToUserType = (roleId) => {
   if (roleId === 1) return 'admin';
   if (roleId === 3) return 'concierge';
+  if (roleId === 4) return 'staff';
   return 'resident';
 };
 
 const userTypeToRoleId = (userType) => {
   if (userType === 'admin') return 1;
   if (userType === 'concierge') return 3;
+  if (userType === 'staff') return 4;
   return 2;
 };
 
@@ -55,6 +64,19 @@ const fetchWrapper = async (url, options = {}) => {
     // Agregar token de autenticación si existe
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    // Agregar Building ID seleccionado para filtrar datos por comunidad
+    const selectedBuildingId = getSelectedBuildingId();
+    if (selectedBuildingId) {
+      headers.set('X-Building-Id', selectedBuildingId);
+      if (import.meta.env.DEV) {
+        console.log('[API] Agregando header X-Building-Id:', selectedBuildingId, 'para endpoint:', url);
+      }
+    } else {
+      if (import.meta.env.DEV) {
+        console.warn('[API] No hay selectedBuildingId en localStorage para endpoint:', url);
+      }
     }
 
     // Log para debugging (solo en desarrollo)
@@ -219,6 +241,7 @@ export const api = {
       localStorage.removeItem('authToken');
       localStorage.removeItem('userType');
       localStorage.removeItem('userEmail');
+      localStorage.removeItem('selectedBuildingId');
     },
 
     /**
@@ -426,5 +449,206 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+    updateStatus: async (incidentId, status) => fetchWrapper(`/incidents/${incidentId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+  },
+
+  adminInvites: {
+    getInfo: async (code) => {
+      if (!code) {
+        throw new Error('Código de invitación no proporcionado');
+      }
+      return fetchWrapper(`/admin-invites/${encodeURIComponent(code)}`, { method: 'GET' });
+    },
+    register: async (code, data) => {
+      if (!code) {
+        throw new Error('Código de invitación no proporcionado');
+      }
+      const payload = {
+        firstName: data.firstName?.trim() || '',
+        lastName: data.lastName?.trim() || '',
+        phone: data.phone?.trim() || '',
+        documentNumber: data.documentNumber?.trim() || '',
+        password: data.password || '',
+      };
+      return fetchWrapper(`/admin-invites/${encodeURIComponent(code)}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+  },
+
+  adminUsers: {
+    create: async (data) => {
+      const payload = {
+        unitId: data.unitId ? Number(data.unitId) : null,
+        roleId: Number(data.roleId),
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        birthDate: data.birthDate || null,
+        email: String(data.email || '').trim(),
+        phone: String(data.phone || '').trim(),
+        documentNumber: String(data.documentNumber || '').trim(),
+        resident: Boolean(data.resident),
+        password: String(data.password || ''),
+      };
+      if (Number.isNaN(payload.roleId)) {
+        throw new Error('roleId inválido');
+      }
+      return fetchWrapper('/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    getResidents: async () => fetchWrapper('/admin/residents', { method: 'GET' }),
+  },
+
+  users: {
+    updateProfile: async (data) => {
+      const payload = {
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        phone: String(data.phone || '').trim(),
+        documentNumber: String(data.documentNumber || '').trim(),
+      };
+      return fetchWrapper('/users/me/profile', {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    changePassword: async (currentPassword, newPassword) => {
+      return fetchWrapper('/users/me/password', {
+        method: 'POST',
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+    },
+  },
+
+  amenities: {
+    list: async () => fetchWrapper('/amenities', { method: 'GET' }),
+    listAll: async () => fetchWrapper('/amenities/all', { method: 'GET' }),
+    get: async (amenityId) => fetchWrapper(`/amenities/${amenityId}`, { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        buildingId: data.buildingId ? Number(data.buildingId) : null,
+        name: String(data.name || '').trim(),
+        description: data.description?.trim() || null,
+        maxCapacity: data.maxCapacity ? Number(data.maxCapacity) : null,
+        costPerSlot: data.costPerSlot ? Number(data.costPerSlot) : 0,
+        rules: data.rules?.trim() || null,
+        imageUrl: data.imageUrl?.trim() || null,
+        status: data.status || 'ACTIVE',
+      };
+      return fetchWrapper('/amenities', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (amenityId, data) => {
+      const payload = {
+        name: String(data.name || '').trim(),
+        description: data.description?.trim() || null,
+        maxCapacity: data.maxCapacity ? Number(data.maxCapacity) : null,
+        costPerSlot: data.costPerSlot ? Number(data.costPerSlot) : 0,
+        rules: data.rules?.trim() || null,
+        imageUrl: data.imageUrl?.trim() || null,
+        status: data.status || 'ACTIVE',
+      };
+      return fetchWrapper(`/amenities/${amenityId}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (amenityId) => fetchWrapper(`/amenities/${amenityId}`, { method: 'DELETE' }),
+    getAvailability: async (amenityId, date) => {
+      const dateParam = date ? `?date=${date}` : '';
+      return fetchWrapper(`/amenities/${amenityId}/availability${dateParam}`, { method: 'GET' });
+    },
+    reserve: async (amenityId, data) => {
+      const payload = {
+        timeSlotId: Number(data.timeSlotId),
+        reservationDate: data.reservationDate,
+        notes: data.notes?.trim() || null,
+      };
+      return fetchWrapper(`/amenities/${amenityId}/reserve`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    getReservations: async (amenityId) => fetchWrapper(`/amenities/${amenityId}/reservations`, { method: 'GET' }),
+    configureTimeSlots: async (amenityId, slots) => {
+      const payload = {
+        slots: slots.map((slot) => ({
+          dayOfWeek: Number(slot.dayOfWeek),
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          active: slot.active !== false,
+        })),
+      };
+      return fetchWrapper(`/amenities/${amenityId}/time-slots`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+  },
+
+  reservations: {
+    listMine: async () => fetchWrapper('/reservations/my', { method: 'GET' }),
+    cancel: async (reservationId) => fetchWrapper(`/reservations/${reservationId}`, { method: 'DELETE' }),
+  },
+
+  housingUnits: {
+    list: async () => fetchWrapper('/admin/housing-units', { method: 'GET' }),
+    getById: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        number: String(data.number || '').trim(),
+        tower: String(data.tower || '').trim(),
+        floor: String(data.floor || '').trim(),
+        aliquotPercentage: data.aliquotPercentage ? Number(data.aliquotPercentage) : null,
+        squareMeters: data.squareMeters ? Number(data.squareMeters) : null,
+      };
+      return fetchWrapper('/admin/housing-units', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (id, data) => {
+      const payload = {
+        number: String(data.number || '').trim(),
+        tower: String(data.tower || '').trim(),
+        floor: String(data.floor || '').trim(),
+        aliquotPercentage: data.aliquotPercentage ? Number(data.aliquotPercentage) : null,
+        squareMeters: data.squareMeters ? Number(data.squareMeters) : null,
+      };
+      return fetchWrapper(`/admin/housing-units/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'DELETE' }),
+    linkResident: async (unitId, userId) => {
+      try {
+        const response = await fetchWrapper(`/admin/housing-units/${unitId}/residents`, {
+          method: 'POST',
+          body: JSON.stringify({ userId: Number(userId) }),
+        });
+        // 204 No Content es una respuesta exitosa
+        return response;
+      } catch (error) {
+        // Re-lanzar el error para que el componente pueda manejarlo
+        throw error;
+      }
+    },
+    unlinkResident: async (unitId, userId) => {
+      return fetchWrapper(`/admin/housing-units/${unitId}/residents/${userId}`, {
+        method: 'DELETE',
+      });
+    },
   },
 };

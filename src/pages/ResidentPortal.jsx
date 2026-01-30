@@ -1,5 +1,5 @@
 import { useAppContext } from '../context';
-import { AuthLayout } from '../layout';
+import { ProtectedLayout } from '../layout';
 import './ResidentPortal.css';
 
 // Datos de ejemplo para notificaciones
@@ -42,7 +42,7 @@ const ResidentPortal = () => {
         : user?.email || 'Residente';
 
     const getNotificationIcon = (type) => {
-        switch(type) {
+        switch (type) {
             case 'announcement': return '📢';
             case 'payment': return '💳';
             case 'maintenance': return '🔧';
@@ -56,11 +56,14 @@ const ResidentPortal = () => {
     };
 
     return (
-        <AuthLayout user={user}>
+        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
             <article className="resident-portal">
                 <header className="resident-portal__header">
                     <h1>Panel Principal</h1>
                     <p className="resident-portal__welcome">Bienvenido, {displayName}</p>
+                    <div className="resident-portal__notice">
+                        Recuerda cambiar tu contraseña si fue creada por un administrador. La contraseña por defecto es 1234567890.
+                    </div>
                 </header>
 
                 <div className="resident-portal__grid">
@@ -73,8 +76,8 @@ const ResidentPortal = () => {
                         <div className="resident-portal__notifications-list">
                             {mockNotifications.length > 0 ? (
                                 mockNotifications.map((notification) => (
-                                    <div 
-                                        key={notification.id} 
+                                    <div
+                                        key={notification.id}
                                         className={`resident-portal__notification resident-portal__notification--${notification.priority}`}
                                     >
                                         <div className="resident-portal__notification-header">
@@ -107,7 +110,7 @@ const ResidentPortal = () => {
                     </section>
                 </div>
             </article>
-        </AuthLayout>
+        </ProtectedLayout>
     );
 };
 

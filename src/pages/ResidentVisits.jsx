@@ -1,5 +1,5 @@
 import { useAppContext } from '../context';
-import { AuthLayout } from '../layout';
+import { ProtectedLayout } from '../layout';
 import { VisitRegistrationPanel } from '../components';
 import './ResidentVisits.css';
 
@@ -7,7 +7,7 @@ const ResidentVisits = () => {
     const { user } = useAppContext();
 
     return (
-        <AuthLayout user={user}>
+        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
             <article className="resident-visits">
                 <header className="resident-visits__intro">
                     <p className="resident-visits__eyebrow">Visitas</p>
@@ -19,7 +19,7 @@ const ResidentVisits = () => {
 
                 <VisitRegistrationPanel user={user} />
             </article>
-        </AuthLayout>
+        </ProtectedLayout>
     );
 };
 

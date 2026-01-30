@@ -1,11 +1,65 @@
 :root {
-  /* Palette variables - ÚNICA PALETA DE COLORES PERMITIDA */
+  /* ========================================
+     SISTEMA DE DISEÑO DOMU - Variables CSS
+     ======================================== */
+
+  /* Colores primarios */
   --color-black: #000000;
   --color-orange: #f16b32;
   --color-yellow: #f7ce0f;
   --color-gray-dark: #67696a;
   --color-gray: #808282;
   --color-turquoise: #53a497;
+
+  /* Colores de fondo */
+  --color-white: #ffffff;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-tertiary: #f1f3f5;
+  --color-bg-accent: #e8f5f2;
+
+  /* Colores semánticos - Estados */
+  --color-success: #2d7a36;
+  --color-success-light: #22c55e;
+  --color-success-bg: #e7f5e8;
+  --color-error: #b42318;
+  --color-error-light: #dc2626;
+  --color-error-bg: #fef2f2;
+  --color-warning: #b54708;
+  --color-warning-light: #f59e0b;
+  --color-warning-bg: #fff4e5;
+  --color-info: #0369a1;
+  --color-info-light: #0ea5e9;
+  --color-info-bg: #e0f2fe;
+
+  /* Bordes */
+  --color-border-light: rgba(0, 0, 0, 0.06);
+  --color-border-medium: rgba(0, 0, 0, 0.12);
+  --color-border-focus: rgba(83, 164, 151, 0.4);
+
+  /* Sombras estandarizadas */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.10);
+
+  /* Sombras con color */
+  --shadow-turquoise: 0 4px 12px rgba(83, 164, 151, 0.3);
+  --shadow-orange: 0 4px 12px rgba(241, 107, 50, 0.3);
+
+  /* Border radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* Animaciones */
+  --motion-duration: 0.6s;
+  --motion-ease: cubic-bezier(0.18, 0.8, 0.3, 1);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
 }
 
 * {
@@ -23,7 +77,7 @@ body {
   font-weight: 400;
   color-scheme: light;
   color: var(--color-black);
-  background: #fafafa;
+  background: var(--color-bg-secondary);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -85,4 +139,65 @@ button {
 #root {
   width: 100%;
   margin: 0 auto;
+}
+
+/* ========================================
+   Layout de páginas públicas (Header + Content + Footer)
+   ======================================== */
+.public-page {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+.public-page > .app-header {
+  grid-row: 1;
+}
+
+.public-page > .app-main {
+  grid-row: 2;
+}
+
+.public-page > .app-footer {
+  grid-row: 3;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animated-section {
+  animation: fadeUp var(--motion-duration) var(--motion-ease);
+}
+
+.animated-card {
+  animation: floatUp 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
