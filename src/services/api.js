@@ -602,49 +602,6 @@ export const api = {
     cancel: async (reservationId) => fetchWrapper(`/reservations/${reservationId}`, { method: 'DELETE' }),
   },
 
-  polls: {
-    list: async () => fetchWrapper('/polls', { method: 'GET' }),
-    create: async (data) => {
-      const payload = {
-        title: String(data.title || '').trim(),
-        description: data.description?.trim() || null,
-        closesAt: data.closesAt,
-        options: data.options || [],
-      };
-      return fetchWrapper('/polls', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-    },
-    vote: async (pollId, optionId) => fetchWrapper(`/polls/${pollId}/votes`, {
-      method: 'POST',
-      body: JSON.stringify({ optionId }),
-    }),
-    close: async (pollId) => fetchWrapper(`/polls/${pollId}/close`, {
-      method: 'PATCH',
-    }),
-    exportCsv: async (pollId) => {
-      const token = localStorage.getItem('authToken');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-      };
-      const selectedBuildingId = localStorage.getItem('selectedBuildingId');
-      if (selectedBuildingId) {
-        headers['X-Building-Id'] = selectedBuildingId;
-      }
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
-        (import.meta.env.DEV ? '/api' : 'http://localhost:7000/api');
-      const response = await fetch(`${API_BASE_URL}/polls/${pollId}/export`, {
-        method: 'GET',
-        headers,
-      });
-      if (!response.ok) {
-        throw new Error('No se pudo exportar la votación');
-      }
-      return response.text();
-    },
-  },
-
   housingUnits: {
     list: async () => fetchWrapper('/admin/housing-units', { method: 'GET' }),
     getById: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'GET' }),

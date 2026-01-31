@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services';
-import './ResidentChargesDetail.css';
+import './ResidentChargesDetail.scss';
 
 /**
  * Resident Charges Detail Page Component

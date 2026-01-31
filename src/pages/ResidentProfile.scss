@@ -1,10 +1,11 @@
 .resident-profile {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: none;
+  width: 100%;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 0 0.5rem 2rem;
+  gap: 1.75rem;
+  padding: 0 0 2.5rem;
 }
 
 .resident-profile__header {
@@ -12,6 +13,14 @@
   position: relative;
   display: grid;
   gap: 0.5rem;
+}
+
+.resident-profile__eyebrow {
+  margin: 0 0 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--color-gray);
 }
 
 .resident-profile__back-button {
@@ -48,6 +57,7 @@
 
 .resident-profile__header h1 {
   margin: 0;
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
 }
 
 .resident-profile__subtitle {
@@ -65,13 +75,13 @@
 .resident-profile__tabs {
   display: flex;
   gap: 0.5rem;
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-primary);
   border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  padding: 0.4rem 0.45rem;
-  width: 100%;
-  height: 100%;
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem;
+  width: fit-content;
+  align-self: flex-start;
+  box-shadow: var(--shadow-sm);
 }
 
 .resident-profile__tab {
@@ -80,33 +90,42 @@
   justify-content: center;
   border: none;
   background: transparent;
-  padding: 0.65rem 1.2rem;
+  padding: 0.5rem 0.95rem;
   border-radius: var(--radius-sm);
   font-weight: 600;
+  font-size: 0.9rem;
   color: var(--color-gray-dark);
   cursor: pointer;
   width: fit-content;
   height: fit-content;
+  transition: all var(--transition-normal);
 }
 
 .resident-profile__tab.is-active {
-  background: var(--color-bg-primary);
-  color: var(--color-black);
-  border: 1px solid var(--color-border-light);
-  box-shadow: var(--shadow-md);
+  background: var(--color-orange);
+  color: var(--color-white);
+  border: 1px solid var(--color-orange);
+  box-shadow: 0 10px 20px rgba(241, 107, 50, 0.2);
 }
 
 .resident-profile__card {
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
   padding: 1.5rem;
   box-shadow: var(--shadow-md);
 }
 
 .resident-profile__card--summary {
-  background: var(--color-bg-accent);
-  border: 1px solid var(--color-turquoise);
+  background: linear-gradient(120deg, rgba(83, 164, 151, 0.08), rgba(255, 255, 255, 0.96));
+  border: 1px solid rgba(83, 164, 151, 0.2);
+  gap: 1rem;
+}
+
+.resident-profile__card--actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .resident-profile__form {
@@ -132,7 +151,7 @@
 }
 
 .resident-profile__info-item label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--color-gray-dark);
   text-transform: uppercase;
@@ -146,11 +165,11 @@
 }
 
 .resident-profile__info-item input {
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-medium);
-  padding: 0.75rem;
-  font-size: 0.97rem;
-  background: var(--color-bg-primary);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  padding: 0.75rem 0.9rem;
+  font-size: 0.95rem;
+  background: #f9fafb;
 }
 
 .resident-profile__info-item input:focus {
@@ -200,8 +219,8 @@
 .resident-profile__card--form {
   display: grid;
   gap: 1rem;
-  width: 600px;
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
 }
 
 .resident-profile__divider {
@@ -212,8 +231,15 @@
 
 .resident-profile__grid {
   display: grid;
+  gap: 1.5rem;
+}
+
+.resident-profile__grid--overview {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.resident-profile__grid--edit {
   grid-template-columns: 1fr;
-  gap: 1rem;
 }
 
 .profile-summary__top {
@@ -221,6 +247,26 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
+}
+
+.profile-summary__identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-summary__avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-turquoise);
+  color: var(--color-white);
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: var(--shadow-turquoise);
 }
 
 .profile-summary__eyebrow {
@@ -245,23 +291,56 @@
   font-weight: 700;
 }
 
+.resident-profile__hint {
+  color: var(--color-gray-dark);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.resident-profile__action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .resident-profile__action-buttons {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 900px) {
+  .resident-profile__grid--overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .resident-profile__tabs {
+    flex-direction: column;
+  }
+}
+
 .profile-summary__details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.2rem;
+  margin-top: 0.75rem;
 }
 
 .profile-summary__label {
   margin: 0;
   color: var(--color-gray-dark);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .profile-summary__value {
   margin: 0.2rem 0 0;
   color: var(--color-black);
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 @media (max-width: 768px) {

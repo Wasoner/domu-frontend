@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentExpenses.css';
+import './ResidentExpenses.scss';
 
 /**
  * Resident Expenses Page Component

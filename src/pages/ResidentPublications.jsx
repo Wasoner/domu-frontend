@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentPublications.css';
+import './ResidentPublications.scss';
 
 /**
  * Resident Publications Page Component

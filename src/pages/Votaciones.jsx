@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
 import { api } from '../services';
-import './Votaciones.css';
+import './Votaciones.scss';
 
 const buildOptionId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {

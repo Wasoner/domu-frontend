@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
 import { api } from '../services';
-import './AdminHousingUnits.css';
+import './AdminHousingUnits.scss';
 
 /**
  * Página de administración de unidades habitacionales

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/LogotipoDOMU.svg';
 import { Button } from '../components';
 import { ROUTES } from '../constants';
-import './Header.css';
+import './Header.scss';
 
 const solucionesItems = [
   { label: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, icon: '🏢' },

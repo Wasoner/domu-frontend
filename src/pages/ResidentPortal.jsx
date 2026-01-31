@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
-import './ResidentPortal.css';
+import { ROUTES } from '../constants';
+import './ResidentPortal.scss';
 
 // Datos de ejemplo para notificaciones
 const mockNotifications = [
@@ -27,6 +29,83 @@ const mockNotifications = [
         message: 'Se realizará mantención preventiva de los ascensores el día 18 de diciembre.',
         date: '2024-12-05',
         priority: 'low'
+    },
+];
+
+const residentStats = [
+    {
+        id: 'balance',
+        label: 'Saldo pendiente',
+        value: '$78.500',
+        note: 'Vence 20 dic',
+        tone: 'warn',
+    },
+    {
+        id: 'reservations',
+        label: 'Reservas activas',
+        value: '2',
+        note: 'Próxima: Quincho',
+        tone: 'info',
+    },
+    {
+        id: 'incidents',
+        label: 'Incidentes abiertos',
+        value: '1',
+        note: 'En revisión',
+        tone: 'alert',
+    },
+    {
+        id: 'payments',
+        label: 'Pagos al día',
+        value: '3',
+        note: 'Último pago nov',
+        tone: 'ok',
+    },
+];
+
+const quickActions = [
+    {
+        id: 'charges',
+        title: 'Gastos comunes',
+        description: 'Revisa tu cartola y pagos',
+        icon: '💳',
+        to: ROUTES.RESIDENT_CHARGES_DETAIL_VIEW,
+    },
+    {
+        id: 'incidents',
+        title: 'Incidentes',
+        description: 'Reporta y sigue solicitudes',
+        icon: '🛠️',
+        to: ROUTES.RESIDENT_INCIDENTS,
+    },
+    {
+        id: 'amenities',
+        title: 'Reservas',
+        description: 'Agenda espacios comunes',
+        icon: '📅',
+        to: ROUTES.RESIDENT_AMENITIES,
+    },
+    {
+        id: 'parcels',
+        title: 'Encomiendas',
+        description: 'Consulta entregas',
+        icon: '📦',
+        to: ROUTES.RESIDENT_PARCELS,
+    },
+];
+
+const upcomingItems = [
+    {
+        id: 'payment-dec',
+        title: 'Gasto común diciembre',
+        detail: 'Monto estimado $78.500',
+        due: 'Vence 20 dic',
+    },
+    {
+        id: 'visit',
+        title: 'Visita programada',
+        detail: 'Proveedor eléctrico',
+        due: '18 dic • 16:00',
     },
 ];
 
@@ -59,55 +138,127 @@ const ResidentPortal = () => {
         <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
             <article className="resident-portal">
                 <header className="resident-portal__header">
-                    <h1>Panel Principal</h1>
-                    <p className="resident-portal__welcome">Bienvenido, {displayName}</p>
-                    <div className="resident-portal__notice">
-                        Recuerda cambiar tu contraseña si fue creada por un administrador. La contraseña por defecto es 1234567890.
+                    <div>
+                        <p className="resident-portal__eyebrow">Portal del residente</p>
+                        <h1>Hola, {displayName}</h1>
+                        <p className="resident-portal__subtitle">Resumen de tu comunidad y accesos rápidos</p>
+                    </div>
+                    <div className="resident-portal__header-actions">
+                        <Link to={ROUTES.RESIDENT_CHARGES_DETAIL_VIEW} className="resident-portal__header-link">
+                            Ver gastos comunes
+                        </Link>
                     </div>
                 </header>
 
+                <div className="resident-portal__alert" role="status">
+                    <span className="resident-portal__alert-icon" aria-hidden="true">🔐</span>
+                    <div>
+                        <strong>Seguridad recomendada</strong>
+                        <p>Si tu contraseña fue creada por un administrador, cámbiala cuanto antes.</p>
+                    </div>
+                </div>
+
+                <section className="resident-portal__stats" aria-label="Indicadores principales">
+                    {residentStats.map((stat) => (
+                        <div key={stat.id} className={`resident-portal__stat resident-portal__stat--${stat.tone}`}>
+                            <span className="resident-portal__stat-label">{stat.label}</span>
+                            <strong className="resident-portal__stat-value">{stat.value}</strong>
+                            <span className="resident-portal__stat-note">{stat.note}</span>
+                        </div>
+                    ))}
+                </section>
+
                 <div className="resident-portal__grid">
-                    {/* Panel de Notificaciones */}
-                    <section className="resident-portal__panel resident-portal__panel--notifications">
-                        <div className="resident-portal__panel-header">
-                            <span className="resident-portal__panel-icon">🔔</span>
-                            <h2>Notificaciones de la Comunidad</h2>
-                        </div>
-                        <div className="resident-portal__notifications-list">
-                            {mockNotifications.length > 0 ? (
-                                mockNotifications.map((notification) => (
-                                    <div
-                                        key={notification.id}
-                                        className={`resident-portal__notification resident-portal__notification--${notification.priority}`}
-                                    >
-                                        <div className="resident-portal__notification-header">
-                                            <span className="resident-portal__notification-icon">
-                                                {getNotificationIcon(notification.type)}
-                                            </span>
-                                            <div className="resident-portal__notification-info">
-                                                <h3>{notification.title}</h3>
-                                                <span className="resident-portal__notification-date">
-                                                    {formatDate(notification.date)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <p className="resident-portal__notification-message">
-                                            {notification.message}
-                                        </p>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="resident-portal__empty-state">
-                                    <p>No hay notificaciones nuevas</p>
+                    <section className="resident-portal__main">
+                        {/* Panel de Notificaciones */}
+                        <section className="resident-portal__panel resident-portal__panel--notifications">
+                            <div className="resident-portal__panel-header">
+                                <span className="resident-portal__panel-icon">🔔</span>
+                                <div>
+                                    <h2>Notificaciones de la comunidad</h2>
+                                    <p>Mensajes relevantes para tu edificio</p>
                                 </div>
-                            )}
-                        </div>
-                        {mockNotifications.length > 0 && (
-                            <button className="resident-portal__view-all-btn">
-                                Ver todas las notificaciones
-                            </button>
-                        )}
+                                <Link to={ROUTES.RESIDENT_PUBLICATIONS} className="resident-portal__panel-link">
+                                    Ver todo
+                                </Link>
+                            </div>
+                            <div className="resident-portal__notifications-list">
+                                {mockNotifications.length > 0 ? (
+                                    mockNotifications.map((notification) => (
+                                        <div
+                                            key={notification.id}
+                                            className={`resident-portal__notification resident-portal__notification--${notification.priority}`}
+                                        >
+                                            <div className="resident-portal__notification-header">
+                                                <span className="resident-portal__notification-icon">
+                                                    {getNotificationIcon(notification.type)}
+                                                </span>
+                                                <div className="resident-portal__notification-info">
+                                                    <h3>{notification.title}</h3>
+                                                    <span className="resident-portal__notification-date">
+                                                        {formatDate(notification.date)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <p className="resident-portal__notification-message">
+                                                {notification.message}
+                                            </p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="resident-portal__empty-state">
+                                        <p>No hay notificaciones nuevas</p>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
                     </section>
+
+                    <aside className="resident-portal__side">
+                        <section className="resident-portal__panel resident-portal__panel--upcoming">
+                            <div className="resident-portal__panel-header">
+                                <span className="resident-portal__panel-icon">🗓️</span>
+                                <div>
+                                    <h2>Próximos eventos</h2>
+                                    <p>Fechas relevantes del mes</p>
+                                </div>
+                            </div>
+                            <div className="resident-portal__upcoming-list">
+                                {upcomingItems.map((item) => (
+                                    <div key={item.id} className="resident-portal__upcoming-item">
+                                        <div>
+                                            <strong>{item.title}</strong>
+                                            <span>{item.detail}</span>
+                                        </div>
+                                        <small>{item.due}</small>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="resident-portal__panel resident-portal__panel--quick">
+                            <div className="resident-portal__panel-header">
+                                <span className="resident-portal__panel-icon">⚡</span>
+                                <div>
+                                    <h2>Accesos rápidos</h2>
+                                    <p>Atajos a tareas frecuentes</p>
+                                </div>
+                            </div>
+                            <div className="resident-portal__quick-grid">
+                                {quickActions.map((action) => (
+                                    <Link key={action.id} to={action.to} className="resident-portal__quick-card">
+                                        <span className="resident-portal__quick-icon" aria-hidden="true">
+                                            {action.icon}
+                                        </span>
+                                        <div>
+                                            <strong>{action.title}</strong>
+                                            <span>{action.description}</span>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    </aside>
                 </div>
             </article>
         </ProtectedLayout>
@@ -115,4 +266,3 @@ const ResidentPortal = () => {
 };
 
 export default ResidentPortal;
-

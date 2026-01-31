@@ -4,7 +4,7 @@ import { Header, MainContent, Footer } from '../layout';
 import { Button, Seo, Spinner } from '../components';
 import { ROUTES } from '../constants';
 import { api } from '../services';
-import './AdminInviteRegister.css';
+import './AdminInviteRegister.scss';
 
 const MIN_PASSWORD_LENGTH = 10;
 

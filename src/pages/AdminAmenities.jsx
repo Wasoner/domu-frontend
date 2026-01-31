@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
 import { api } from '../services';
-import './AdminAmenities.css';
+import './AdminAmenities.scss';
 
 const DAY_NAMES = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
