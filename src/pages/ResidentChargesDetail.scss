@@ -1,162 +1,233 @@
 .resident-charges-detail {
-  padding: 2rem;
-}
+  padding: 2rem 3vw 3rem;
 
-.resident-charges-detail__header {
-  margin-bottom: 2rem;
-}
-
-.resident-charges-detail__header h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.resident-charges-detail__subtitle {
-  color: var(--color-gray-dark);
-  font-size: 0.9375rem;
-}
-
-.resident-charges-detail__error {
-  background: var(--color-error-bg);
-  color: var(--color-error);
-  padding: 1rem;
-  border-radius: var(--radius-sm);
-  margin-bottom: 1.5rem;
-}
-
-.resident-charges-detail__loading {
-  text-align: center;
-  padding: 3rem;
-  color: var(--color-gray-dark);
-}
-
-.resident-charges-detail__controls {
-  margin-bottom: 2rem;
-}
-
-.resident-charges-detail__select-label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 280px;
-}
-
-.resident-charges-detail__select-label span {
-  font-weight: 600;
-  color: var(--color-gray-dark);
-}
-
-.resident-charges-detail__select {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border-medium);
-  border-radius: var(--radius-sm);
-  font-size: 0.9375rem;
-  background: var(--color-bg-primary);
-}
-
-.resident-charges-detail__total-card {
-  background: var(--color-bg-accent);
-  border: 1px solid var(--color-turquoise);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.resident-charges-detail__total-icon {
-  font-size: 2.5rem;
-}
-
-.resident-charges-detail__total-card p {
-  font-size: 0.9375rem;
-  color: var(--color-gray-dark);
-  margin-bottom: 0.25rem;
-}
-
-.resident-charges-detail__total-card strong {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-black);
-}
-
-.resident-charges-detail__breakdown h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1.25rem;
-}
-
-.resident-charges-detail__list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.resident-charges-detail__item {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem;
-}
-
-.resident-charges-detail__concept {
-  font-weight: 500;
-  color: var(--color-black);
-}
-
-.resident-charges-detail__amount {
-  font-weight: 700;
-  color: var(--color-turquoise);
-}
-
-.resident-charges-detail__bar {
-  grid-column: 1 / -1;
-  height: 6px;
-  background: var(--color-border-light);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 0.5rem;
-}
-
-.resident-charges-detail__bar-fill {
-  height: 100%;
-  background: var(--color-turquoise);
-  border-radius: 3px;
-  transition: width var(--transition-slow);
-}
-
-.resident-charges-detail__empty {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-}
-
-.resident-charges-detail__empty-icon {
-  font-size: 4rem;
-  display: block;
-  margin-bottom: 1rem;
-}
-
-.resident-charges-detail__empty p {
-  color: var(--color-gray-dark);
-}
-
-@media (max-width: 768px) {
-  .resident-charges-detail {
-    padding: 1.5rem;
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
   }
 
-  .resident-charges-detail__total-card {
-    flex-direction: column;
+  &__eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.7rem;
+    color: var(--color-gray);
+  }
+
+  &__subtitle {
+    max-width: 520px;
+    margin-top: 0.5rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  &__primary {
+    background: var(--color-orange);
+    color: var(--color-white);
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-fast);
+
+    &:hover {
+      box-shadow: var(--shadow-orange);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+  }
+
+  &__error {
+    background: var(--color-error-bg);
+    color: var(--color-error);
+    padding: 0.9rem 1.1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+
+  &__loading {
     text-align: center;
+    padding: 3rem;
+    color: var(--color-gray-dark);
+  }
+
+  &__controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-bottom: 1.8rem;
+  }
+
+  &__select-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--color-gray-dark);
+  }
+
+  &__select {
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-light);
+    background: var(--color-bg-primary);
+    font-family: inherit;
+  }
+
+  &__building {
+    background: var(--color-bg-primary);
+    padding: 0.9rem 1.2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-sm);
+
+    span {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--color-gray);
+    }
+
+    strong {
+      font-size: 1rem;
+      color: var(--color-black);
+    }
+  }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  &__summary-card {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-light);
+    padding: 1rem 1.2rem;
+    box-shadow: var(--shadow-sm);
+
+    span {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--color-gray);
+      margin-bottom: 0.3rem;
+    }
+
+    strong {
+      font-size: 1.2rem;
+      color: var(--color-black);
+    }
+  }
+
+  &__table {
+    margin-bottom: 2rem;
+  }
+
+  &__table-grid {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  &__table-row {
+    display: grid;
+    grid-template-columns: 1.1fr 1.2fr 2.2fr 1fr 0.9fr;
+    gap: 0.8rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-light);
+    align-items: center;
+
+    &--head {
+      background: var(--color-bg-tertiary);
+      font-weight: 700;
+      color: var(--color-gray-dark);
+    }
+  }
+
+  &__amount {
+    font-weight: 700;
+    color: var(--color-turquoise);
+  }
+
+  &__link {
+    background: transparent;
+    border: none;
+    color: var(--color-orange);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  &__history {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-light);
+    padding: 1.2rem 1.4rem;
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.8rem 0 0;
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    li {
+      display: grid;
+      gap: 0.2rem;
+      font-size: 0.85rem;
+      color: var(--color-gray-dark);
+
+      strong {
+        color: var(--color-black);
+      }
+    }
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+  }
+
+  &__empty-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .resident-charges-detail {
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__controls {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__table-row {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
   }
 }

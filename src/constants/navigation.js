@@ -25,7 +25,7 @@ export const NAV_SECTIONS = [
       { label: 'Residentes', icon: '👥', to: ROUTES.ADMIN_RESIDENTS, roles: ['admin', 'concierge'], exact: true },
       { label: 'Unidades', icon: '🏠', to: ROUTES.ADMIN_HOUSING_UNITS, roles: ['admin'], exact: true },
 
-      { label: 'Gastos comunes', icon: '💳', roles: ['admin'] },
+      { label: 'Gastos comunes', icon: '💳', to: ROUTES.COMMON_CHARGES, roles: ['admin'], exact: true },
 
       { label: 'Pagos', icon: '💰', roles: ['admin'] },
 
@@ -49,6 +49,17 @@ export const NAV_SECTIONS = [
     ],
 
   },
+  {
+
+    title: 'Propiedad',
+
+    roles: ['resident'],
+
+    items: [
+      { label: 'Gastos comunes', icon: '💳', to: ROUTES.RESIDENT_CHARGES_DETAIL_VIEW, roles: ['resident'], exact: true },
+    ],
+
+  },
 
   {
 
@@ -69,4 +80,3 @@ export const NAV_SECTIONS = [
   },
 
 ];
-
