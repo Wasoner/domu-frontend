@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
 import { api } from '../services';
-import './AdminResidents.css';
+import './AdminResidents.scss';
 
 /**
  * Iconos de roles

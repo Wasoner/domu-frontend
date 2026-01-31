@@ -4,7 +4,7 @@ import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services';
 import { ROUTES } from '../constants';
-import './Dashboard.css';
+import './Dashboard.scss';
 
 /**
  * Módulos de acceso rápido - Enlaces funcionales a páginas principales
@@ -131,22 +131,46 @@ const Dashboard = () => {
         return labels[status] || status;
     };
 
+    const openIncidents = incidentStats.reported + incidentStats.inProgress;
+    const statusTone = openIncidents === 0 ? 'ok' : openIncidents < 4 ? 'warn' : 'alert';
+    const statusMessage = openIncidents === 0
+        ? 'Todo bajo control'
+        : openIncidents < 4
+            ? 'Atención requerida'
+            : 'Carga alta';
+    const statusDetail = openIncidents === 0
+        ? 'No tienes incidentes pendientes en este momento.'
+        : openIncidents < 4
+            ? 'Hay casos abiertos que necesitan seguimiento.'
+            : 'Revisa prioridades y asigna responsables.';
+
     return (
         <ProtectedLayout allowedRoles={['admin', 'concierge']}>
             <article className="dashboard" aria-label="Panel administrativo">
                 {/* Header compacto */}
                 <header className="dashboard__header">
                     <div className="dashboard__greeting">
+                        <p className="dashboard__eyebrow">Panel administrativo</p>
                         <h1>Hola, {userName}</h1>
                         <p className="dashboard__subtitle">
                             Resumen de tu comunidad
                         </p>
                     </div>
-                    {lastUpdated && (
-                        <span className="dashboard__sync">
-                            Actualizado a las {formatTime(lastUpdated)}
-                        </span>
-                    )}
+                    <div className="dashboard__actions">
+                        {lastUpdated && (
+                            <span className="dashboard__sync">
+                                Actualizado a las {formatTime(lastUpdated)}
+                            </span>
+                        )}
+                        <button
+                            type="button"
+                            className="dashboard__refresh"
+                            onClick={fetchIncidentData}
+                            disabled={loading}
+                        >
+                            {loading ? 'Actualizando...' : 'Actualizar'}
+                        </button>
+                    </div>
                 </header>
 
                 {/* Métricas principales - Clickables */}
@@ -178,90 +202,99 @@ const Dashboard = () => {
 
                 {/* Contenido principal en dos columnas */}
                 <div className="dashboard__grid">
-                    {/* Feed de incidentes recientes */}
-                    <section className="dashboard__feed" aria-label="Incidentes recientes">
-                        <div className="dashboard__feed-header">
+                    <section className="dashboard__primary">
+                        {/* Feed de incidentes recientes */}
+                        <section className="dashboard__feed" aria-label="Incidentes recientes">
+                            <div className="dashboard__feed-header">
+                                <div>
+                                    <h2>Actividad reciente</h2>
+                                    <p>Últimos incidentes reportados</p>
+                                </div>
+                                <div className="dashboard__feed-actions">
+                                    <Link to={ROUTES.ADMIN_INCIDENTS} className="dashboard__view-all">
+                                        Ver todo
+                                    </Link>
+                                </div>
+                            </div>
+
+                            <div className="dashboard__feed-list">
+                                {loading && recentIncidents.length === 0 && (
+                                    <div className="dashboard__feed-empty">
+                                        Cargando incidentes...
+                                    </div>
+                                )}
+
+                                {!loading && recentIncidents.length === 0 && (
+                                    <div className="dashboard__feed-empty">
+                                        <span className="dashboard__feed-empty-icon">✓</span>
+                                        <p>Sin incidentes pendientes</p>
+                                        <small>Todo está en orden</small>
+                                    </div>
+                                )}
+
+                                {recentIncidents.map((incident) => (
+                                    <Link
+                                        key={incident.id}
+                                        to={ROUTES.ADMIN_INCIDENTS}
+                                        className="incident-item"
+                                    >
+                                        <div className="incident-item__main">
+                                            <span className="incident-item__category">
+                                                {incident.category}
+                                            </span>
+                                            <p className="incident-item__title">{incident.title}</p>
+                                            <span className="incident-item__time">
+                                                {formatIncidentDate(incident.createdAt)}
+                                            </span>
+                                        </div>
+                                        <span className={`incident-item__status incident-item__status--${incident.status.toLowerCase()}`}>
+                                            {getStatusLabel(incident.status)}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    </section>
+
+                    <aside className="dashboard__side">
+                        <section className={`dashboard__status-card dashboard__status-card--${statusTone}`}>
                             <div>
-                                <h2>Actividad reciente</h2>
-                                <p>Últimos incidentes reportados</p>
+                                <p className="dashboard__status-eyebrow">Estado general</p>
+                                <h3>{statusMessage}</h3>
+                                <p>{statusDetail}</p>
                             </div>
-                            <div className="dashboard__feed-actions">
-                                <button
-                                    type="button"
-                                    className="dashboard__refresh-btn"
-                                    onClick={fetchIncidentData}
-                                    disabled={loading}
-                                    aria-label="Actualizar datos"
-                                >
-                                    {loading ? '...' : '↻'}
-                                </button>
-                                <Link to={ROUTES.ADMIN_INCIDENTS} className="dashboard__view-all">
-                                    Ver todo
-                                </Link>
+                            <Link to={ROUTES.ADMIN_INCIDENTS} className="dashboard__status-link">
+                                Ver incidentes
+                            </Link>
+                        </section>
+
+                        {/* Accesos rápidos */}
+                        <section className="dashboard__quick-access" aria-label="Accesos rápidos">
+                            <div className="dashboard__quick-header">
+                                <h2>Accesos rápidos</h2>
+                                <span>Atajos a tareas frecuentes</span>
                             </div>
-                        </div>
-
-                        <div className="dashboard__feed-list">
-                            {loading && recentIncidents.length === 0 && (
-                                <div className="dashboard__feed-empty">
-                                    Cargando incidentes...
-                                </div>
-                            )}
-
-                            {!loading && recentIncidents.length === 0 && (
-                                <div className="dashboard__feed-empty">
-                                    <span className="dashboard__feed-empty-icon">✓</span>
-                                    <p>Sin incidentes pendientes</p>
-                                    <small>Todo está en orden</small>
-                                </div>
-                            )}
-
-                            {recentIncidents.map((incident) => (
-                                <Link
-                                    key={incident.id}
-                                    to={ROUTES.ADMIN_INCIDENTS}
-                                    className="incident-item"
-                                >
-                                    <div className="incident-item__main">
-                                        <span className="incident-item__category">
-                                            {incident.category}
+                            <div className="dashboard__modules">
+                                {quickAccessModules.map((module) => (
+                                    <Link
+                                        key={module.id}
+                                        to={module.to}
+                                        className="module-card"
+                                        style={{ '--module-accent': module.accentColor }}
+                                    >
+                                        <span className="module-card__icon" aria-hidden="true">
+                                            {module.icon}
                                         </span>
-                                        <p className="incident-item__title">{incident.title}</p>
-                                        <span className="incident-item__time">
-                                            {formatIncidentDate(incident.createdAt)}
-                                        </span>
-                                    </div>
-                                    <span className={`incident-item__status incident-item__status--${incident.status.toLowerCase()}`}>
-                                        {getStatusLabel(incident.status)}
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* Accesos rápidos */}
-                    <section className="dashboard__quick-access" aria-label="Accesos rápidos">
-                        <h2>Accesos rápidos</h2>
-                        <div className="dashboard__modules">
-                            {quickAccessModules.map((module) => (
-                                <Link
-                                    key={module.id}
-                                    to={module.to}
-                                    className="module-card"
-                                    style={{ '--module-accent': module.accentColor }}
-                                >
-                                    <span className="module-card__icon" aria-hidden="true">
-                                        {module.icon}
-                                    </span>
-                                    <div className="module-card__content">
-                                        <h3>{module.title}</h3>
-                                        <p>{module.description}</p>
-                                    </div>
-                                    <span className="module-card__arrow" aria-hidden="true">→</span>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
+                                        <div className="module-card__content">
+                                            <h3>{module.title}</h3>
+                                            <p>{module.description}</p>
+                                        </div>
+                                        <span className="module-card__arrow" aria-hidden="true">→</span>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    </aside>
                 </div>
             </article>
         </ProtectedLayout>

@@ -6,7 +6,7 @@ import { ROUTES } from '../constants';
 import { useAppContext } from '../context';
 import { api } from '../services';
 import Dashboard from './Dashboard';
-import './Home.css';
+import './Home.scss';
 
 const residentChartData = [
   { month: 'May', amount: '$64.3K', value: 70 },
@@ -483,6 +483,21 @@ const Home = () => {
     },
   ];
 
+  const heroHighlights = [
+    {
+      title: 'Pagos sin fricción',
+      description: 'Cobranza clara, pagos en línea y reportes al instante.',
+    },
+    {
+      title: 'Accesos más seguros',
+      description: 'Registro de visitas con QR y trazabilidad de ingresos.',
+    },
+    {
+      title: 'Comunidad conectada',
+      description: 'Mensajes, avisos y gestión centralizada en un solo lugar.',
+    },
+  ];
+
   const benefits = [
     {
       title: 'Para Administradores',
@@ -529,6 +544,7 @@ const Home = () => {
         <div className="container">
           <div className="home-hero__content">
             <div className="home-hero__text">
+              <p className="home-hero__eyebrow">Plataforma DOMU para comunidades</p>
               <h1 className="home-hero__title">
                 Software para la administración de <strong>edificios y condominios</strong>
               </h1>
@@ -536,6 +552,14 @@ const Home = () => {
                 Administra edificios con DOMU: el software y el portal web responsivo para tu comunidad.
                 Gastos Comunes en línea y mucho más.
               </p>
+              <div className="home-hero__highlights" aria-label="Beneficios clave">
+                {heroHighlights.map((item) => (
+                  <div key={item.title} className="home-hero__highlight">
+                    <span>{item.title}</span>
+                    <small>{item.description}</small>
+                  </div>
+                ))}
+              </div>
               <div className="home-hero__actions">
                 <Button onClick={handleCreateCommunity} variant="primary" className="home-hero__cta">
                   Crear mi comunidad
@@ -546,7 +570,9 @@ const Home = () => {
               </div>
             </div>
             <div className="home-hero__visual">
-              <img src={heroLogo} alt="DOMU Logo" className="home-hero__logo" />
+              <div className="home-hero__frame">
+                <img src={heroLogo} alt="DOMU Logo" className="home-hero__logo" />
+              </div>
             </div>
           </div>
         </div>

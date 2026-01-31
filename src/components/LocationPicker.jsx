@@ -20,6 +20,8 @@ const LocationPicker = ({ latitude, longitude, onSelect, className }) => {
   const [mapCenter, setMapCenter] = useState(() => (hasCoords ? [Number(latitude), Number(longitude)] : DEFAULT_CENTER));
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
     if (hasCoords) {
@@ -63,6 +65,10 @@ const LocationPicker = ({ latitude, longitude, onSelect, className }) => {
     if (!search || !search.trim()) {
       return;
     }
+    if (isSearching) {
+      return;
+    }
+    setIsSearching(true);
     setStatus('Buscando dirección...');
     try {
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(search)}&addressdetails=1&limit=1&accept-language=es`;
@@ -77,12 +83,15 @@ const LocationPicker = ({ latitude, longitude, onSelect, className }) => {
           const extra = await fetchReverse(lat, lng);
           setStatus(extra.address ? 'Dirección aproximada encontrada.' : 'Ubicación encontrada.');
           applySelection(lat, lng, extra);
+          setIsSearching(false);
           return;
         }
       }
       setStatus('No se encontraron resultados.');
     } catch {
       setStatus('Error buscando la dirección.');
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -91,6 +100,10 @@ const LocationPicker = ({ latitude, longitude, onSelect, className }) => {
       setStatus('Tu navegador no permite geolocalización.');
       return;
     }
+    if (isLocating) {
+      return;
+    }
+    setIsLocating(true);
     setStatus('Obteniendo ubicación...');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -99,30 +112,48 @@ const LocationPicker = ({ latitude, longitude, onSelect, className }) => {
           fetchReverse(lat, lng).then((extra) => {
             applySelection(lat, lng, extra);
             setStatus(extra.address ? 'Ubicación actual aplicada.' : 'Ubicación actual aplicada (sin dirección).');
+            setIsLocating(false);
           });
         } else {
           setStatus('No se pudo leer tu ubicación.');
+          setIsLocating(false);
         }
       },
-      () => setStatus('No se pudo obtener tu ubicación.'),
-      { enableHighAccuracy: true, timeout: 10000 }
+      () => {
+        setStatus('No se pudo obtener tu ubicación.');
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
     );
   };
 
   return (
     <div className={`location-picker ${className || ''}`}>
       <div className="location-picker__controls">
-        <input
-          type="text"
-          placeholder="Buscar dirección o calle (ej: Av. O'Higgins 100, Concepción)"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button type="button" onClick={handleSearch}>Buscar</button>
-        <button type="button" onClick={handleGeolocate}>Usar mi ubicación</button>
+        <div className="location-picker__search">
+          <input
+            type="text"
+            placeholder="Buscar dirección o calle (ej: Av. O'Higgins 100, Concepción)"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button
+            type="button"
+            className="location-picker__btn location-picker__btn--primary"
+            onClick={handleSearch}
+            disabled={isSearching}
+          >
+            {isSearching ? 'Buscando...' : 'Buscar'}
+          </button>
+        </div>
+        <div className="location-picker__actions">
+          <button type="button" className="location-picker__btn" onClick={handleGeolocate} disabled={isLocating}>
+            {isLocating ? 'Ubicando...' : 'Usar mi ubicación'}
+          </button>
+        </div>
       </div>
       <Map
-        height={260}
+        height={300}
         defaultCenter={DEFAULT_CENTER}
         center={mapCenter}
         defaultZoom={14}
@@ -140,7 +171,7 @@ const LocationPicker = ({ latitude, longitude, onSelect, className }) => {
         <span className="location-picker__coords">
           Lng: {mapCenter ? Number(mapCenter[1]).toFixed(6) : '—'}
         </span>
-        <span>Haz click en el mapa para fijar la ubicación exacta.</span>
+        <span className="location-picker__hint">Haz click en el mapa para fijar la ubicación exacta.</span>
       </div>
       {status && <div className="location-picker__status">{status}</div>}
     </div>
@@ -155,5 +186,3 @@ LocationPicker.propTypes = {
 };
 
 export default LocationPicker;
-
-

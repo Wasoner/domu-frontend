@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import './Spinner.css';
+import './Spinner.scss';
 
 function Spinner({ label, size = 'md', inline = false, overlay = false }) {
   return (

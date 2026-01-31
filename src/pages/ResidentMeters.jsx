@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentMeters.css';
+import './ResidentMeters.scss';
 
 /**
  * Resident Meters Page Component

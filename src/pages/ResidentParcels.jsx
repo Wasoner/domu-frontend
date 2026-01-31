@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentParcels.css';
+import './ResidentParcels.scss';
 
 /**
  * Resident Parcels Page Component

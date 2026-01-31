@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { Seo, Spinner } from '../components';
 import { api } from '../services';
-import './AdminCreateUser.css';
+import './AdminCreateUser.scss';
 
 const MIN_PASSWORD_LENGTH = 10;
 

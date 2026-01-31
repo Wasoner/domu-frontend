@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import logo from '../assets/LogotipoDOMU.svg';
 import { useAppContext } from '../context';
 import { ROUTES } from '../constants';
-import './AuthHeader.css';
+import './AuthHeader.scss';
 
 const AuthHeader = ({ user }) => {
   const navigate = useNavigate();
