@@ -42,6 +42,9 @@ export const NAV_SECTIONS = [
     items: [
       { label: 'Visitas', icon: '🧑‍🤝‍🧑', to: ROUTES.RESIDENT_EVENTS, roles: ['resident', 'concierge', 'admin'], exact: true },
       { label: 'Incidentes', icon: '🚨', to: ROUTES.RESIDENT_INCIDENTS, roles: ['resident'], exact: true },
+      { label: 'Votaciones', icon: '🗳️', to: ROUTES.VOTINGS, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
+      { label: 'Áreas comunes', icon: '🏊', to: ROUTES.RESIDENT_AMENITIES, roles: ['resident', 'admin', 'concierge'], exact: true },
+      { label: 'Gastos comunes', icon: '💳', to: ROUTES.RESIDENT_CHARGES_DETAIL_VIEW, roles: ['resident'], exact: true },
       { label: 'Mi perfil', icon: '🙍‍♂️', to: ROUTES.RESIDENT_PROFILE, roles: ['resident'], exact: true },
     ],
 

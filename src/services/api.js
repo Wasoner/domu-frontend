@@ -602,6 +602,51 @@ export const api = {
     cancel: async (reservationId) => fetchWrapper(`/reservations/${reservationId}`, { method: 'DELETE' }),
   },
 
+  polls: {
+    list: async () => fetchWrapper('/polls', { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        title: String(data.title || '').trim(),
+        description: data.description?.trim() || null,
+        closesAt: data.closesAt || null,
+        options: Array.isArray(data.options) ? data.options : [],
+      };
+      return fetchWrapper('/polls', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    vote: async (pollId, optionId) => {
+      return fetchWrapper(`/polls/${pollId}/vote`, {
+        method: 'POST',
+        body: JSON.stringify({ optionId }),
+      });
+    },
+    close: async (pollId) => {
+      return fetchWrapper(`/polls/${pollId}/close`, {
+        method: 'POST',
+      });
+    },
+    exportCsv: async (pollId) => {
+      const token = getAuthToken();
+      const selectedBuildingId = getSelectedBuildingId();
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
+      if (selectedBuildingId) {
+        headers['X-Building-Id'] = selectedBuildingId;
+      }
+      const response = await fetch(`${API_BASE_URL}/polls/${pollId}/export`, {
+        method: 'GET',
+        headers,
+      });
+      if (!response.ok) {
+        throw new Error('No se pudo exportar la votación');
+      }
+      return response.text();
+    },
+  },
+
   housingUnits: {
     list: async () => fetchWrapper('/admin/housing-units', { method: 'GET' }),
     getById: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'GET' }),
