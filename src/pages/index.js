@@ -13,6 +13,7 @@ export { default as AdminIncidentsBoard } from './AdminIncidentsBoard';
 export { default as AdminResidents } from './AdminResidents';
 export { default as AdminHousingUnits } from './AdminHousingUnits';
 export { default as AdminAmenities } from './AdminAmenities';
+export { default as AdminCommonExpenses } from './AdminCommonExpenses';
 
 // Resident pages
 export { default as ResidentPortal } from './ResidentPortal';

@@ -1,73 +1,116 @@
 import { useEffect, useState } from 'react';
-import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services';
 import './ResidentChargesDetail.scss';
 
-/**
- * Resident Charges Detail Page Component
- * Detailed view of common charges breakdown
- */
 const ResidentChargesDetail = () => {
-  const { user } = useAppContext();
+  const [periods, setPeriods] = useState([]);
+  const [selectedPeriodId, setSelectedPeriodId] = useState('');
+  const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState('');
-  const [charges, setCharges] = useState([]);
-  const [breakdown, setBreakdown] = useState({
-    total: 0,
-    items: [],
-  });
 
   useEffect(() => {
-    const fetchCharges = async () => {
-      if (!user) return;
+    const fetchPeriods = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await api.finance.getMyCharges();
-        setCharges(Array.isArray(data) ? data : []);
+        const data = await api.finance.listMyPeriods();
+        const list = Array.isArray(data) ? data : [];
+        setPeriods(list);
+        if (list.length > 0) {
+          setSelectedPeriodId(String(list[0].periodId));
+        }
       } catch (err) {
-        setError(err.message || 'No pudimos cargar los gastos comunes.');
+        setError(err.message || 'No pudimos cargar los periodos.');
       } finally {
         setLoading(false);
       }
     };
-    fetchCharges();
-  }, [user]);
+    fetchPeriods();
+  }, []);
 
   useEffect(() => {
-    if (selectedPeriod && charges.length > 0) {
-      const charge = charges.find((c) => `${c.month}/${c.year}` === selectedPeriod);
-      if (charge) {
-        setBreakdown({
-          total: charge.amount || 0,
-          items: [
-            { concept: 'Gasto común ordinario', amount: charge.amount * 0.6 },
-            { concept: 'Fondo de reserva', amount: charge.amount * 0.15 },
-            { concept: 'Agua caliente', amount: charge.amount * 0.1 },
-            { concept: 'Calefacción', amount: charge.amount * 0.08 },
-            { concept: 'Otros', amount: charge.amount * 0.07 },
-          ],
-        });
+    const fetchDetail = async () => {
+      if (!selectedPeriodId) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await api.finance.getMyPeriodDetail(selectedPeriodId);
+        setDetail(data);
+      } catch (err) {
+        setError(err.message || 'No pudimos cargar el detalle del período.');
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [selectedPeriod, charges]);
+    };
+    fetchDetail();
+  }, [selectedPeriodId]);
 
   const formatCurrency = (value) => {
     const safe = Number.isFinite(value) ? value : 0;
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(safe);
   };
 
-  const periods = charges.map((c) => `${c.month}/${c.year}`);
+  const formatDate = (value) => {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString('es-CL');
+  };
+
+  const downloadBlob = (blob, fileName) => {
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName || 'documento.pdf';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!selectedPeriodId) return;
+    try {
+      const { blob, fileName } = await api.finance.downloadMyPeriodPdf(selectedPeriodId);
+      downloadBlob(blob, fileName || 'gasto-comun.pdf');
+    } catch (err) {
+      setError(err.message || 'No pudimos descargar el PDF.');
+    }
+  };
+
+  const handleDownloadReceipt = async (chargeId) => {
+    try {
+      const { blob, fileName } = await api.finance.downloadChargeReceipt(chargeId);
+      downloadBlob(blob, fileName || 'boleta.pdf');
+    } catch (err) {
+      setError(err.message || 'No pudimos descargar la boleta.');
+    }
+  };
+
+  const selectedPeriodLabel = detail ? `${String(detail.month).padStart(2, '0')}/${detail.year}` : '';
 
   return (
     <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
       <article className="resident-charges-detail">
         <header className="resident-charges-detail__header">
           <div>
-            <h1>Detalle del Gasto Común</h1>
-            <p className="resident-charges-detail__subtitle">Desglose completo de tus gastos mensuales</p>
+            <p className="resident-charges-detail__eyebrow">Gastos comunes</p>
+            <h1>Detalle mensual</h1>
+            <p className="resident-charges-detail__subtitle">
+              Consulta cargos, origen y correcciones del período seleccionado.
+            </p>
+          </div>
+          <div className="resident-charges-detail__actions">
+            <button
+              type="button"
+              className="resident-charges-detail__primary"
+              onClick={handleDownloadPdf}
+              disabled={!detail}
+            >
+              Descargar PDF
+            </button>
           </div>
         </header>
 
@@ -75,48 +118,99 @@ const ResidentChargesDetail = () => {
 
         <div className="resident-charges-detail__controls">
           <label className="resident-charges-detail__select-label">
-            <span>Selecciona un período:</span>
+            <span>Período</span>
             <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
+              value={selectedPeriodId || ''}
+              onChange={(e) => setSelectedPeriodId(e.target.value)}
               className="resident-charges-detail__select"
             >
-              <option value="">-- Seleccionar --</option>
-              {periods.map((p) => (
-                <option key={p} value={p}>{p}</option>
+              <option value="">Selecciona un período</option>
+              {periods.map((period) => (
+                <option key={period.periodId} value={String(period.periodId)}>
+                  {String(period.month).padStart(2, '0')}/{period.year}
+                </option>
               ))}
             </select>
           </label>
+          {detail && (
+            <div className="resident-charges-detail__building">
+              <span>{detail.buildingName}</span>
+              <strong>{detail.unitLabel}</strong>
+            </div>
+          )}
         </div>
 
         {loading ? (
-          <div className="resident-charges-detail__loading">Cargando gastos...</div>
-        ) : selectedPeriod && breakdown.items.length > 0 ? (
+          <div className="resident-charges-detail__loading">Cargando detalle...</div>
+        ) : detail ? (
           <div className="resident-charges-detail__content">
-            <div className="resident-charges-detail__total-card">
-              <span className="resident-charges-detail__total-icon">🧾</span>
-              <div>
-                <p>Total Gasto Común - {selectedPeriod}</p>
-                <strong>{formatCurrency(breakdown.total)}</strong>
+            <div className="resident-charges-detail__summary">
+              <div className="resident-charges-detail__summary-card">
+                <span>Total {selectedPeriodLabel}</span>
+                <strong>{formatCurrency(detail.unitTotal)}</strong>
+              </div>
+              <div className="resident-charges-detail__summary-card">
+                <span>Pagado</span>
+                <strong>{formatCurrency(detail.unitPaid)}</strong>
+              </div>
+              <div className="resident-charges-detail__summary-card">
+                <span>Pendiente</span>
+                <strong>{formatCurrency(detail.unitPending)}</strong>
+              </div>
+              <div className="resident-charges-detail__summary-card">
+                <span>Vence</span>
+                <strong>{formatDate(detail.dueDate)}</strong>
               </div>
             </div>
 
-            <section className="resident-charges-detail__breakdown">
-              <h2>Desglose de Conceptos</h2>
-              <ul className="resident-charges-detail__list">
-                {breakdown.items.map((item, index) => (
-                  <li key={index} className="resident-charges-detail__item">
-                    <span className="resident-charges-detail__concept">{item.concept}</span>
-                    <span className="resident-charges-detail__amount">{formatCurrency(item.amount)}</span>
-                    <div className="resident-charges-detail__bar">
-                      <div
-                        className="resident-charges-detail__bar-fill"
-                        style={{ width: `${(item.amount / breakdown.total) * 100}%` }}
-                      />
-                    </div>
-                  </li>
+            <section className="resident-charges-detail__table">
+              <h2>Desglose de cargos</h2>
+              <div className="resident-charges-detail__table-grid">
+                <div className="resident-charges-detail__table-row resident-charges-detail__table-row--head">
+                  <span>Tipo</span>
+                  <span>Origen</span>
+                  <span>Descripción</span>
+                  <span>Monto</span>
+                  <span>Boleta</span>
+                </div>
+                {(detail.charges || []).map((charge) => (
+                  <div key={charge.id} className="resident-charges-detail__table-row">
+                    <span>{charge.type}</span>
+                    <span>{charge.origin || '—'}</span>
+                    <span>{charge.description}</span>
+                    <span className="resident-charges-detail__amount">{formatCurrency(charge.amount)}</span>
+                    <span>
+                      {charge.receiptAvailable ? (
+                        <button
+                          type="button"
+                          className="resident-charges-detail__link"
+                          onClick={() => handleDownloadReceipt(charge.id)}
+                        >
+                          Ver boleta
+                        </button>
+                      ) : (
+                        'No disponible'
+                      )}
+                    </span>
+                  </div>
                 ))}
-              </ul>
+              </div>
+            </section>
+
+            <section className="resident-charges-detail__history">
+              <h2>Historial de correcciones</h2>
+              {(detail.revisions || []).length === 0 ? (
+                <p>No hay ajustes registrados en este período.</p>
+              ) : (
+                <ul>
+                  {(detail.revisions || []).map((revision) => (
+                    <li key={revision.id}>
+                      <strong>{revision.action}</strong>
+                      <span>{revision.note || 'Sin observaciones'}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           </div>
         ) : (
