@@ -1,0 +1,474 @@
+.resident-amenities {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.resident-amenities__header {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-lg);
+}
+
+.resident-amenities__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-gray);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.resident-amenities__subtitle {
+  margin: 0.2rem 0 0;
+  color: var(--color-gray-dark);
+}
+
+.resident-amenities__error {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-error);
+}
+
+.resident-amenities__tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  padding: 0.4rem;
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  color: var(--color-gray-dark);
+  font-weight: 500;
+  transition: all var(--transition-normal);
+}
+
+.tab--active {
+  background: var(--color-turquoise);
+  color: var(--color-white);
+}
+
+/* Amenities Grid */
+.amenities-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.amenities-grid__empty {
+  grid-column: 1 / -1;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-gray-dark);
+  border: 1px dashed var(--color-border-medium);
+}
+
+/* Amenity Preview Card */
+.amenity-preview {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.amenity-preview__image {
+  height: 160px;
+  overflow: hidden;
+  background: var(--color-bg-tertiary);
+}
+
+.amenity-preview__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.amenity-preview__content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex: 1;
+}
+
+.amenity-preview__content h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--color-black);
+}
+
+.amenity-preview__description {
+  margin: 0;
+  color: var(--color-gray-dark);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.amenity-preview__meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--color-gray-dark);
+}
+
+.amenity-preview__free {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.amenity-preview__rules {
+  font-size: 0.9rem;
+  color: var(--color-gray-dark);
+}
+
+.amenity-preview__rules summary {
+  cursor: pointer;
+  color: var(--color-turquoise);
+  font-weight: 500;
+}
+
+.amenity-preview__rules p {
+  margin: 0.5rem 0 0;
+  padding: 0.75rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  line-height: 1.5;
+}
+
+.amenity-preview__reserve {
+  margin-top: auto;
+  background: var(--color-turquoise);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background var(--transition-normal);
+}
+
+.amenity-preview__reserve:hover {
+  opacity: 0.9;
+}
+
+/* My Reservations */
+.my-reservations {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.my-reservations__empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-gray-dark);
+}
+
+.my-reservations__section-title {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  color: var(--color-black);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.my-reservations__section-title--past {
+  margin-top: 1rem;
+  color: var(--color-gray);
+}
+
+/* Reservation Card */
+.reservation-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+  flex-wrap: wrap;
+}
+
+.reservation-card--past {
+  opacity: 0.7;
+}
+
+.reservation-card__main h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-black);
+}
+
+.reservation-card__date {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+  color: var(--color-gray-dark);
+  text-transform: capitalize;
+}
+
+.reservation-card__time {
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  color: var(--color-gray);
+}
+
+.reservation-card__notes {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-gray-dark);
+  font-style: italic;
+}
+
+.reservation-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.status-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge--confirmed {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.status-badge--cancelled {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.status-badge--completed {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.btn-cancel {
+  background: none;
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.modal__card {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.modal__header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--color-gray);
+  padding: 0.25rem;
+}
+
+/* Reserve Form */
+.reserve-form {
+  padding: 1.25rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.reserve-form__field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.reserve-form__field span {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-black);
+}
+
+.reserve-form__field input,
+.reserve-form__field textarea {
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.reserve-form__slots {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reserve-form__label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-black);
+}
+
+.reserve-form__no-slots {
+  color: var(--color-gray);
+  font-style: italic;
+  margin: 0;
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.5rem;
+}
+
+.slot-btn {
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.5rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all var(--transition-normal);
+}
+
+.slot-btn:hover:not(:disabled) {
+  border-color: var(--color-turquoise);
+}
+
+.slot-btn--selected {
+  background: var(--color-turquoise);
+  border-color: var(--color-turquoise);
+  color: var(--color-white);
+}
+
+.slot-btn--unavailable {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
+}
+
+.slot-btn__time {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.slot-btn__reserved {
+  font-size: 0.75rem;
+  color: var(--color-error);
+}
+
+.slot-btn--selected .slot-btn__time {
+  color: var(--color-white);
+}
+
+.reserve-form__summary {
+  background: var(--color-success-bg);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  border: 1px solid var(--color-success);
+}
+
+.reserve-form__summary p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-success);
+}
+
+.reserve-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.reserve-form__actions button {
+  border: 1px solid var(--color-border-medium);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1.1rem;
+  cursor: pointer;
+  color: var(--color-gray-dark);
+}
+
+.reserve-form__actions button.primary {
+  background: var(--color-turquoise);
+  color: var(--color-white);
+  border-color: transparent;
+}
+
+.reserve-form__actions button.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .amenities-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

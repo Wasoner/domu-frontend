@@ -1,0 +1,182 @@
+.resident-funds {
+  padding: 2rem;
+}
+
+.resident-funds__header {
+  margin-bottom: 2rem;
+}
+
+.resident-funds__header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.resident-funds__subtitle {
+  color: var(--color-gray-dark);
+  font-size: 0.9375rem;
+}
+
+.resident-funds__total {
+  background: var(--color-bg-accent);
+  border: 1px solid var(--color-turquoise);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.resident-funds__total-icon {
+  font-size: 3rem;
+}
+
+.resident-funds__total p {
+  font-size: 1rem;
+  color: var(--color-gray-dark);
+  margin-bottom: 0.25rem;
+}
+
+.resident-funds__total strong {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+.resident-funds__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.resident-funds__card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: all var(--transition-normal);
+}
+
+.resident-funds__card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.resident-funds__card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.resident-funds__card-icon {
+  font-size: 1.75rem;
+}
+
+.resident-funds__card-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.resident-funds__card-desc {
+  font-size: 0.875rem;
+  color: var(--color-gray-dark);
+  margin-bottom: 1.25rem;
+}
+
+.resident-funds__balance {
+  margin-bottom: 0.75rem;
+}
+
+.resident-funds__balance-current {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-turquoise);
+}
+
+.resident-funds__balance-target {
+  font-size: 0.875rem;
+  color: var(--color-gray);
+  margin-left: 0.5rem;
+}
+
+.resident-funds__progress {
+  height: 8px;
+  background: var(--color-border-light);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.resident-funds__progress-bar {
+  height: 100%;
+  background: var(--color-turquoise);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.resident-funds__progress-label {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.resident-funds__progress-label span {
+  font-size: 0.8125rem;
+  color: var(--color-gray);
+  font-weight: 500;
+}
+
+.resident-funds__update {
+  font-size: 0.75rem;
+  color: var(--color-gray);
+  border-top: 1px solid var(--color-border-light);
+  padding-top: 0.75rem;
+}
+
+.resident-funds__info {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+}
+
+.resident-funds__info h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.resident-funds__info p {
+  color: var(--color-gray-dark);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.resident-funds__info ul {
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.resident-funds__info li {
+  color: var(--color-gray-dark);
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 768px) {
+  .resident-funds {
+    padding: 1.5rem;
+  }
+
+  .resident-funds__total {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .resident-funds__grid {
+    grid-template-columns: 1fr;
+  }
+}
