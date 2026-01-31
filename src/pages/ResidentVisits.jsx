@@ -1,7 +1,7 @@
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { VisitRegistrationPanel } from '../components';
-import './ResidentVisits.css';
+import './ResidentVisits.scss';
 
 const ResidentVisits = () => {
     const { user } = useAppContext();

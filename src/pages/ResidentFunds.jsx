@@ -1,5 +1,5 @@
 import { ProtectedLayout } from '../layout';
-import './ResidentFunds.css';
+import './ResidentFunds.scss';
 
 /**
  * Resident Funds Page Component

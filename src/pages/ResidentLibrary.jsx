@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentLibrary.css';
+import './ResidentLibrary.scss';
 
 /**
  * Resident Library Page Component

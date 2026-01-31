@@ -5,7 +5,7 @@ import { Button, Seo, Spinner } from '../components';
 import { ROUTES } from '../constants';
 import { api } from '../services';
 import { useAppContext } from '../context';
-import './Register.css';
+import './Register.scss';
 
 /**
  * Register Page Component

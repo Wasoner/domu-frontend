@@ -40,7 +40,6 @@ export const NAV_SECTIONS = [
     roles: ['resident', 'admin', 'concierge', 'staff'],
 
     items: [
-      { label: 'Panel principal', icon: '🏠', to: ROUTES.RESIDENT_PORTAL, roles: ['resident'], exact: true },
       { label: 'Visitas', icon: '🧑‍🤝‍🧑', to: ROUTES.RESIDENT_EVENTS, roles: ['resident', 'concierge', 'admin'], exact: true },
       { label: 'Incidentes', icon: '🚨', to: ROUTES.RESIDENT_INCIDENTS, roles: ['resident'], exact: true },
       { label: 'Mi perfil', icon: '🙍‍♂️', to: ROUTES.RESIDENT_PROFILE, roles: ['resident'], exact: true },
@@ -67,5 +66,4 @@ export const NAV_SECTIONS = [
   },
 
 ];
-
 

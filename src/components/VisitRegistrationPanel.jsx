@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { api } from '../services';
 import Button from './Button';
-import './VisitPanel.css';
+import './VisitPanel.scss';
 
 const SUPPORTED_ROLES = ['resident', 'concierge', 'admin'];
 const ROLE_LABELS = {

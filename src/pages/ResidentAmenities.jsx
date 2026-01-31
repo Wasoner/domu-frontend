@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
 import { api } from '../services';
-import './ResidentAmenities.css';
+import './ResidentAmenities.scss';
 
 const ResidentAmenities = () => {
   const { user } = useAppContext();

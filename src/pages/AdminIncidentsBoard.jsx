@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
 import { api } from '../services';
-import './AdminIncidentsBoard.css';
+import './AdminIncidentsBoard.scss';
 
 /**
  * Configuración de columnas del Kanban

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import AuthHeader from './AuthHeader';
 import Sidebar from './Sidebar';
-import './AuthLayout.css';
+import './AuthLayout.scss';
 
 const AuthLayout = ({ user, children, navSections, bodyActions }) => {
   return (

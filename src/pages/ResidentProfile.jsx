@@ -1,17 +1,14 @@
-import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
-import { ROUTES } from '../constants';
 import { api } from '../services';
-import './ResidentProfile.css';
+import './ResidentProfile.scss';
 
 /**
  * Resident Profile Page Component
  * Displays user profile information and allows editing
  */
 const ResidentProfile = () => {
-    const navigate = useNavigate();
     const { user, setUser } = useAppContext();
     const [activeTab, setActiveTab] = useState('overview');
     const [editData, setEditData] = useState({
@@ -34,6 +31,14 @@ const ResidentProfile = () => {
         ? `${user.firstName} ${user?.lastName || ''}`.trim()
         : user?.email || 'Usuario Domu'), [user]);
 
+    const initials = useMemo(() => {
+        const first = user?.firstName?.trim()?.[0];
+        const last = user?.lastName?.trim()?.[0];
+        if (first || last) return `${first || ''}${last || ''}`.toUpperCase();
+        if (user?.email) return user.email.trim()[0].toUpperCase();
+        return 'D';
+    }, [user]);
+
     const roleLabel = useMemo(() => {
         if (user?.userType === 'admin') return 'Administrador';
         if (user?.userType === 'concierge') return 'Conserje';
@@ -41,31 +46,6 @@ const ResidentProfile = () => {
     }, [user]);
 
     const unitLabel = user?.unitId ? `Unidad ${user.unitId}` : 'Sin unidad asignada';
-
-    // Determinar la ruta del panel principal según el tipo de usuario
-    const getMainPanelRoute = () => {
-        if (user?.userType === 'admin') {
-            return ROUTES.DASHBOARD;
-        }
-        return ROUTES.RESIDENT_PORTAL;
-    };
-
-    const handleGoBack = () => {
-        navigate(getMainPanelRoute());
-    };
-
-    const backButton = (
-        <button
-            className="resident-profile__back-button"
-            onClick={handleGoBack}
-            aria-label="Volver al panel principal"
-        >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Volver
-        </button>
-    );
 
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
@@ -104,10 +84,14 @@ const ResidentProfile = () => {
     };
 
     return (
-        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']} bodyActions={backButton}>
+        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
             <article className="resident-profile">
                 <header className="resident-profile__header">
-                    <h1>Mi Perfil</h1>
+                    <div>
+                        <p className="resident-profile__eyebrow">Cuenta y seguridad</p>
+                        <h1>Mi Perfil</h1>
+                        <p className="resident-profile__subtitle">Administra tus datos personales y credenciales.</p>
+                    </div>
                 </header>
 
                 {(error || message) && (
@@ -139,13 +123,18 @@ const ResidentProfile = () => {
                     </div>
 
                     {activeTab === 'overview' && (
-                        <div className="resident-profile__grid">
+                        <div className="resident-profile__grid resident-profile__grid--overview">
                             <article className="resident-profile__card resident-profile__card--summary">
                                 <div className="profile-summary__top">
-                                    <div>
-                                        <p className="profile-summary__eyebrow">Cuenta</p>
-                                        <h2>{displayName}</h2>
-                                        <p className="profile-summary__role">{roleLabel}</p>
+                                    <div className="profile-summary__identity">
+                                        <div className="profile-summary__avatar" aria-hidden="true">
+                                            {initials}
+                                        </div>
+                                        <div>
+                                            <p className="profile-summary__eyebrow">Cuenta</p>
+                                            <h2>{displayName}</h2>
+                                            <p className="profile-summary__role">{roleLabel}</p>
+                                        </div>
                                     </div>
                                     <div className="profile-summary__badge">{unitLabel}</div>
                                 </div>
@@ -164,11 +153,34 @@ const ResidentProfile = () => {
                                     </div>
                                 </div>
                             </article>
+
+                            <article className="resident-profile__card resident-profile__card--actions">
+                                <h2>Acciones rápidas</h2>
+                                <p className="resident-profile__hint">
+                                    Mantén tu información actualizada y protege tu cuenta.
+                                </p>
+                                <div className="resident-profile__action-buttons">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() => setActiveTab('edit')}
+                                    >
+                                        Editar datos
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-ghost"
+                                        onClick={() => setActiveTab('edit')}
+                                    >
+                                        Cambiar contraseña
+                                    </button>
+                                </div>
+                            </article>
                         </div>
                     )}
 
                     {activeTab === 'edit' && (
-                        <div className="resident-profile__grid">
+                        <div className="resident-profile__grid resident-profile__grid--edit">
                             <article className="resident-profile__card resident-profile__card--form">
                                 <h2>Editar información y seguridad</h2>
                                 <form className="resident-profile__form" onSubmit={handleProfileSubmit}>
@@ -265,4 +277,3 @@ const ResidentProfile = () => {
 };
 
 export default ResidentProfile;
-
