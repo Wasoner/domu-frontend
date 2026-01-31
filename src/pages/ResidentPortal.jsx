@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { ROUTES } from '../constants';
+import { api } from '../services';
 import './ResidentPortal.scss';
 
 // Datos de ejemplo para notificaciones
@@ -29,37 +31,6 @@ const mockNotifications = [
         message: 'Se realizará mantención preventiva de los ascensores el día 18 de diciembre.',
         date: '2024-12-05',
         priority: 'low'
-    },
-];
-
-const residentStats = [
-    {
-        id: 'balance',
-        label: 'Saldo pendiente',
-        value: '$78.500',
-        note: 'Vence 20 dic',
-        tone: 'warn',
-    },
-    {
-        id: 'reservations',
-        label: 'Reservas activas',
-        value: '2',
-        note: 'Próxima: Quincho',
-        tone: 'info',
-    },
-    {
-        id: 'incidents',
-        label: 'Incidentes abiertos',
-        value: '1',
-        note: 'En revisión',
-        tone: 'alert',
-    },
-    {
-        id: 'payments',
-        label: 'Pagos al día',
-        value: '3',
-        note: 'Último pago nov',
-        tone: 'ok',
     },
 ];
 
@@ -115,6 +86,7 @@ const upcomingItems = [
  */
 const ResidentPortal = () => {
     const { user } = useAppContext();
+    const [latestPeriod, setLatestPeriod] = useState(null);
 
     const displayName = user?.firstName
         ? `${user.firstName} ${user?.lastName || ''}`.trim()
@@ -133,6 +105,88 @@ const ResidentPortal = () => {
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
     };
+
+    const formatCurrency = (value) => {
+        const safe = Number(value);
+        if (!Number.isFinite(safe)) return '—';
+        return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 })
+            .format(safe);
+    };
+
+    const formatDueDate = (value) => {
+        if (!value) return null;
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+    };
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchLatestPeriod = async () => {
+            try {
+                const data = await api.finance.listMyPeriods();
+                const list = Array.isArray(data) ? data : [];
+                if (!isMounted) return;
+                setLatestPeriod(list.length > 0 ? list[0] : null);
+            } catch (error) {
+                if (isMounted) {
+                    setLatestPeriod(null);
+                }
+            }
+        };
+        fetchLatestPeriod();
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const dueLabel = formatDueDate(latestPeriod?.dueDate);
+    const status = latestPeriod?.status;
+    const statusNote = status === 'PAID'
+        ? 'Pagado'
+        : status === 'PARTIAL'
+            ? `Pago parcial${dueLabel ? ` • Vence ${dueLabel}` : ''}`
+            : dueLabel
+                ? `Vence ${dueLabel}`
+                : 'Sin fecha de vencimiento';
+    const balanceNote = latestPeriod
+        ? `Reparto equitativo • ${statusNote}`
+        : 'Sin periodos publicados';
+    const balanceTone = latestPeriod
+        ? (Number(latestPeriod?.pendingAmount) <= 0 ? 'ok' : 'warn')
+        : 'info';
+    const balanceValue = latestPeriod ? formatCurrency(latestPeriod?.totalAmount) : '—';
+
+    const residentStats = [
+        {
+            id: 'balance',
+            label: 'Cuota mensual',
+            value: balanceValue,
+            note: balanceNote,
+            tone: balanceTone,
+        },
+        {
+            id: 'reservations',
+            label: 'Reservas activas',
+            value: '2',
+            note: 'Próxima: Quincho',
+            tone: 'info',
+        },
+        {
+            id: 'incidents',
+            label: 'Incidentes abiertos',
+            value: '1',
+            note: 'En revisión',
+            tone: 'alert',
+        },
+        {
+            id: 'payments',
+            label: 'Pagos al día',
+            value: '3',
+            note: 'Último pago nov',
+            tone: 'ok',
+        },
+    ];
 
     return (
         <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>

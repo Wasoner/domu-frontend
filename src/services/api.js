@@ -152,6 +152,66 @@ const fetchWrapper = async (url, options = {}) => {
 };
 
 /**
+ * Fetch helper for binary responses (PDF, boletas).
+ */
+const fetchBlob = async (url, options = {}) => {
+  try {
+    const token = getAuthToken();
+    const headers = new Headers();
+    const isFormData = options.body instanceof FormData;
+
+    if (options.headers) {
+      Object.entries(options.headers).forEach(([key, value]) => {
+        headers.set(key, value);
+      });
+    }
+
+    if (options.body && !headers.has('Content-Type') && !headers.has('content-type') && !isFormData) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const selectedBuildingId = getSelectedBuildingId();
+    if (selectedBuildingId) {
+      headers.set('X-Building-Id', selectedBuildingId);
+    }
+
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      method: options.method || 'GET',
+      headers: headers,
+      body: options.body,
+      ...(options.credentials && { credentials: options.credentials }),
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch {
+        const text = await response.text();
+        if (text) {
+          errorMessage = text;
+        }
+      }
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="([^"]+)"/);
+    const fileName = match?.[1];
+    return { blob, fileName };
+  } catch (error) {
+    console.error('API Error (blob):', error);
+    throw error;
+  }
+};
+
+/**
  * API methods
  */
 export const api = {
@@ -361,6 +421,39 @@ export const api = {
 
   finance: {
     getMyCharges: async () => fetchWrapper('/finance/my-charges', { method: 'GET' }),
+    listPeriods: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.from) query.set('from', params.from);
+      if (params.to) query.set('to', params.to);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/finance/periods${suffix}`, { method: 'GET' });
+    },
+    createPeriod: async (data) => fetchWrapper('/finance/periods', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    addCharges: async (periodId, data) => fetchWrapper(`/finance/periods/${periodId}/charges`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    listMyPeriods: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.from) query.set('from', params.from);
+      if (params.to) query.set('to', params.to);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/finance/my-periods${suffix}`, { method: 'GET' });
+    },
+    getMyPeriodDetail: async (periodId) => fetchWrapper(`/finance/my-periods/${periodId}`, { method: 'GET' }),
+    downloadMyPeriodPdf: async (periodId) => fetchBlob(`/finance/my-periods/${periodId}/pdf`, { method: 'GET' }),
+    uploadChargeReceipt: async (chargeId, file) => {
+      const formData = new FormData();
+      formData.append('document', file);
+      return fetchWrapper(`/finance/charges/${chargeId}/receipt`, {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    downloadChargeReceipt: async (chargeId) => fetchBlob(`/finance/charges/${chargeId}/receipt`, { method: 'GET' }),
   },
 
   buildings: {
