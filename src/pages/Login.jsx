@@ -191,7 +191,7 @@ const Login = () => {
                             </section>
                         </div>
                     </div>
-                )}
+                </div>
             </MainContent>
             <Footer />
         </div>
