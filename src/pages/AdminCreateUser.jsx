@@ -111,16 +111,16 @@ const AdminCreateUser = () => {
         canonicalPath="/admin/create-user"
         noindex
       />
-      <section className="admin-create-user">
-        <header className="admin-create-user__header">
+      <section className="admin-create-user page-shell">
+        <header className="admin-create-user__header page-header">
           <div>
-            <p className="eyebrow">Usuarios</p>
-            <h1>Crear nuevo usuario</h1>
-            <p className="subtitle">Conserjes y funcionarios del condominio.</p>
+            <p className="eyebrow page-eyebrow">Usuarios</p>
+            <h1 className="page-title">Crear nuevo usuario</h1>
+            <p className="subtitle page-subtitle">Conserjes y funcionarios del condominio.</p>
           </div>
         </header>
 
-        <div className="admin-create-user__card">
+        <div className="admin-create-user__card page-card">
           <form className="admin-create-user__form" onSubmit={handleSubmit}>
             {error && <div className="alert alert--error">{error}</div>}
             {success && <div className="alert alert--success">{success}</div>}

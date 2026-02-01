@@ -121,8 +121,19 @@
 }
 
 .app-sidebar__icon {
-  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
   line-height: 1;
+  color: currentColor;
+}
+
+.app-sidebar__icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 .app-sidebar__link-label {
@@ -131,11 +142,8 @@
   max-width: 220px;
   overflow: hidden;
   white-space: nowrap;
+  font-size: 1rem;
   transition: opacity 0.15s ease 0.15s, max-width 0.25s ease 0.1s;
-}
-
-.app-sidebar__link span {
-  font-size: 1.1rem;
 }
 
 .app-sidebar__link:hover {

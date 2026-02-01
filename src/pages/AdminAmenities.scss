@@ -1,37 +1,13 @@
 .admin-amenities {
-  display: grid;
-  gap: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .admin-amenities__header {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  border: 1px solid var(--color-border-light);
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.admin-amenities__eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-gray);
-  font-size: 0.8rem;
-  margin: 0;
-}
-
-.admin-amenities__subtitle {
-  margin: 0.2rem 0 0;
-  color: var(--color-gray-dark);
 }
 
 .admin-amenities__actions {
-  display: flex;
-  gap: 0.5rem;
 }
 
 .admin-amenities__actions button {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services';
 import './AdminCommonExpenses.scss';
@@ -12,8 +12,10 @@ const emptyCharge = {
 };
 
 const AdminCommonExpenses = () => {
+  const [activeTab, setActiveTab] = useState('create');
   const [periods, setPeriods] = useState([]);
   const [loadingPeriods, setLoadingPeriods] = useState(false);
+  const [periodsLoaded, setPeriodsLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({
     period: '',
@@ -29,23 +31,48 @@ const AdminCommonExpenses = () => {
   const [receiptFile, setReceiptFile] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoadingPeriods(true);
-      setError(null);
-      try {
-        const [periodData] = await Promise.all([
-          api.finance.listPeriods(),
-        ]);
-        setPeriods(Array.isArray(periodData) ? periodData : []);
-      } catch (err) {
-        setError(err.message || 'No pudimos cargar los períodos de gastos comunes.');
-      } finally {
-        setLoadingPeriods(false);
-      }
-    };
-    loadData();
+  const tabs = [
+    {
+      id: 'create',
+      label: 'Crear período',
+      caption: 'Define el mes y prorratea cargos.',
+    },
+    {
+      id: 'append',
+      label: 'Agregar cargos',
+      caption: 'Añade cobros extraordinarios.',
+    },
+    {
+      id: 'receipt',
+      label: 'Subir boleta',
+      caption: 'Adjunta respaldo por cargo.',
+    },
+    {
+      id: 'periods',
+      label: 'Historial',
+      caption: 'Revisa períodos y totales.',
+    },
+  ];
+
+  const loadPeriods = useCallback(async () => {
+    setLoadingPeriods(true);
+    setError(null);
+    try {
+      const periodData = await api.finance.listPeriods();
+      setPeriods(Array.isArray(periodData) ? periodData : []);
+      setPeriodsLoaded(true);
+    } catch (err) {
+      setError(err.message || 'No pudimos cargar los períodos de gastos comunes.');
+    } finally {
+      setLoadingPeriods(false);
+    }
   }, []);
+
+  useEffect(() => {
+    if ((activeTab === 'append' || activeTab === 'periods') && !periodsLoaded) {
+      loadPeriods();
+    }
+  }, [activeTab, periodsLoaded, loadPeriods]);
 
   const periodOptions = useMemo(() => {
     return periods.map((p) => ({
@@ -100,6 +127,7 @@ const AdminCommonExpenses = () => {
     try {
       const data = await api.finance.listPeriods();
       setPeriods(Array.isArray(data) ? data : []);
+      setPeriodsLoaded(true);
     } catch (err) {
       console.warn(err);
     }
@@ -190,23 +218,27 @@ const AdminCommonExpenses = () => {
 
   return (
     <ProtectedLayout allowedRoles={['admin']}>
-      <section className="admin-ggcc">
-        <header className="admin-ggcc__header">
+      <section className="admin-ggcc page-shell">
+        <header className="admin-ggcc__header page-header">
           <div>
-            <p className="admin-ggcc__eyebrow">Centro financiero</p>
-            <h1>Gestión de gastos comunes</h1>
-            <p className="admin-ggcc__subtitle">
+            <p className="admin-ggcc__eyebrow page-eyebrow">Centro financiero</p>
+            <h1 className="page-title">Gestión de gastos comunes</h1>
+            <p className="admin-ggcc__subtitle page-subtitle">
               Registra periodos mensuales, sube cargos detallados y mantén un historial transparente para la comunidad.
             </p>
           </div>
           <div className="admin-ggcc__summary">
             <div>
               <span>Períodos activos</span>
-              <strong>{periods.length}</strong>
+              <strong>{periodsLoaded ? periods.length : '—'}</strong>
             </div>
             <div>
               <span>Última actualización</span>
-              <strong>{periods[0] ? `${String(periods[0].month).padStart(2, '0')}/${periods[0].year}` : '—'}</strong>
+              <strong>
+                {periodsLoaded && periods[0]
+                  ? `${String(periods[0].month).padStart(2, '0')}/${periods[0].year}`
+                  : '—'}
+              </strong>
             </div>
           </div>
         </header>
@@ -214,259 +246,314 @@ const AdminCommonExpenses = () => {
         {error && <div className="admin-ggcc__alert admin-ggcc__alert--error">{error}</div>}
         {feedback && <div className="admin-ggcc__alert admin-ggcc__alert--success">{feedback}</div>}
 
-        <div className="admin-ggcc__grid">
-          <article className="admin-ggcc__card">
-            <h2>Crear período</h2>
-            <form onSubmit={handleCreatePeriod} className="admin-ggcc__form">
-              <div className="admin-ggcc__form-row">
+        <div className="admin-ggcc__tabs" role="tablist" aria-label="Secciones de gastos comunes">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              id={`ggcc-tab-${tab.id}`}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`ggcc-panel-${tab.id}`}
+              className={`admin-ggcc__tab ${activeTab === tab.id ? 'admin-ggcc__tab--active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <span className="admin-ggcc__tab-title">{tab.label}</span>
+              <span className="admin-ggcc__tab-caption">{tab.caption}</span>
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'create' && (
+          <div
+            className="admin-ggcc__panel"
+            role="tabpanel"
+            id="ggcc-panel-create"
+            aria-labelledby="ggcc-tab-create"
+          >
+            <article className="admin-ggcc__card page-card">
+              <h2>Crear período</h2>
+              <form onSubmit={handleCreatePeriod} className="admin-ggcc__form">
+                <div className="admin-ggcc__form-row">
+                  <label>
+                    Período (mes)
+                    <input
+                      type="month"
+                      value={form.period}
+                      onChange={(e) => setForm((prev) => ({ ...prev, period: e.target.value }))}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Vencimiento
+                    <input
+                      type="date"
+                      value={form.dueDate}
+                      onChange={(e) => setForm((prev) => ({ ...prev, dueDate: e.target.value }))}
+                      required
+                    />
+                  </label>
+                </div>
+                <div className="admin-ggcc__form-row">
+                  <label>
+                    Fondo de reserva (CLP)
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.reserveAmount}
+                      onChange={(e) => setForm((prev) => ({ ...prev, reserveAmount: e.target.value }))}
+                      placeholder="0"
+                    />
+                  </label>
+                  <label>
+                    Nota / comentario
+                    <input
+                      type="text"
+                      value={form.note}
+                      onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))}
+                      placeholder="Ej: Ajuste por mantención preventiva"
+                    />
+                  </label>
+                </div>
+
+                <div className="admin-ggcc__charges">
+                  <div className="admin-ggcc__charges-header">
+                    <h3>Cargos del período</h3>
+                    <button type="button" className="admin-ggcc__ghost" onClick={() => handleAddChargeRow(setCharges)}>
+                      + Agregar cargo
+                    </button>
+                  </div>
+                  <p className="admin-ggcc__hint">
+                    Todos los cargos se prorratean entre las unidades. Usa la descripción para detallar intereses o cobros adicionales.
+                  </p>
+                  {charges.map((charge, index) => (
+                    <div key={`charge-${index}`} className="admin-ggcc__charge-row">
+                      <input
+                        type="text"
+                        placeholder="Descripción (ej: interés por mora)"
+                        value={charge.description}
+                        onChange={(e) => handleChargeChange(index, 'description', e.target.value, setCharges)}
+                        required
+                      />
+                      <input
+                        type="text"
+                        placeholder="Tipo (ej: Interés, Servicio)"
+                        value={charge.type}
+                        onChange={(e) => handleChargeChange(index, 'type', e.target.value, setCharges)}
+                        required
+                      />
+                      <input
+                        type="text"
+                        placeholder="Origen (opcional)"
+                        value={charge.origin}
+                        onChange={(e) => handleChargeChange(index, 'origin', e.target.value, setCharges)}
+                      />
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Monto"
+                        value={charge.amount}
+                        onChange={(e) => handleChargeChange(index, 'amount', e.target.value, setCharges)}
+                        required
+                      />
+                      <div className="admin-ggcc__badge">Prorrateo general</div>
+                      <input
+                        type="text"
+                        placeholder="Detalle adicional"
+                        value={charge.receiptText}
+                        onChange={(e) => handleChargeChange(index, 'receiptText', e.target.value, setCharges)}
+                      />
+                      {charges.length > 1 && (
+                        <button
+                          type="button"
+                          className="admin-ggcc__remove"
+                          onClick={() => handleRemoveChargeRow(index, setCharges)}
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <button type="submit" className="admin-ggcc__primary">Crear período</button>
+              </form>
+            </article>
+          </div>
+        )}
+
+        {activeTab === 'append' && (
+          <div
+            className="admin-ggcc__panel"
+            role="tabpanel"
+            id="ggcc-panel-append"
+            aria-labelledby="ggcc-tab-append"
+          >
+            <article className="admin-ggcc__card page-card">
+              <h2>Agregar cargos a un período</h2>
+              <form onSubmit={handleAppendCharges} className="admin-ggcc__form">
+                <div className="admin-ggcc__form-row">
+                  <label>
+                    Período
+                    <select
+                      value={appendTarget}
+                      onChange={(e) => setAppendTarget(e.target.value)}
+                      required
+                      disabled={loadingPeriods && !periodsLoaded}
+                    >
+                      <option value="">{loadingPeriods ? 'Cargando períodos...' : 'Selecciona'}</option>
+                      {periodOptions.map((period) => (
+                        <option key={period.id} value={period.id}>{period.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Nota / corrección
+                    <input
+                      type="text"
+                      value={appendNote}
+                      onChange={(e) => setAppendNote(e.target.value)}
+                      placeholder="Ej: Ajuste por gasto extraordinario"
+                    />
+                  </label>
+                </div>
+                <div className="admin-ggcc__charges">
+                  <div className="admin-ggcc__charges-header">
+                    <h3>Nuevos cargos</h3>
+                    <button type="button" className="admin-ggcc__ghost" onClick={() => handleAddChargeRow(setAppendCharges)}>
+                      + Agregar cargo
+                    </button>
+                  </div>
+                  <p className="admin-ggcc__hint">
+                    Los cargos se aplican a todas las unidades. Detalla aquí cualquier interés o cobro adicional.
+                  </p>
+                  {appendCharges.map((charge, index) => (
+                    <div key={`append-${index}`} className="admin-ggcc__charge-row">
+                      <input
+                        type="text"
+                        placeholder="Descripción (ej: interés por mora)"
+                        value={charge.description}
+                        onChange={(e) => handleChargeChange(index, 'description', e.target.value, setAppendCharges)}
+                        required
+                      />
+                      <input
+                        type="text"
+                        placeholder="Tipo (ej: Interés, Servicio)"
+                        value={charge.type}
+                        onChange={(e) => handleChargeChange(index, 'type', e.target.value, setAppendCharges)}
+                        required
+                      />
+                      <input
+                        type="text"
+                        placeholder="Origen (opcional)"
+                        value={charge.origin}
+                        onChange={(e) => handleChargeChange(index, 'origin', e.target.value, setAppendCharges)}
+                      />
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Monto"
+                        value={charge.amount}
+                        onChange={(e) => handleChargeChange(index, 'amount', e.target.value, setAppendCharges)}
+                        required
+                      />
+                      <div className="admin-ggcc__badge">Prorrateo general</div>
+                      <input
+                        type="text"
+                        placeholder="Detalle adicional"
+                        value={charge.receiptText}
+                        onChange={(e) => handleChargeChange(index, 'receiptText', e.target.value, setAppendCharges)}
+                      />
+                      {appendCharges.length > 1 && (
+                        <button
+                          type="button"
+                          className="admin-ggcc__remove"
+                          onClick={() => handleRemoveChargeRow(index, setAppendCharges)}
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <button type="submit" className="admin-ggcc__primary">Agregar cargos</button>
+              </form>
+            </article>
+          </div>
+        )}
+
+        {activeTab === 'receipt' && (
+          <div
+            className="admin-ggcc__panel"
+            role="tabpanel"
+            id="ggcc-panel-receipt"
+            aria-labelledby="ggcc-tab-receipt"
+          >
+            <article className="admin-ggcc__card admin-ggcc__card--secondary page-card">
+              <h2>Subir boleta</h2>
+              <p className="admin-ggcc__hint">
+                Sube la boleta asociada a un cargo específico (ID del cargo). El archivo se almacenará en Box.
+              </p>
+              <form onSubmit={handleUploadReceipt} className="admin-ggcc__form admin-ggcc__form--compact">
                 <label>
-                  Período (mes)
-                  <input
-                    type="month"
-                    value={form.period}
-                    onChange={(e) => setForm((prev) => ({ ...prev, period: e.target.value }))}
-                    required
-                  />
-                </label>
-                <label>
-                  Vencimiento
-                  <input
-                    type="date"
-                    value={form.dueDate}
-                    onChange={(e) => setForm((prev) => ({ ...prev, dueDate: e.target.value }))}
-                    required
-                  />
-                </label>
-              </div>
-              <div className="admin-ggcc__form-row">
-                <label>
-                  Fondo de reserva (CLP)
+                  ID del cargo
                   <input
                     type="number"
-                    min="0"
-                    value={form.reserveAmount}
-                    onChange={(e) => setForm((prev) => ({ ...prev, reserveAmount: e.target.value }))}
-                    placeholder="0"
+                    value={receiptChargeId}
+                    onChange={(e) => setReceiptChargeId(e.target.value)}
+                    placeholder="Ej: 1234"
+                    required
                   />
                 </label>
                 <label>
-                  Nota / comentario
+                  Archivo de boleta
                   <input
-                    type="text"
-                    value={form.note}
-                    onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))}
-                    placeholder="Ej: Ajuste por mantención preventiva"
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                    required
                   />
                 </label>
-              </div>
+                <button type="submit" className="admin-ggcc__primary">Subir boleta</button>
+              </form>
+            </article>
+          </div>
+        )}
 
-              <div className="admin-ggcc__charges">
-                <div className="admin-ggcc__charges-header">
-                  <h3>Cargos del período</h3>
-                  <button type="button" className="admin-ggcc__ghost" onClick={() => handleAddChargeRow(setCharges)}>
-                    + Agregar cargo
-                  </button>
+        {activeTab === 'periods' && (
+          <div
+            className="admin-ggcc__panel"
+            role="tabpanel"
+            id="ggcc-panel-periods"
+            aria-labelledby="ggcc-tab-periods"
+          >
+            <article className="admin-ggcc__card admin-ggcc__card--secondary page-card">
+              <h2>Períodos registrados</h2>
+              {loadingPeriods ? (
+                <p>Cargando periodos...</p>
+              ) : (
+                <div className="admin-ggcc__periods">
+                  {periodOptions.length === 0 && <p>No hay períodos registrados aún.</p>}
+                  {periodOptions.map((period) => (
+                    <div key={period.id} className="admin-ggcc__period">
+                      <div>
+                        <h4>{period.label}</h4>
+                        <span>{period.status}</span>
+                      </div>
+                      <div>
+                        <p>Total: {formatCurrency(period.total)}</p>
+                        <p>Reserva: {formatCurrency(period.reserve)}</p>
+                      </div>
+                      <div>
+                        <p>Correcciones: {period.corrections || 0}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="admin-ggcc__hint">
-                  Todos los cargos se prorratean entre las unidades. Usa la descripción para detallar intereses o cobros adicionales.
-                </p>
-                {charges.map((charge, index) => (
-                  <div key={`charge-${index}`} className="admin-ggcc__charge-row">
-                    <input
-                      type="text"
-                      placeholder="Descripción (ej: interés por mora)"
-                      value={charge.description}
-                      onChange={(e) => handleChargeChange(index, 'description', e.target.value, setCharges)}
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Tipo (ej: Interés, Servicio)"
-                      value={charge.type}
-                      onChange={(e) => handleChargeChange(index, 'type', e.target.value, setCharges)}
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Origen (opcional)"
-                      value={charge.origin}
-                      onChange={(e) => handleChargeChange(index, 'origin', e.target.value, setCharges)}
-                    />
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Monto"
-                      value={charge.amount}
-                      onChange={(e) => handleChargeChange(index, 'amount', e.target.value, setCharges)}
-                      required
-                    />
-                    <div className="admin-ggcc__badge">Prorrateo general</div>
-                    <input
-                      type="text"
-                      placeholder="Detalle adicional"
-                      value={charge.receiptText}
-                      onChange={(e) => handleChargeChange(index, 'receiptText', e.target.value, setCharges)}
-                    />
-                    {charges.length > 1 && (
-                      <button
-                        type="button"
-                        className="admin-ggcc__remove"
-                        onClick={() => handleRemoveChargeRow(index, setCharges)}
-                      >
-                        Quitar
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <button type="submit" className="admin-ggcc__primary">Crear período</button>
-            </form>
-          </article>
-
-          <article className="admin-ggcc__card admin-ggcc__card--secondary">
-            <h2>Períodos registrados</h2>
-            {loadingPeriods ? (
-              <p>Cargando periodos...</p>
-            ) : (
-              <div className="admin-ggcc__periods">
-                {periodOptions.length === 0 && <p>No hay períodos registrados aún.</p>}
-                {periodOptions.map((period) => (
-                  <div key={period.id} className="admin-ggcc__period">
-                    <div>
-                      <h4>{period.label}</h4>
-                      <span>{period.status}</span>
-                    </div>
-                    <div>
-                      <p>Total: {formatCurrency(period.total)}</p>
-                      <p>Reserva: {formatCurrency(period.reserve)}</p>
-                    </div>
-                    <div>
-                      <p>Correcciones: {period.corrections || 0}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </article>
-        </div>
-
-        <div className="admin-ggcc__grid admin-ggcc__grid--compact">
-          <article className="admin-ggcc__card">
-            <h2>Agregar cargos a un período</h2>
-            <form onSubmit={handleAppendCharges} className="admin-ggcc__form">
-              <div className="admin-ggcc__form-row">
-                <label>
-                  Período
-                  <select value={appendTarget} onChange={(e) => setAppendTarget(e.target.value)} required>
-                    <option value="">Selecciona</option>
-                    {periodOptions.map((period) => (
-                      <option key={period.id} value={period.id}>{period.label}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Nota / corrección
-                  <input
-                    type="text"
-                    value={appendNote}
-                    onChange={(e) => setAppendNote(e.target.value)}
-                    placeholder="Ej: Ajuste por gasto extraordinario"
-                  />
-                </label>
-              </div>
-              <div className="admin-ggcc__charges">
-                <div className="admin-ggcc__charges-header">
-                  <h3>Nuevos cargos</h3>
-                  <button type="button" className="admin-ggcc__ghost" onClick={() => handleAddChargeRow(setAppendCharges)}>
-                    + Agregar cargo
-                  </button>
-                </div>
-                <p className="admin-ggcc__hint">
-                  Los cargos se aplican a todas las unidades. Detalla aquí cualquier interés o cobro adicional.
-                </p>
-                {appendCharges.map((charge, index) => (
-                  <div key={`append-${index}`} className="admin-ggcc__charge-row">
-                    <input
-                      type="text"
-                      placeholder="Descripción (ej: interés por mora)"
-                      value={charge.description}
-                      onChange={(e) => handleChargeChange(index, 'description', e.target.value, setAppendCharges)}
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Tipo (ej: Interés, Servicio)"
-                      value={charge.type}
-                      onChange={(e) => handleChargeChange(index, 'type', e.target.value, setAppendCharges)}
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Origen (opcional)"
-                      value={charge.origin}
-                      onChange={(e) => handleChargeChange(index, 'origin', e.target.value, setAppendCharges)}
-                    />
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Monto"
-                      value={charge.amount}
-                      onChange={(e) => handleChargeChange(index, 'amount', e.target.value, setAppendCharges)}
-                      required
-                    />
-                    <div className="admin-ggcc__badge">Prorrateo general</div>
-                    <input
-                      type="text"
-                      placeholder="Detalle adicional"
-                      value={charge.receiptText}
-                      onChange={(e) => handleChargeChange(index, 'receiptText', e.target.value, setAppendCharges)}
-                    />
-                    {appendCharges.length > 1 && (
-                      <button
-                        type="button"
-                        className="admin-ggcc__remove"
-                        onClick={() => handleRemoveChargeRow(index, setAppendCharges)}
-                      >
-                        Quitar
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <button type="submit" className="admin-ggcc__primary">Agregar cargos</button>
-            </form>
-          </article>
-
-          <article className="admin-ggcc__card admin-ggcc__card--secondary">
-            <h2>Subir boleta</h2>
-            <p className="admin-ggcc__hint">
-              Sube la boleta asociada a un cargo específico (ID del cargo). El archivo se almacenará en Box.
-            </p>
-            <form onSubmit={handleUploadReceipt} className="admin-ggcc__form admin-ggcc__form--compact">
-              <label>
-                ID del cargo
-                <input
-                  type="number"
-                  value={receiptChargeId}
-                  onChange={(e) => setReceiptChargeId(e.target.value)}
-                  placeholder="Ej: 1234"
-                  required
-                />
-              </label>
-              <label>
-                Archivo de boleta
-                <input
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg"
-                  onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-                  required
-                />
-              </label>
-              <button type="submit" className="admin-ggcc__primary">Subir boleta</button>
-            </form>
-          </article>
-        </div>
+              )}
+            </article>
+          </div>
+        )}
       </section>
     </ProtectedLayout>
   );

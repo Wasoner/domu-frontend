@@ -25,10 +25,90 @@
   margin-bottom: 1.5rem;
 }
 
-.resident-cartola__loading {
-  text-align: center;
-  padding: 3rem;
-  color: var(--color-gray-dark);
+.resident-cartola__summary--skeleton {
+  margin-bottom: 2.5rem;
+}
+
+.resident-cartola__card--skeleton {
+  border-color: var(--color-border-light);
+  background: var(--color-bg-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.resident-cartola__skeleton-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.9) 25%, rgba(248, 250, 252, 0.95) 50%, rgba(226, 232, 240, 0.9) 75%);
+  background-size: 200% 100%;
+  animation: cartola-shimmer 1.6s infinite;
+  flex-shrink: 0;
+}
+
+.resident-cartola__skeleton-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+}
+
+.resident-cartola__skeleton-block {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.9) 25%, rgba(248, 250, 252, 0.95) 50%, rgba(226, 232, 240, 0.9) 75%);
+  background-size: 200% 100%;
+  animation: cartola-shimmer 1.6s infinite;
+}
+
+.resident-cartola__skeleton-block--xs {
+  width: 70px;
+}
+
+.resident-cartola__skeleton-block--sm {
+  width: 110px;
+}
+
+.resident-cartola__skeleton-block--md {
+  width: 160px;
+}
+
+.resident-cartola__skeleton-block--lg {
+  width: 220px;
+  height: 14px;
+}
+
+.resident-cartola__skeleton-title {
+  margin-bottom: 1rem;
+}
+
+.resident-cartola__table-skeleton {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.resident-cartola__table-skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+}
+
+.resident-cartola__table-skeleton-row--header {
+  background: var(--color-bg-secondary);
+}
+
+@keyframes cartola-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .resident-cartola__summary {
@@ -168,5 +248,13 @@
   .resident-cartola__table {
     display: block;
     overflow-x: auto;
+  }
+
+  .resident-cartola__table-skeleton {
+    overflow-x: auto;
+  }
+
+  .resident-cartola__table-skeleton-row {
+    min-width: 720px;
   }
 }

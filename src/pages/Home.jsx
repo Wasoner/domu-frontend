@@ -331,6 +331,14 @@ const Home = () => {
     }
   }, [communityForm, documentName]);
 
+  if (isAuthenticated) {
+    const isAdmin = user?.roleId === 1 || user?.userType === 'admin';
+    if (isAdmin) {
+      return <Dashboard />;
+    }
+    return <ResidentHome user={user} />;
+  }
+
   if (isLoading) {
     return (
       <div className="home-page">
@@ -343,14 +351,6 @@ const Home = () => {
         <Footer />
       </div>
     );
-  }
-
-  if (isAuthenticated) {
-    const isAdmin = user?.roleId === 1 || user?.userType === 'admin';
-    if (isAdmin) {
-      return <Dashboard />;
-    }
-    return <ResidentHome user={user} />;
   }
 
   const resetCommunityState = () => {
