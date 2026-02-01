@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { Buffer } from 'node:buffer'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,8 +15,8 @@ export default defineConfig({
         // Reescribir la ruta para que /api vaya directamente al backend
         rewrite: (path) => path,
         // Configurar para preservar headers y body correctamente
-        configure: (proxy, _options) => {
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
             // Asegurar que Content-Type se preserve correctamente
             if (req.headers['content-type']) {
               proxyReq.setHeader('Content-Type', req.headers['content-type']);

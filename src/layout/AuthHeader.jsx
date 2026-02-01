@@ -2,48 +2,84 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import logo from '../assets/LogotipoDOMU.svg';
+import { Icon } from '../components';
 import { useAppContext } from '../context';
 import { ROUTES } from '../constants';
+import { getNotificationVisual } from '../constants/notifications';
+import { useNotifications } from '../hooks/useNotifications';
 import './AuthHeader.scss';
 
 const AuthHeader = ({ user }) => {
   const navigate = useNavigate();
-  const { logout, selectBuilding } = useAppContext();
+  const { selectBuilding } = useAppContext();
   const [showBuildingDropdown, setShowBuildingDropdown] = useState(false);
   const [showHelpDropdown, setShowHelpDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const buildingRef = useRef(null);
   const helpRef = useRef(null);
   const notificationsRef = useRef(null);
-  const profileRef = useRef(null);
 
-  const displayName = user?.firstName
-    ? `${user.firstName} ${user?.lastName || ''}`.trim()
-    : user?.email || 'Usuario Domu';
   const buildingOptions = user?.buildings || [];
   const activeBuildingId = user?.selectedBuildingId || user?.activeBuildingId;
   const selectedBuilding = buildingOptions.find((b) => b.id === activeBuildingId) || buildingOptions[0];
   const buildingName = selectedBuilding?.name || 'Sin edificio';
-  const unitLabel = user?.unitId ? user.unitId : selectedBuilding?.id || '—';
-  const roleLabel = user?.userType === 'admin'
-    ? 'Administrador'
-    : user?.userType === 'concierge'
-      ? 'Conserje'
-      : 'Residente';
-  const userEmail = user?.email || '';
 
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.LOGIN);
-    setShowProfileDropdown(false);
+  const {
+    notificationsPreview,
+    unreadCount,
+    markRead,
+    hideNotifications,
+  } = useNotifications(user);
+
+  const formatRelativeTime = (dateString) => {
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return '';
+    const diffMs = Date.now() - date.getTime();
+    const diffMinutes = Math.max(1, Math.round(diffMs / (1000 * 60)));
+    if (diffMinutes < 60) return `Hace ${diffMinutes} min`;
+    const diffHours = Math.round(diffMinutes / 60);
+    if (diffHours < 24) return `Hace ${diffHours} h`;
+    const diffDays = Math.round(diffHours / 24);
+    if (diffDays === 1) return 'Ayer';
+    if (diffDays < 7) return `Hace ${diffDays} dias`;
+    return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
   };
 
-  const handleProfileClick = () => {
-    navigate(ROUTES.RESIDENT_PROFILE);
-    setShowProfileDropdown(false);
+  const getNotificationDetail = (notification) => {
+    return notification.detail || notification.message || '';
   };
+
+  const getNotificationTime = (notification) => {
+    return notification.timeLabel || formatRelativeTime(notification.date);
+  };
+
+  const handleNotificationClick = (notification) => {
+    setShowNotificationsDropdown(false);
+    markRead([notification.id]);
+    if (notification.to) {
+      navigate(notification.to);
+    }
+  };
+
+  const handleViewAllNotifications = () => {
+    setShowNotificationsDropdown(false);
+    navigate(ROUTES.RESIDENT_PUBLICATIONS);
+  };
+
+  const handleClearVisible = () => {
+    hideNotifications(notificationsPreview.map((item) => item.id));
+  };
+
+  useEffect(() => {
+    if (!showNotificationsDropdown) return;
+    const unreadIds = notificationsPreview
+      .filter((item) => item.isUnread)
+      .map((item) => item.id);
+    if (unreadIds.length > 0) {
+      markRead(unreadIds);
+    }
+  }, [showNotificationsDropdown, notificationsPreview, markRead]);
 
   // Navegar al panel principal según el tipo de usuario
   const handleLogoClick = () => {
@@ -65,9 +101,6 @@ const AuthHeader = ({ user }) => {
       }
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
         setShowNotificationsDropdown(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setShowProfileDropdown(false);
       }
     };
 
@@ -211,51 +244,77 @@ const AuthHeader = ({ user }) => {
             <path d="M10 3C7.23858 3 5 5.23858 5 8V11.5858C5 12.1162 4.78929 12.625 4.41421 13L3 14.4142V15H17V14.4142L15.5858 13C15.2107 12.625 15 12.1162 15 11.5858V8C15 5.23858 12.7614 3 10 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M7 15V16C7 17.6569 8.34315 19 10 19C11.6569 19 13 17.6569 13 16V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="auth-header__badge">9+</span>
-          {showNotificationsDropdown && (
-            <div className="auth-header__dropdown auth-header__dropdown--right">
-              <div className="auth-header__dropdown-header">Notificaciones</div>
-              <div className="auth-header__dropdown-item">Nueva visita registrada</div>
-              <div className="auth-header__dropdown-item">Pago recibido</div>
-              <div className="auth-header__dropdown-item">Mensaje del administrador</div>
-              <div className="auth-header__dropdown-footer">Ver todas</div>
-            </div>
+          {unreadCount > 0 && (
+            <span className="auth-header__badge">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
           )}
-        </div>
-
-        <div
-          className="auth-header__icon-button"
-          ref={profileRef}
-          onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-          aria-label="Perfil"
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M5 17C5 14.2386 7.23858 12 10 12C12.7614 12 15 14.2386 15 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          {showProfileDropdown && (
-            <div className="auth-header__dropdown auth-header__dropdown--right">
+          {showNotificationsDropdown && (
+            <div className="auth-header__dropdown auth-header__dropdown--right auth-header__dropdown--notifications">
               <div className="auth-header__dropdown-header">
-                <div className="auth-header__profile-info">
-                  <div className="auth-header__profile-name">{displayName}</div>
-                  <div className="auth-header__profile-role">{roleLabel}</div>
-                  {userEmail && (
-                    <div className="auth-header__profile-email">{userEmail}</div>
-                  )}
+                <span>Notificaciones</span>
+                <div className="auth-header__dropdown-actions">
+                  <button
+                    type="button"
+                    className="auth-header__dropdown-action auth-header__dropdown-action--muted"
+                    onClick={handleClearVisible}
+                    disabled={notificationsPreview.length === 0}
+                  >
+                    Limpiar visibles
+                  </button>
+                  <button
+                    type="button"
+                    className="auth-header__dropdown-action"
+                    onClick={handleViewAllNotifications}
+                  >
+                    Ver todas
+                  </button>
                 </div>
               </div>
-              <div
-                className="auth-header__dropdown-item"
-                onClick={handleProfileClick}
-              >
-                Mi perfil
+              <div className="auth-header__notifications-head" aria-hidden="true">
+                <span>Tipo</span>
+                <span>Detalle</span>
+                <span>Fecha</span>
               </div>
-              <div className="auth-header__dropdown-item">Configuración</div>
-              <div
-                className="auth-header__dropdown-item auth-header__dropdown-item--danger"
-                onClick={handleLogout}
-              >
-                Cerrar sesión
+              <div className="auth-header__notifications-list">
+                {notificationsPreview.length > 0 ? (
+                  notificationsPreview.map((notification) => {
+                    const visual = getNotificationVisual(notification);
+                    const detail = getNotificationDetail(notification);
+                    const timeLabel = getNotificationTime(notification);
+                    return (
+                      <button
+                        key={notification.id}
+                        type="button"
+                        className={`auth-header__notification ${notification.isUnread ? 'is-new' : 'is-read'}`}
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="auth-header__notification-type">
+                          <span
+                            className="auth-header__notification-icon"
+                            style={{ '--notif-color': visual.color, '--notif-bg': visual.bg }}
+                            aria-hidden="true"
+                          >
+                            <Icon name={visual.icon} size={16} />
+                          </span>
+                          <span className="auth-header__notification-tag">{visual.tag}</span>
+                        </div>
+                        <div className="auth-header__notification-content">
+                          <div className="auth-header__notification-title-row">
+                            <span className="auth-header__notification-title">{notification.title}</span>
+                            {notification.isUnread && <span className="auth-header__notification-dot" aria-hidden="true" />}
+                          </div>
+                          <span className="auth-header__notification-detail">{detail}</span>
+                        </div>
+                        <span className="auth-header__notification-time">{timeLabel}</span>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="auth-header__notifications-empty">
+                    No hay notificaciones nuevas
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -280,6 +339,3 @@ AuthHeader.defaultProps = {
 };
 
 export default AuthHeader;
-
-
-

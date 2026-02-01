@@ -8,9 +8,11 @@ import {
   Dashboard,
   AdminCreateUser,
   AdminIncidentsBoard,
+  AdminIncidentStats,
   AdminResidents,
   AdminHousingUnits,
   AdminCommonExpenses,
+  UserConfirmation,
   ResidentPortal,
   ResidentVisits,
   ResidentProfile,
@@ -24,6 +26,8 @@ import {
   ResidentExpenses,
   ResidentFunds,
   ResidentLibrary,
+  ResidentMarketplace,
+  ChatHub,
   Votaciones,
   UserTypeConserjeria,
   UserTypeAdministrador,
@@ -44,6 +48,7 @@ function App() {
           <Route path={ROUTES.ABOUT} element={<About />} />
           <Route path={ROUTES.LOGIN} element={<Login />} />
           <Route path={ROUTES.REGISTER} element={<Register />} />
+          <Route path={ROUTES.CONFIRM_USER} element={<UserConfirmation />} />
           <Route path={ROUTES.ADMIN_INVITE} element={<AdminInviteRegister />} />
 
           {/* Soluciones - Landing pages por tipo de usuario */}
@@ -57,6 +62,7 @@ function App() {
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.ADMIN_CREATE_USER} element={<AdminCreateUser />} />
           <Route path={ROUTES.ADMIN_INCIDENTS} element={<AdminIncidentsBoard />} />
+          <Route path={ROUTES.ADMIN_INCIDENT_STATS} element={<AdminIncidentStats />} />
           <Route path={ROUTES.ADMIN_RESIDENTS} element={<AdminResidents />} />
           <Route path={ROUTES.ADMIN_HOUSING_UNITS} element={<AdminHousingUnits />} />
           <Route path={ROUTES.COMMON_CHARGES} element={<AdminCommonExpenses />} />
@@ -80,6 +86,8 @@ function App() {
           <Route path={ROUTES.RESIDENT_EXPENSES} element={<ResidentExpenses />} />
           <Route path={ROUTES.RESIDENT_FUNDS} element={<ResidentFunds />} />
           <Route path={ROUTES.RESIDENT_LIBRARY} element={<ResidentLibrary />} />
+          <Route path={ROUTES.RESIDENT_MARKETPLACE} element={<ResidentMarketplace />} />
+          <Route path={ROUTES.RESIDENT_CHAT} element={<ChatHub />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>

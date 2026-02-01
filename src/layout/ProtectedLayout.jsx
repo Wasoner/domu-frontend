@@ -10,7 +10,16 @@ const filterSectionsByRole = (sections, role) => {
   return sections
     .filter((section) => !section.roles || section.roles.includes(role))
     .map((section) => {
-      const items = (section.items || []).filter((item) => !item.roles || item.roles.includes(role));
+      const items = (section.items || [])
+        .filter((item) => !item.roles || item.roles.includes(role))
+        .map((item) => {
+          if (item.subItems) {
+            const subItems = item.subItems.filter((sub) => !sub.roles || sub.roles.includes(role));
+            return { ...item, subItems };
+          }
+          return item;
+        })
+        .filter((item) => (item.subItems && item.subItems.length > 0) || item.to);
       return { ...section, items };
     })
     .filter((section) => section.items && section.items.length > 0);

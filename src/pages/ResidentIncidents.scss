@@ -328,6 +328,21 @@
   border-left: 4px solid var(--category-color, var(--color-turquoise));
   transition: background var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-fast);
   cursor: pointer;
+
+  &--skeleton {
+    pointer-events: none;
+    background: var(--color-bg-secondary);
+    border-style: dashed;
+  }
+}
+
+.dashboard__skeleton-block {
+  display: block;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f1f3f5 25%, #e7eaee 45%, #f1f3f5 65%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
 }
 
 .resident-incidents__incident-item:hover {
@@ -668,6 +683,16 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @keyframes incidentsFadeIn {

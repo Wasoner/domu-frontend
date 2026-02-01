@@ -7,24 +7,30 @@ const ResidentChargesDetail = () => {
   const [periods, setPeriods] = useState([]);
   const [selectedPeriodId, setSelectedPeriodId] = useState('');
   const [detail, setDetail] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingPeriods, setLoadingPeriods] = useState(true);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPeriods = async () => {
-      setLoading(true);
+      setLoadingPeriods(true);
+      setLoadingDetail(false);
       setError(null);
       try {
         const data = await api.finance.listMyPeriods();
         const list = Array.isArray(data) ? data : [];
         setPeriods(list);
         if (list.length > 0) {
+          setLoadingDetail(true);
           setSelectedPeriodId(String(list[0].periodId));
+        } else {
+          setSelectedPeriodId('');
+          setDetail(null);
         }
       } catch (err) {
         setError(err.message || 'No pudimos cargar los periodos.');
       } finally {
-        setLoading(false);
+        setLoadingPeriods(false);
       }
     };
     fetchPeriods();
@@ -32,8 +38,11 @@ const ResidentChargesDetail = () => {
 
   useEffect(() => {
     const fetchDetail = async () => {
-      if (!selectedPeriodId) return;
-      setLoading(true);
+      if (!selectedPeriodId) {
+        setLoadingDetail(false);
+        return;
+      }
+      setLoadingDetail(true);
       setError(null);
       try {
         const data = await api.finance.getMyPeriodDetail(selectedPeriodId);
@@ -41,7 +50,7 @@ const ResidentChargesDetail = () => {
       } catch (err) {
         setError(err.message || 'No pudimos cargar el detalle del período.');
       } finally {
-        setLoading(false);
+        setLoadingDetail(false);
       }
     };
     fetchDetail();
@@ -90,6 +99,9 @@ const ResidentChargesDetail = () => {
   };
 
   const selectedPeriodLabel = detail ? `${String(detail.month).padStart(2, '0')}/${detail.year}` : '';
+
+  const isLoading = loadingPeriods || loadingDetail;
+  const hasPeriods = periods.length > 0;
 
   return (
     <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
@@ -140,7 +152,7 @@ const ResidentChargesDetail = () => {
           )}
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="resident-charges-detail__skeleton" aria-hidden="true">
             <div className="resident-charges-detail__summary resident-charges-detail__summary--skeleton">
               {Array.from({ length: 4 }, (_, index) => (
@@ -253,10 +265,15 @@ const ResidentChargesDetail = () => {
               )}
             </section>
           </div>
-        ) : (
+        ) : hasPeriods ? (
           <div className="resident-charges-detail__empty">
             <span className="resident-charges-detail__empty-icon">📊</span>
             <p>Selecciona un período para ver el detalle</p>
+          </div>
+        ) : (
+          <div className="resident-charges-detail__empty">
+            <span className="resident-charges-detail__empty-icon">📊</span>
+            <p>Aún no hay gastos comunes publicados</p>
           </div>
         )}
       </article>

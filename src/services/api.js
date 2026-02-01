@@ -546,6 +546,10 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ status }),
     }),
+    assign: async (incidentId, assignedToUserId) => fetchWrapper(`/incidents/${incidentId}/assign`, {
+      method: 'PATCH',
+      body: JSON.stringify({ assignedToUserId }),
+    }),
   },
 
   adminInvites: {
@@ -771,22 +775,50 @@ export const api = {
     },
     delete: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'DELETE' }),
     linkResident: async (unitId, userId) => {
-      try {
-        const response = await fetchWrapper(`/admin/housing-units/${unitId}/residents`, {
-          method: 'POST',
-          body: JSON.stringify({ userId: Number(userId) }),
-        });
-        // 204 No Content es una respuesta exitosa
-        return response;
-      } catch (error) {
-        // Re-lanzar el error para que el componente pueda manejarlo
-        throw error;
-      }
+      const response = await fetchWrapper(`/admin/housing-units/${unitId}/residents`, {
+        method: 'POST',
+        body: JSON.stringify({ userId: Number(userId) }),
+      });
+      // 204 No Content es una respuesta exitosa
+      return response;
     },
     unlinkResident: async (unitId, userId) => {
       return fetchWrapper(`/admin/housing-units/${unitId}/residents/${userId}`, {
         method: 'DELETE',
       });
+    },
+  },
+
+  market: {
+    listItems: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.categoryId) query.set('categoryId', params.categoryId);
+      if (params.status) query.set('status', params.status);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/market/items${suffix}`, { method: 'GET' });
+    },
+    createItem: async (data) => {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+      return fetchWrapper('/market/items', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+  },
+
+  chat: {
+    listRooms: async () => fetchWrapper('/chat/rooms', { method: 'GET' }),
+    getMessages: async (roomId) => fetchWrapper(`/chat/rooms/${roomId}/messages`, { method: 'GET' }),
+    startConversation: async (sellerId, itemId) => {
+      const params = new URLSearchParams();
+      params.set('sellerId', sellerId);
+      if (itemId) params.set('itemId', itemId);
+      return fetchWrapper(`/chat/rooms?${params.toString()}`, { method: 'POST' });
     },
   },
 };

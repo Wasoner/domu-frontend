@@ -1,11 +1,84 @@
-import { useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../components';
+import { ROUTES } from '../constants';
+import { useAppContext } from '../context';
 import './Sidebar.scss';
 
-const Sidebar = ({ navSections }) => {
+const Sidebar = ({ navSections, user }) => {
+  const navigate = useNavigate();
+  const { logout } = useAppContext();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const safeNavSections = Array.isArray(navSections) ? navSections : [];
+
+  const [expandedItems, setExpandedItems] = useState(() => {
+    const initial = {};
+    safeNavSections.forEach((section) => {
+      section.items.forEach((item) => {
+        if (item.subItems) {
+          const hasActiveChild = item.subItems.some((sub) => window.location.pathname === sub.to);
+          if (hasActiveChild) {
+            initial[item.label] = true;
+          }
+        }
+      });
+    });
+    return initial;
+  });
+
+  const displayName = useMemo(() => (
+    user?.firstName
+      ? `${user.firstName} ${user?.lastName || ''}`.trim()
+      : user?.email || 'Mi perfil'
+  ), [user]);
+
+  const initials = useMemo(() => {
+    const first = user?.firstName?.trim()?.[0];
+    const last = user?.lastName?.trim()?.[0];
+    if (first || last) return `${first || ''}${last || ''}`.toUpperCase();
+    if (user?.email) return user.email.trim()[0].toUpperCase();
+    return 'D';
+  }, [user]);
+
+  const avatarUrl = user?.imageUrl || '';
+
+  const handleLogout = () => {
+    logout();
+    navigate(ROUTES.LOGIN);
+  };
+
+  // Auto-expand sections that contain the active route if they aren't already
+  useEffect(() => {
+    const newExpanded = { ...expandedItems };
+    let changed = false;
+
+    safeNavSections.forEach((section) => {
+      section.items.forEach((item) => {
+        if (item.subItems) {
+          const hasActiveChild = item.subItems.some((sub) => location.pathname === sub.to);
+          if (hasActiveChild && !expandedItems[item.label]) {
+            newExpanded[item.label] = true;
+            changed = true;
+          }
+        }
+      });
+    });
+
+    if (changed) {
+      setExpandedItems(newExpanded);
+    }
+  }, [location.pathname, safeNavSections, expandedItems]);
+
+  const toggleExpand = (e, label) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedItems((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
 
   return (
     <aside
@@ -28,51 +101,114 @@ const Sidebar = ({ navSections }) => {
         </button>
       </div>
       <div className="app-sidebar__inner">
-        {navSections.map((section) => (
+        {safeNavSections.map((section) => (
           <div key={section.title} className="app-sidebar__section">
             <p className="app-sidebar__section-title">{section.title}</p>
             <nav>
               <ul className="app-sidebar__list">
-                {section.items.map((item) => (
-                  <li key={item.label} className="app-sidebar__item">
-                    {item.to ? (
-                      <NavLink
-                        to={item.to}
-                        end={item.exact !== undefined ? item.exact : true}
-                        title={item.label}
-                        className={({ isActive }) =>
-                          `app-sidebar__link ${isActive ? 'is-active' : ''}`
-                        }
-                      >
-                        <span aria-hidden="true" className="app-sidebar__icon">
-                          {item.icon && <Icon name={item.icon} size={18} />}
-                        </span>
-                        <span className="app-sidebar__link-label">{item.label}</span>
-                      </NavLink>
-                    ) : (
-                      <button
-                        type="button"
-                        title={item.label}
-                        className="app-sidebar__link app-sidebar__link--static"
-                      >
-                        <span aria-hidden="true" className="app-sidebar__icon">
-                          {item.icon && <Icon name={item.icon} size={18} />}
-                        </span>
-                        <span className="app-sidebar__link-label">{item.label}</span>
-                      </button>
-                    )}
-                  </li>
-                ))}
+                {section.items.map((item) => {
+                  const hasSubItems = item.subItems && item.subItems.length > 0;
+                  const isExpanded = expandedItems[item.label];
+                  const isAnySubActive = hasSubItems && item.subItems.some(sub => location.pathname === sub.to);
+
+                  return (
+                    <li key={item.label} className={`app-sidebar__item ${hasSubItems ? 'has-subitems' : ''}`}>
+                      {item.to ? (
+                        <NavLink
+                          to={item.to}
+                          end={item.exact !== undefined ? item.exact : true}
+                          title={item.label}
+                          className={({ isActive }) =>
+                            `app-sidebar__link ${isActive ? 'is-active' : ''}`
+                          }
+                        >
+                          <span aria-hidden="true" className="app-sidebar__icon">
+                            {item.icon && <Icon name={item.icon} size={18} />}
+                          </span>
+                          <span className="app-sidebar__link-label">{item.label}</span>
+                        </NavLink>
+                      ) : (
+                        <button
+                          type="button"
+                          title={item.label}
+                          className={`app-sidebar__link ${hasSubItems ? 'app-sidebar__link--collapsible' : 'app-sidebar__link--static'} ${isExpanded ? 'is-expanded' : ''} ${isAnySubActive ? 'is-child-active' : ''}`}
+                          onClick={hasSubItems ? (e) => toggleExpand(e, item.label) : undefined}
+                        >
+                          <span aria-hidden="true" className="app-sidebar__icon">
+                            {item.icon && <Icon name={item.icon} size={18} />}
+                          </span>
+                          <span className="app-sidebar__link-label">{item.label}</span>
+                          {hasSubItems && !isCollapsed && (
+                            <span className="app-sidebar__chevron">
+                              <Icon name="chevronDown" size={14} />
+                            </span>
+                          )}
+                        </button>
+                      )}
+
+                      {hasSubItems && isExpanded && !isCollapsed && (
+                        <ul className="app-sidebar__sublist">
+                          {item.subItems.map((subItem) => (
+                            <li key={subItem.label} className="app-sidebar__subitem">
+                              <NavLink
+                                to={subItem.to}
+                                end={subItem.exact !== undefined ? subItem.exact : true}
+                                className={({ isActive }) =>
+                                  `app-sidebar__sublink ${isActive ? 'is-active' : ''}`
+                                }
+                              >
+                                <span className="app-sidebar__sublink-label">{subItem.label}</span>
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
           </div>
         ))}
+        <div className="app-sidebar__profile">
+          <NavLink
+            to={ROUTES.RESIDENT_PROFILE}
+            className={({ isActive }) =>
+              `app-sidebar__profile-card ${isActive ? 'is-active' : ''}`
+            }
+            aria-label="Ir a mi perfil"
+          >
+            <div className="app-sidebar__profile-avatar" aria-hidden="true">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" />
+              ) : (
+                <span>{initials}</span>
+              )}
+            </div>
+            <span className="app-sidebar__profile-name">{displayName}</span>
+          </NavLink>
+          <button
+            type="button"
+            className="app-sidebar__profile-logout"
+            onClick={handleLogout}
+            aria-label="Cerrar sesión"
+          >
+            <Icon name="door" size={16} />
+            <span className="app-sidebar__profile-logout-label">Cerrar sesión</span>
+          </button>
+        </div>
       </div>
     </aside>
   );
 };
 
 Sidebar.propTypes = {
+  user: PropTypes.shape({
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+    email: PropTypes.string,
+    imageUrl: PropTypes.string,
+  }),
   navSections: PropTypes.arrayOf(
     PropTypes.shape({
       title: PropTypes.string.isRequired,
@@ -82,6 +218,13 @@ Sidebar.propTypes = {
           icon: PropTypes.string,
           to: PropTypes.string,
           exact: PropTypes.bool,
+          subItems: PropTypes.arrayOf(
+            PropTypes.shape({
+              label: PropTypes.string.isRequired,
+              to: PropTypes.string.isRequired,
+              exact: PropTypes.bool,
+            })
+          ),
         })
       ),
     })
@@ -90,8 +233,7 @@ Sidebar.propTypes = {
 
 Sidebar.defaultProps = {
   navSections: [],
+  user: null,
 };
 
 export default Sidebar;
-
-

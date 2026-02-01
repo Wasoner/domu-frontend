@@ -53,8 +53,23 @@ const CATEGORY_ICONS = {
 /**
  * Componente de tarjeta de incidente draggable
  */
-const IncidentCard = ({ incident, onDragStart, onDragEnd, isDragging }) => {
+const IncidentCard = ({ incident, onDragStart, onDragEnd, isDragging, staffMembers, onAssign }) => {
   const categoryIcon = CATEGORY_ICONS[incident.category] || CATEGORY_ICONS.general;
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  const isDragIgnoredTarget = (target) => {
+    if (!(target instanceof Element)) return false;
+    return Boolean(target.closest('[data-drag-ignore="true"]'));
+  };
+
+  const handleCardDragStart = (event) => {
+    if (isDragIgnoredTarget(event.target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    onDragStart(event, incident);
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Sin fecha';
@@ -75,11 +90,16 @@ const IncidentCard = ({ incident, onDragStart, onDragEnd, isDragging }) => {
     });
   };
 
+  const assignedMember = useMemo(() => {
+    if (!incident.assignedToUserId) return null;
+    return staffMembers.find(m => m.id === incident.assignedToUserId);
+  }, [incident.assignedToUserId, staffMembers]);
+
   return (
     <article
       className={`kanban-card ${isDragging ? 'kanban-card--dragging' : ''}`}
       draggable="true"
-      onDragStart={(e) => onDragStart(e, incident)}
+      onDragStart={handleCardDragStart}
       onDragEnd={onDragEnd}
       role="listitem"
       aria-grabbed={isDragging}
@@ -101,6 +121,43 @@ const IncidentCard = ({ incident, onDragStart, onDragEnd, isDragging }) => {
             : incident.description}
         </p>
       )}
+
+      <div className="kanban-card__assignment" data-drag-ignore="true">
+        {isAssigning ? (
+          <select 
+            className="kanban-card__assign-select"
+            autoFocus
+            onBlur={() => setIsAssigning(false)}
+            onChange={(e) => {
+              onAssign(incident.id, e.target.value ? Number(e.target.value) : null);
+              setIsAssigning(false);
+            }}
+            value={incident.assignedToUserId || ''}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <option value="">Sin asignar</option>
+            {staffMembers.map(member => (
+              <option key={member.id} value={member.id}>
+                {member.firstName} {member.lastName}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <button 
+            className={`kanban-card__assign-btn ${assignedMember ? 'is-assigned' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsAssigning(true);
+            }}
+            title={assignedMember ? `Asignado a: ${assignedMember.firstName} ${assignedMember.lastName}` : 'Asignar a alguien'}
+          >
+            <Icon name="user" size={12} />
+            <span>
+              {assignedMember ? `${assignedMember.firstName}` : 'Asignar'}
+            </span>
+          </button>
+        )}
+      </div>
 
       <div className="kanban-card__footer">
         <span className="kanban-card__time">
@@ -134,6 +191,8 @@ const KanbanColumn = ({
   isDragOver,
   draggingIncident,
   isLoading,
+  staffMembers,
+  onAssign,
 }) => {
   const isEmpty = incidents.length === 0 && !isLoading;
   const canDrop = draggingIncident && draggingIncident.status !== column.status;
@@ -204,6 +263,8 @@ const KanbanColumn = ({
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             isDragging={draggingIncident?.id === incident.id}
+            staffMembers={staffMembers}
+            onAssign={onAssign}
           />
         ))}
       </div>
@@ -218,6 +279,7 @@ const KanbanColumn = ({
 const AdminIncidentsBoard = () => {
   const { user, buildingVersion } = useAppContext();
   const [kanban, setKanban] = useState({ reported: [], inProgress: [], closed: [] });
+  const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draggingIncident, setDraggingIncident] = useState(null);
@@ -230,6 +292,18 @@ const AdminIncidentsBoard = () => {
     return kanban.reported.length + kanban.inProgress.length + kanban.closed.length;
   }, [kanban]);
   const isInitialLoading = loading && totalIncidents === 0;
+
+  const fetchStaff = useCallback(async () => {
+    try {
+      const members = await api.adminUsers.getResidents();
+      // Filtrar por roles que pueden ser asignados (Concierge, Staff)
+      // O simplemente mostrar todos los que no son residentes
+      const staff = (members || []).filter(m => m.roleId !== 2);
+      setStaffMembers(staff);
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+    }
+  }, []);
 
   const fetchKanban = useCallback(async () => {
     if (!user) return;
@@ -268,8 +342,40 @@ const AdminIncidentsBoard = () => {
     if (lastFetchKeyRef.current !== key) {
       lastFetchKeyRef.current = key;
       fetchKanban();
+      fetchStaff();
     }
-  }, [fetchKanban, buildingVersion, user]); // Recargar cuando cambia el edificio
+  }, [fetchKanban, fetchStaff, buildingVersion, user]); // Recargar cuando cambia el edificio
+
+  const clearDragState = useCallback(() => {
+    setDraggingIncident(null);
+    setDragOverColumn(null);
+    dragCounterRef.current = {};
+    document.body.classList.remove('is-dragging');
+  }, []);
+
+  const handleAssign = async (incidentId, userId) => {
+    clearDragState();
+    setSaving(true);
+    try {
+      await api.incidents.assign(incidentId, userId);
+      const member = staffMembers.find(m => m.id === userId);
+      setLastAction({
+        type: 'success',
+        message: userId 
+          ? `Incidente asignado a ${member?.firstName || 'usuario'}`
+          : 'Asignación removida',
+      });
+      fetchKanban();
+    } catch (error) {
+      console.error('Error assigning incident:', error);
+      setLastAction({
+        type: 'error',
+        message: 'No se pudo actualizar la asignación.',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Auto-ocultar mensaje de acción después de 3 segundos
   useEffect(() => {
@@ -288,12 +394,9 @@ const AdminIncidentsBoard = () => {
     document.body.classList.add('is-dragging');
   };
 
-  const handleDragEnd = () => {
-    setDraggingIncident(null);
-    setDragOverColumn(null);
-    dragCounterRef.current = {};
-    document.body.classList.remove('is-dragging');
-  };
+  const handleDragEnd = useCallback(() => {
+    clearDragState();
+  }, [clearDragState]);
 
   const handleDragOver = (e, columnKey) => {
     e.preventDefault();
@@ -316,8 +419,7 @@ const AdminIncidentsBoard = () => {
 
   const handleDrop = async (e, targetStatus) => {
     e.preventDefault();
-    setDragOverColumn(null);
-    dragCounterRef.current = {};
+    clearDragState();
 
     if (!draggingIncident || draggingIncident.status === targetStatus) {
       return;
@@ -444,6 +546,8 @@ const AdminIncidentsBoard = () => {
                 isDragOver={dragOverColumn === column.key}
                 draggingIncident={draggingIncident}
                 isLoading={isInitialLoading}
+                staffMembers={staffMembers}
+                onAssign={handleAssign}
               />
             ))}
           </div>

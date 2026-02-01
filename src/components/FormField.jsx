@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import './FormField.css';
+import './FormField.scss';
 
 const FormField = ({
   label,
