@@ -500,6 +500,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+    checkQr: async (data) => fetchWrapper('/visits/qr-check', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
     listMine: async () => fetchWrapper('/visits/my', { method: 'GET' }),
     checkIn: async (authorizationId) => fetchWrapper(`/visits/${authorizationId}/check-in`, {
       method: 'POST',
