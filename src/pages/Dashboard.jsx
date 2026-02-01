@@ -12,6 +12,14 @@ import './Dashboard.scss';
  */
 const quickAccessModules = [
     {
+        id: 'charges',
+        title: 'Gastos Comunes',
+        description: 'Gestiona periodos y cargos',
+        icon: 'banknotes',
+        to: ROUTES.COMMON_CHARGES,
+        accentColor: 'var(--color-turquoise)',
+    },
+    {
         id: 'incidents',
         title: 'Incidentes',
         description: 'Gestiona tickets y reportes',
@@ -20,20 +28,28 @@ const quickAccessModules = [
         accentColor: 'var(--color-warning-light)',
     },
     {
+        id: 'amenities',
+        title: 'Áreas Comunes',
+        description: 'Reservas y espacios',
+        icon: 'calendar',
+        to: ROUTES.RESIDENT_AMENITIES,
+        accentColor: 'var(--color-info-light)',
+    },
+    {
+        id: 'residents',
+        title: 'Residentes',
+        description: 'Administrar comunidad',
+        icon: 'home',
+        to: ROUTES.ADMIN_RESIDENTS,
+        accentColor: 'var(--color-success)',
+    },
+    {
         id: 'users',
         title: 'Usuarios',
         description: 'Crear y administrar cuentas',
         icon: 'user',
         to: ROUTES.ADMIN_CREATE_USER,
-        accentColor: 'var(--color-info-light)',
-    },
-    {
-        id: 'visits',
-        title: 'Visitas',
-        description: 'Accesos y autorizaciones',
-        icon: 'door',
-        to: ROUTES.RESIDENT_EVENTS,
-        accentColor: 'var(--color-turquoise)',
+        accentColor: 'var(--color-gray-dark)',
     },
     {
         id: 'profile',
@@ -51,12 +67,17 @@ const quickAccessModules = [
  */
 const Dashboard = () => {
     const { user, buildingVersion } = useAppContext();
-    const [incidentStats, setIncidentStats] = useState({
+    const [stats, setStats] = useState({
         reported: 0,
         inProgress: 0,
         closed: 0,
+        totalResidents: 0,
+        activeResidents: 0,
+        latestPeriodTotal: 0,
+        activeMarketItems: 0,
     });
     const [recentIncidents, setRecentIncidents] = useState([]);
+    const [recentMarketItems, setRecentMarketItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [hasFetched, setHasFetched] = useState(false);
@@ -69,20 +90,41 @@ const Dashboard = () => {
         return user.firstName || user.email?.split('@')[0] || 'Administrador';
     }, [user]);
 
-    const fetchIncidentData = useCallback(async () => {
+    const fetchData = useCallback(async () => {
         if (!user || isFetchingRef.current) return;
         isFetchingRef.current = true;
         setLoading(true);
         try {
-            const data = await api.incidents.listMine();
-            const reported = data?.reported || [];
-            const inProgress = data?.inProgress || [];
-            const closed = data?.closed || [];
+            // Fetch all data in parallel
+            const [incidentData, residentData, periodData, marketData] = await Promise.all([
+                api.incidents.listMine(),
+                api.adminUsers.getResidents(),
+                api.finance.listPeriods(),
+                api.market.listItems({ status: 'AVAILABLE' })
+            ]);
 
-            setIncidentStats({
+            // Process incidents
+            const reported = incidentData?.reported || [];
+            const inProgress = incidentData?.inProgress || [];
+            const closed = incidentData?.closed || [];
+
+            // Process residents
+            const residents = residentData || [];
+            
+            // Process periods
+            const latestPeriod = periodData && periodData.length > 0 ? periodData[0] : null;
+
+            // Process market
+            const marketItems = marketData || [];
+
+            setStats({
                 reported: reported.length,
                 inProgress: inProgress.length,
                 closed: closed.length,
+                totalResidents: residents.length,
+                activeResidents: residents.filter(r => r.status === 'ACTIVE').length,
+                latestPeriodTotal: latestPeriod?.totalAmount || 0,
+                activeMarketItems: marketItems.length,
             });
 
             // Últimos 5 incidentes más recientes
@@ -98,9 +140,10 @@ const Dashboard = () => {
                 .slice(0, 5);
 
             setRecentIncidents(allIncidents);
+            setRecentMarketItems(marketItems.slice(0, 3));
             setLastUpdated(new Date());
         } catch (error) {
-            console.error('Error cargando datos de incidentes:', error);
+            console.error('Error cargando datos del dashboard:', error);
         } finally {
             setLoading(false);
             setHasFetched(true);
@@ -113,11 +156,11 @@ const Dashboard = () => {
         const key = `${user.id || user.email || 'anon'}-${buildingVersion ?? '0'}`;
         if (lastFetchKeyRef.current !== key) {
             lastFetchKeyRef.current = key;
-            fetchIncidentData();
+            fetchData();
         }
-        const interval = setInterval(fetchIncidentData, 30000); // Actualizar cada 30s
+        const interval = setInterval(fetchData, 30000); // Actualizar cada 30s
         return () => clearInterval(interval);
-    }, [fetchIncidentData, buildingVersion, user]);
+    }, [fetchData, buildingVersion, user]);
 
     const formatTime = (date) => {
         if (!date) return '';
@@ -135,6 +178,10 @@ const Dashboard = () => {
         });
     };
 
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(value);
+    };
+
     const getStatusLabel = (status) => {
         const labels = {
             REPORTED: 'Reportado',
@@ -144,7 +191,7 @@ const Dashboard = () => {
         return labels[status] || status;
     };
 
-    const openIncidents = incidentStats.reported + incidentStats.inProgress;
+    const openIncidents = stats.reported + stats.inProgress;
     const statusTone = openIncidents === 0 ? 'ok' : openIncidents < 4 ? 'warn' : 'alert';
     const statusMessage = openIncidents === 0
         ? 'Todo bajo control'
@@ -154,7 +201,7 @@ const Dashboard = () => {
     const statusDetail = openIncidents === 0
         ? 'No tienes incidentes pendientes en este momento.'
         : openIncidents < 4
-            ? 'Hay casos abiertos que necesitan seguimiento.'
+            ? `Hay ${openIncidents} casos abiertos que necesitan seguimiento.`
             : 'Revisa prioridades y asigna responsables.';
 
     return (
@@ -178,7 +225,7 @@ const Dashboard = () => {
                         <button
                             type="button"
                             className="dashboard__refresh"
-                            onClick={fetchIncidentData}
+                            onClick={fetchData}
                             disabled={loading}
                         >
                             {loading ? 'Actualizando...' : 'Actualizar'}
@@ -204,26 +251,26 @@ const Dashboard = () => {
                         <>
                             <Link to={ROUTES.ADMIN_INCIDENTS} className="metric-card metric-card--warning">
                                 <div className="metric-card__content">
-                                    <span className="metric-card__value">{incidentStats.reported}</span>
-                                    <span className="metric-card__label">Reportados</span>
+                                    <span className="metric-card__value">{stats.reported}</span>
+                                    <span className="metric-card__label">Incidentes pendientes</span>
                                 </div>
-                                <span className="metric-card__indicator">Pendientes de atención</span>
+                                <span className="metric-card__indicator">Requieren atención</span>
                             </Link>
 
-                            <Link to={ROUTES.ADMIN_INCIDENTS} className="metric-card metric-card--info">
+                            <Link to={ROUTES.ADMIN_RESIDENTS} className="metric-card metric-card--info">
                                 <div className="metric-card__content">
-                                    <span className="metric-card__value">{incidentStats.inProgress}</span>
-                                    <span className="metric-card__label">En progreso</span>
+                                    <span className="metric-card__value">{stats.totalResidents}</span>
+                                    <span className="metric-card__label">Residentes</span>
                                 </div>
-                                <span className="metric-card__indicator">En gestión activa</span>
+                                <span className="metric-card__indicator">{stats.activeResidents} activos en el sistema</span>
                             </Link>
 
-                            <Link to={ROUTES.ADMIN_INCIDENTS} className="metric-card metric-card--success">
+                            <Link to={ROUTES.COMMON_CHARGES} className="metric-card metric-card--success">
                                 <div className="metric-card__content">
-                                    <span className="metric-card__value">{incidentStats.closed}</span>
-                                    <span className="metric-card__label">Cerrados</span>
+                                    <span className="metric-card__value" style={{ fontSize: '1.75rem' }}>{formatCurrency(stats.latestPeriodTotal)}</span>
+                                    <span className="metric-card__label">Último Gasto Común</span>
                                 </div>
-                                <span className="metric-card__indicator">Resueltos este mes</span>
+                                <span className="metric-card__indicator">Monto total facturado</span>
                             </Link>
                         </>
                     )}
@@ -292,6 +339,49 @@ const Dashboard = () => {
                                 ))}
                             </div>
                         </section>
+
+                        {/* Mercado de la comunidad */}
+                        <section className="dashboard__market" aria-label="Productos destacados">
+                            <div className="dashboard__feed-header">
+                                <div>
+                                    <h2>Tienda vecinal</h2>
+                                    <p>Últimos productos publicados</p>
+                                </div>
+                                <div className="dashboard__feed-actions">
+                                    <Link to={ROUTES.RESIDENT_MARKETPLACE} className="dashboard__view-all">
+                                        Ver tienda
+                                    </Link>
+                                </div>
+                            </div>
+
+                            <div className="dashboard__market-grid">
+                                {isInitialLoading ? (
+                                    Array.from({ length: 3 }).map((_, i) => (
+                                        <div key={i} className="market-card-mini-skeleton" />
+                                    ))
+                                ) : recentMarketItems.length === 0 ? (
+                                    <div className="dashboard__feed-empty">
+                                        <p>No hay productos activos</p>
+                                    </div>
+                                ) : (
+                                    recentMarketItems.map(item => (
+                                        <Link key={item.id} to={ROUTES.RESIDENT_MARKETPLACE} className="market-card-mini">
+                                            <div className="market-card-mini__img">
+                                                {item.mainImageUrl ? (
+                                                    <img src={item.mainImageUrl} alt={item.title} />
+                                                ) : (
+                                                    <Icon name="archiveBox" size={24} />
+                                                )}
+                                            </div>
+                                            <div className="market-card-mini__info">
+                                                <h4>{item.title}</h4>
+                                                <span>{formatCurrency(item.price)}</span>
+                                            </div>
+                                        </Link>
+                                    ))
+                                )}
+                            </div>
+                        </section>
                     </section>
 
                     <aside className="dashboard__side">
@@ -307,12 +397,12 @@ const Dashboard = () => {
                         ) : (
                             <section className={`dashboard__status-card dashboard__status-card--${statusTone}`}>
                                 <div>
-                                    <p className="dashboard__status-eyebrow">Estado general</p>
+                                    <p className="dashboard__status-eyebrow">Estado de la comunidad</p>
                                     <h3>{statusMessage}</h3>
                                     <p>{statusDetail}</p>
                                 </div>
                                 <Link to={ROUTES.ADMIN_INCIDENTS} className="dashboard__status-link">
-                                    Ver incidentes
+                                    Gestionar casos
                                 </Link>
                             </section>
                         )}
@@ -320,12 +410,12 @@ const Dashboard = () => {
                         {/* Accesos rápidos */}
                         <section className="dashboard__quick-access" aria-label="Accesos rápidos">
                             <div className="dashboard__quick-header">
-                                <h2>Accesos rápidos</h2>
-                                <span>Atajos a tareas frecuentes</span>
+                                <h2>Gestión directa</h2>
+                                <span>Atajos a herramientas clave</span>
                             </div>
                             <div className="dashboard__modules">
                                 {isInitialLoading ? (
-                                    Array.from({ length: 4 }, (_, index) => (
+                                    Array.from({ length: 6 }, (_, index) => (
                                         <div key={index} className="module-card module-card--skeleton" aria-hidden="true">
                                             <span className="module-card__icon" />
                                             <div className="module-card__content">
