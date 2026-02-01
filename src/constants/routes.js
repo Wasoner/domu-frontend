@@ -9,6 +9,7 @@ export const ROUTES = {
   ABOUT: '/about',
   LOGIN: '/login',
   REGISTER: '/register',
+  CONFIRM_USER: '/confirmar',
   ADMIN_INVITE: '/registrar-admin',
   FEATURES: '/features',
   PRICING: '/pricing',
@@ -36,6 +37,7 @@ export const ROUTES = {
   EVENTS: '/dashboard/events',
   REPORTS: '/dashboard/reports',
   ADMIN_INCIDENTS: '/dashboard/incidents',
+  ADMIN_INCIDENT_STATS: '/dashboard/incidents/stats',
   SETTINGS: '/dashboard/settings',
 
   // Protected routes - Resident
@@ -64,6 +66,8 @@ export const ROUTES = {
   RESIDENT_EXPENSES: '/resident/egresos',
   RESIDENT_FUNDS: '/resident/fondos',
   RESIDENT_LIBRARY: '/resident/biblioteca',
+  RESIDENT_MARKETPLACE: '/resident/marketplace',
+  RESIDENT_CHAT: '/resident/chat',
 };
 
 /**

@@ -182,6 +182,20 @@ const ClosedIllustration = () => (
   </svg>
 );
 
+const ResidentIncidentsSkeleton = () => (
+  <div className="resident-incidents__panel-list">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="resident-incidents__incident-item resident-incidents__incident-item--skeleton">
+        <div className="resident-incidents__incident-category">
+          <span className="dashboard__skeleton-block" style={{ width: '80px', height: '20px' }} />
+        </div>
+        <span className="dashboard__skeleton-block" style={{ width: '60%', height: '16px' }} />
+        <span className="dashboard__skeleton-block" style={{ width: '40px', height: '12px' }} />
+      </div>
+    ))}
+  </div>
+);
+
 /**
  * Resident Incidents Page Component
  * Page for managing and tracking incidents
@@ -255,7 +269,6 @@ const ResidentIncidents = () => {
 
   useEffect(() => {
     fetchIncidents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, dateFilter]);
 
   const handleReportIncident = async (e) => {
@@ -294,7 +307,7 @@ const ResidentIncidents = () => {
   };
 
   return (
-    <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
+    <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge', 'staff']}>
       <article className="resident-incidents">
         <header className="resident-incidents__header">
           <div className="resident-incidents__title-section">
@@ -380,7 +393,7 @@ const ResidentIncidents = () => {
             </div>
             <div className="resident-incidents__panel-body">
               {loading ? (
-                <p className="resident-incidents__loading">Cargando...</p>
+                <ResidentIncidentsSkeleton />
               ) : filteredIncidents.reported.length > 0 ? (
                 <div className="resident-incidents__panel-list">
                   {filteredIncidents.reported.map((incident) => (
@@ -413,7 +426,7 @@ const ResidentIncidents = () => {
             </div>
             <div className="resident-incidents__panel-body">
               {loading ? (
-                <p className="resident-incidents__loading">Cargando...</p>
+                <ResidentIncidentsSkeleton />
               ) : filteredIncidents.inProgress.length > 0 ? (
                 <div className="resident-incidents__panel-list">
                   {filteredIncidents.inProgress.map((incident) => (
@@ -440,7 +453,7 @@ const ResidentIncidents = () => {
             </div>
             <div className="resident-incidents__panel-body">
               {loading ? (
-                <p className="resident-incidents__loading">Cargando...</p>
+                <ResidentIncidentsSkeleton />
               ) : filteredIncidents.closed.length > 0 ? (
                 <div className="resident-incidents__panel-list">
                   {filteredIncidents.closed.map((incident) => (

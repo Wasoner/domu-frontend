@@ -2,35 +2,65 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
+import { Icon, MarketCarousel } from '../components';
 import { ROUTES } from '../constants';
 import { api } from '../services';
 import './ResidentPortal.scss';
 
-// Datos de ejemplo para notificaciones
+// Datos de ejemplo para notificaciones (El sistema que mencionaste)
 const mockNotifications = [
     {
         id: 1,
-        type: 'announcement',
-        title: 'Nueva asamblea de copropietarios',
-        message: 'Se convoca a asamblea extraordinaria el próximo viernes 15 de diciembre a las 19:00 hrs.',
-        date: '2024-12-10',
-        priority: 'high'
+        type: 'incident',
+        category: 'water',
+        title: 'Incidente abierto en torre B',
+        message: 'Filtración reportada en pasillo del piso 4. Seguimiento en curso.',
+        date: '2026-02-01T09:20:00',
+        priority: 'high',
+        source: 'Administración',
+        isNew: true,
+        to: ROUTES.RESIDENT_INCIDENTS,
     },
     {
         id: 2,
-        type: 'payment',
-        title: 'Recordatorio de pago',
-        message: 'Tu gasto común de noviembre está próximo a vencer. Fecha límite: 20 de diciembre.',
-        date: '2024-12-08',
-        priority: 'medium'
+        type: 'parcel',
+        title: 'Encomienda disponible en conserjería',
+        message: 'Paquete recibido hoy a las 10:45. Retíralo con tu identificación.',
+        date: '2026-02-01T10:52:00',
+        priority: 'medium',
+        source: 'Conserjería',
+        isNew: true,
+        to: ROUTES.RESIDENT_PARCELS,
     },
     {
         id: 3,
-        type: 'maintenance',
-        title: 'Mantención de ascensores',
-        message: 'Se realizará mantención preventiva de los ascensores el día 18 de diciembre.',
-        date: '2024-12-05',
-        priority: 'low'
+        type: 'visit',
+        title: 'Visita autorizada para hoy',
+        message: 'Juan Pérez ingresará a las 19:30. Recuerda habilitar acceso en portería.',
+        date: '2026-01-31T15:05:00',
+        priority: 'low',
+        source: 'Accesos',
+        to: ROUTES.RESIDENT_EVENTS,
+    },
+    {
+        id: 4,
+        type: 'admin',
+        title: 'Aviso de administración',
+        message: 'Corte programado de agua el martes 3 de febrero entre 09:00 y 12:00.',
+        date: '2026-01-30T08:30:00',
+        priority: 'medium',
+        source: 'Administración',
+        to: ROUTES.RESIDENT_PUBLICATIONS,
+    },
+    {
+        id: 5,
+        type: 'payment',
+        title: 'Pago registrado',
+        message: 'Confirmamos el pago de tu gasto común de enero.',
+        date: '2026-01-29T12:40:00',
+        priority: 'low',
+        source: 'Finanzas',
+        to: ROUTES.RESIDENT_CHARGES_DETAIL_VIEW,
     },
 ];
 
@@ -80,10 +110,6 @@ const upcomingItems = [
     },
 ];
 
-/**
- * Resident Portal Page Component
- * Simplified portal for residents with notifications
- */
 const ResidentPortal = () => {
     const { user } = useAppContext();
     const [latestPeriod, setLatestPeriod] = useState(null);
@@ -92,32 +118,48 @@ const ResidentPortal = () => {
         ? `${user.firstName} ${user?.lastName || ''}`.trim()
         : user?.email || 'Residente';
 
-    const getNotificationIcon = (type) => {
-        switch (type) {
-            case 'announcement': return '📢';
-            case 'payment': return '💳';
-            case 'maintenance': return '🔧';
-            default: return '📌';
-        }
+    const INCIDENT_CATEGORIES = {
+        water: { label: 'Agua', icon: 'water', color: '#0ea5e9', bg: '#e0f2fe' },
+        electricity: { label: 'Electricidad', icon: 'bolt', color: '#f59e0b', bg: '#fff7ed' },
+        noise: { label: 'Ruidos', icon: 'speakerWave', color: '#f97316', bg: '#fff7ed' },
+        security: { label: 'Seguridad', icon: 'lock', color: '#ef4444', bg: '#fef2f2' },
+        maintenance: { label: 'Mantención', icon: 'wrench', color: '#2563eb', bg: '#eff6ff' },
+        cleaning: { label: 'Limpieza', icon: 'sparkles', color: '#10b981', bg: '#ecfdf5' },
+        parking: { label: 'Estacionamiento', icon: 'car', color: '#64748b', bg: '#f1f5f9' },
+        elevator: { label: 'Ascensor', icon: 'arrowsUpDown', color: '#6366f1', bg: '#eef2ff' },
+        general: { label: 'Incidente', icon: 'ticket', color: '#f43f5e', bg: '#fff1f2' },
     };
+
+    const NOTIFICATION_TYPES = {
+        visit: { label: 'Visita', icon: 'door', color: '#0ea5e9', bg: '#e0f2fe' },
+        parcel: { label: 'Encomienda', icon: 'cube', color: '#f59e0b', bg: '#fff7ed' },
+        admin: { label: 'Administración', icon: 'bellAlert', color: '#0f766e', bg: '#ecfdf5' },
+        payment: { label: 'Pago', icon: 'banknotes', color: '#16a34a', bg: '#ecfdf5' },
+        maintenance: { label: 'Mantención', icon: 'wrench', color: '#6366f1', bg: '#eef2ff' },
+    };
+
+    const getNotificationVisual = (notification) => {
+        if (notification.type === 'incident') {
+            const categoryKey = notification.category || 'general';
+            const category = INCIDENT_CATEGORIES[categoryKey] || INCIDENT_CATEGORIES.general;
+            return { ...category, tag: `Incidente • ${category.label}` };
+        }
+        const meta = NOTIFICATION_TYPES[notification.type] || NOTIFICATION_TYPES.admin;
+        return { ...meta, tag: meta.label };
+    };
+
+    const priorityLabels = { high: 'Alta', medium: 'Media', low: 'Baja' };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        if (Number.isNaN(date.getTime())) return 'Fecha no disponible';
+        return date.toLocaleString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     };
 
     const formatCurrency = (value) => {
         const safe = Number(value);
         if (!Number.isFinite(safe)) return '—';
-        return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 })
-            .format(safe);
-    };
-
-    const formatDueDate = (value) => {
-        if (!value) return null;
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return value;
-        return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+        return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(safe);
     };
 
     useEffect(() => {
@@ -125,67 +167,27 @@ const ResidentPortal = () => {
         const fetchLatestPeriod = async () => {
             try {
                 const data = await api.finance.listMyPeriods();
-                const list = Array.isArray(data) ? data : [];
                 if (!isMounted) return;
-                setLatestPeriod(list.length > 0 ? list[0] : null);
-            } catch (error) {
-                if (isMounted) {
-                    setLatestPeriod(null);
-                }
+                setLatestPeriod(data && data.length > 0 ? data[0] : null);
+            } catch {
+                if (isMounted) setLatestPeriod(null);
             }
         };
         fetchLatestPeriod();
-        return () => {
-            isMounted = false;
-        };
+        return () => { isMounted = false; };
     }, []);
-
-    const dueLabel = formatDueDate(latestPeriod?.dueDate);
-    const status = latestPeriod?.status;
-    const statusNote = status === 'PAID'
-        ? 'Pagado'
-        : status === 'PARTIAL'
-            ? `Pago parcial${dueLabel ? ` • Vence ${dueLabel}` : ''}`
-            : dueLabel
-                ? `Vence ${dueLabel}`
-                : 'Sin fecha de vencimiento';
-    const balanceNote = latestPeriod
-        ? `Reparto equitativo • ${statusNote}`
-        : 'Sin periodos publicados';
-    const balanceTone = latestPeriod
-        ? (Number(latestPeriod?.pendingAmount) <= 0 ? 'ok' : 'warn')
-        : 'info';
-    const balanceValue = latestPeriod ? formatCurrency(latestPeriod?.totalAmount) : '—';
 
     const residentStats = [
         {
             id: 'balance',
             label: 'Cuota mensual',
-            value: balanceValue,
-            note: balanceNote,
-            tone: balanceTone,
+            value: latestPeriod ? formatCurrency(latestPeriod.totalAmount) : '—',
+            note: latestPeriod ? `Vence ${new Date(latestPeriod.dueDate).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}` : 'Sin periodos',
+            tone: latestPeriod ? (latestPeriod.pendingAmount <= 0 ? 'ok' : 'warn') : 'info',
         },
-        {
-            id: 'reservations',
-            label: 'Reservas activas',
-            value: '2',
-            note: 'Próxima: Quincho',
-            tone: 'info',
-        },
-        {
-            id: 'incidents',
-            label: 'Incidentes abiertos',
-            value: '1',
-            note: 'En revisión',
-            tone: 'alert',
-        },
-        {
-            id: 'payments',
-            label: 'Pagos al día',
-            value: '3',
-            note: 'Último pago nov',
-            tone: 'ok',
-        },
+        { id: 'reservations', label: 'Reservas activas', value: '2', note: 'Próxima: Quincho', tone: 'info' },
+        { id: 'incidents', label: 'Incidentes abiertos', value: '1', note: 'En revisión', tone: 'alert' },
+        { id: 'payments', label: 'Pagos al día', value: '3', note: 'Último pago nov', tone: 'ok' },
     ];
 
     return (
@@ -197,22 +199,9 @@ const ResidentPortal = () => {
                         <h1>Hola, {displayName}</h1>
                         <p className="resident-portal__subtitle">Resumen de tu comunidad y accesos rápidos</p>
                     </div>
-                    <div className="resident-portal__header-actions">
-                        <Link to={ROUTES.RESIDENT_CHARGES_DETAIL_VIEW} className="resident-portal__header-link">
-                            Ver gastos comunes
-                        </Link>
-                    </div>
                 </header>
 
-                <div className="resident-portal__alert" role="status">
-                    <span className="resident-portal__alert-icon" aria-hidden="true">🔐</span>
-                    <div>
-                        <strong>Seguridad recomendada</strong>
-                        <p>Si tu contraseña fue creada por un administrador, cámbiala cuanto antes.</p>
-                    </div>
-                </div>
-
-                <section className="resident-portal__stats" aria-label="Indicadores principales">
+                <section className="resident-portal__stats">
                     {residentStats.map((stat) => (
                         <div key={stat.id} className={`resident-portal__stat resident-portal__stat--${stat.tone}`}>
                             <span className="resident-portal__stat-label">{stat.label}</span>
@@ -222,9 +211,10 @@ const ResidentPortal = () => {
                     ))}
                 </section>
 
+                <MarketCarousel />
+
                 <div className="resident-portal__grid">
                     <section className="resident-portal__main">
-                        {/* Panel de Notificaciones */}
                         <section className="resident-portal__panel resident-portal__panel--notifications">
                             <div className="resident-portal__panel-header">
                                 <span className="resident-portal__panel-icon">🔔</span>
@@ -232,38 +222,32 @@ const ResidentPortal = () => {
                                     <h2>Notificaciones de la comunidad</h2>
                                     <p>Mensajes relevantes para tu edificio</p>
                                 </div>
-                                <Link to={ROUTES.RESIDENT_PUBLICATIONS} className="resident-portal__panel-link">
-                                    Ver todo
-                                </Link>
                             </div>
                             <div className="resident-portal__notifications-list">
-                                {mockNotifications.length > 0 ? (
-                                    mockNotifications.map((notification) => (
-                                        <div
-                                            key={notification.id}
-                                            className={`resident-portal__notification resident-portal__notification--${notification.priority}`}
-                                        >
-                                            <div className="resident-portal__notification-header">
-                                                <span className="resident-portal__notification-icon">
-                                                    {getNotificationIcon(notification.type)}
-                                                </span>
-                                                <div className="resident-portal__notification-info">
-                                                    <h3>{notification.title}</h3>
-                                                    <span className="resident-portal__notification-date">
-                                                        {formatDate(notification.date)}
+                                {mockNotifications.map((notification) => {
+                                    const visual = getNotificationVisual(notification);
+                                    return (
+                                        <Link key={notification.id} to={notification.to} className={`resident-portal__notification ${notification.isNew ? 'is-new' : ''}`}>
+                                            <span className="resident-portal__notification-icon" style={{ '--notif-color': visual.color, '--notif-bg': visual.bg }}>
+                                                <Icon name={visual.icon} size={18} />
+                                            </span>
+                                            <div className="resident-portal__notification-body">
+                                                <h3>{notification.title}</h3>
+                                                <p className="resident-portal__notification-message">{notification.message}</p>
+                                                <div className="resident-portal__notification-meta">
+                                                    <span className="resident-portal__notification-tag">{visual.tag}</span>
+                                                    <span className={`resident-portal__notification-pill resident-portal__notification-pill--${notification.priority}`}>
+                                                        {priorityLabels[notification.priority]}
                                                     </span>
                                                 </div>
                                             </div>
-                                            <p className="resident-portal__notification-message">
-                                                {notification.message}
-                                            </p>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="resident-portal__empty-state">
-                                        <p>No hay notificaciones nuevas</p>
-                                    </div>
-                                )}
+                                            <div className="resident-portal__notification-aside">
+                                                <span className="resident-portal__notification-date">{formatDate(notification.date)}</span>
+                                                <Icon name="chevronRight" size={16} />
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </section>
                     </section>
@@ -272,18 +256,12 @@ const ResidentPortal = () => {
                         <section className="resident-portal__panel resident-portal__panel--upcoming">
                             <div className="resident-portal__panel-header">
                                 <span className="resident-portal__panel-icon">🗓️</span>
-                                <div>
-                                    <h2>Próximos eventos</h2>
-                                    <p>Fechas relevantes del mes</p>
-                                </div>
+                                <h2>Próximos eventos</h2>
                             </div>
                             <div className="resident-portal__upcoming-list">
                                 {upcomingItems.map((item) => (
                                     <div key={item.id} className="resident-portal__upcoming-item">
-                                        <div>
-                                            <strong>{item.title}</strong>
-                                            <span>{item.detail}</span>
-                                        </div>
+                                        <strong>{item.title}</strong>
                                         <small>{item.due}</small>
                                     </div>
                                 ))}
@@ -293,21 +271,13 @@ const ResidentPortal = () => {
                         <section className="resident-portal__panel resident-portal__panel--quick">
                             <div className="resident-portal__panel-header">
                                 <span className="resident-portal__panel-icon">⚡</span>
-                                <div>
-                                    <h2>Accesos rápidos</h2>
-                                    <p>Atajos a tareas frecuentes</p>
-                                </div>
+                                <h2>Accesos rápidos</h2>
                             </div>
                             <div className="resident-portal__quick-grid">
                                 {quickActions.map((action) => (
                                     <Link key={action.id} to={action.to} className="resident-portal__quick-card">
-                                        <span className="resident-portal__quick-icon" aria-hidden="true">
-                                            {action.icon}
-                                        </span>
-                                        <div>
-                                            <strong>{action.title}</strong>
-                                            <span>{action.description}</span>
-                                        </div>
+                                        <span className="resident-portal__quick-icon">{action.icon}</span>
+                                        <strong>{action.title}</strong>
                                     </Link>
                                 ))}
                             </div>
