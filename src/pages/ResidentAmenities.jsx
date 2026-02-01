@@ -191,7 +191,23 @@ const ResidentAmenities = () => {
         {activeTab === 'amenities' && (
           <section className="amenities-grid">
             {loading && amenities.length === 0 && (
-              <div className="amenities-grid__empty">Cargando áreas comunes...</div>
+              <>
+                {[0, 1, 2].map((key) => (
+                  <div key={key} className="amenity-preview amenity-preview--skeleton" aria-hidden="true">
+                    <div className="amenity-preview__image" />
+                    <div className="amenity-preview__content">
+                      <span className="amenities-skeleton-block amenities-skeleton-block--lg" />
+                      <span className="amenities-skeleton-block amenities-skeleton-block--md" />
+                      <span className="amenities-skeleton-block amenities-skeleton-block--sm" />
+                      <div className="amenities-skeleton-row">
+                        <span className="amenities-skeleton-block amenities-skeleton-block--xs" />
+                        <span className="amenities-skeleton-block amenities-skeleton-block--xs" />
+                      </div>
+                      <span className="amenities-skeleton-block amenities-skeleton-block--md" />
+                    </div>
+                  </div>
+                ))}
+              </>
             )}
             {!loading && amenities.length === 0 && (
               <div className="amenities-grid__empty">
@@ -243,7 +259,19 @@ const ResidentAmenities = () => {
         {activeTab === 'my-reservations' && (
           <section className="my-reservations">
             {loading && myReservations.length === 0 && (
-              <div className="my-reservations__empty">Cargando tus reservas...</div>
+              <div className="my-reservations__skeleton" aria-hidden="true">
+                {[0, 1, 2].map((key) => (
+                  <div key={key} className="reservation-card reservation-card--skeleton">
+                    <div className="reservation-card__main">
+                      <span className="amenities-skeleton-block amenities-skeleton-block--md" />
+                      <span className="amenities-skeleton-block amenities-skeleton-block--sm" />
+                    </div>
+                    <div className="reservation-card__actions">
+                      <span className="amenities-skeleton-block amenities-skeleton-block--xs" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
             {!loading && myReservations.length === 0 && (
               <div className="my-reservations__empty">

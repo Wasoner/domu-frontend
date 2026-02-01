@@ -273,7 +273,24 @@ const Votaciones = () => {
         </div>
 
         <section className="polls-page__list" aria-live="polite">
-          {loading && currentList.length === 0 && <div className="polls-page__empty">Cargando votaciones…</div>}
+          {loading && currentList.length === 0 && (
+            <div className="polls-page__skeleton" aria-hidden="true">
+              {[0, 1, 2].map((key) => (
+                <div key={key} className="polls-page__skeleton-card">
+                  <div className="polls-page__skeleton-header">
+                    <span className="polls-page__skeleton-block polls-page__skeleton-block--lg" />
+                    <span className="polls-page__skeleton-block polls-page__skeleton-block--sm" />
+                  </div>
+                  <span className="polls-page__skeleton-block polls-page__skeleton-block--md" />
+                  <span className="polls-page__skeleton-block polls-page__skeleton-block--xl" />
+                  <div className="polls-page__skeleton-footer">
+                    <span className="polls-page__skeleton-block polls-page__skeleton-block--sm" />
+                    <span className="polls-page__skeleton-block polls-page__skeleton-block--sm" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           {!loading && currentList.length === 0 && (
             <div className="polls-page__empty">
               {tab === 'open' ? 'Sin votaciones abiertas por ahora.' : 'Aún no hay histórico de votaciones.'}

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
+import { Icon } from '../components';
 import { api } from '../services';
 import './AdminResidents.scss';
 
@@ -8,11 +9,11 @@ import './AdminResidents.scss';
  * Iconos de roles
  */
 const ROLE_ICONS = {
-  Administrador: '👑',
-  Residente: '🏠',
-  Conserje: '🔑',
-  Personal: '🔧',
-  Usuario: '👤',
+  Administrador: 'crown',
+  Residente: 'home',
+  Conserje: 'key',
+  Personal: 'wrench',
+  Usuario: 'user',
 };
 
 /**
@@ -44,7 +45,7 @@ const ResidentCard = ({ resident }) => {
         </div>
         <div className="resident-card__details">
           <span className="resident-card__role" style={{ color: roleColor }}>
-            {roleIcon} {resident.roleName}
+            <Icon name={roleIcon} size={14} /> {resident.roleName}
           </span>
           {resident.resident && (
             <span className="resident-card__badge">Residente</span>
@@ -71,11 +72,13 @@ const ResidentCard = ({ resident }) => {
 /**
  * Sección de unidad con sus residentes
  */
-const UnitSection = ({ unitNumber, tower, floor, residents }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-
+const UnitSection = ({ unitNumber, tower, floor, residents, isExpanded, onToggle }) => {
   const unitLabel = useMemo(() => {
-    let label = `Unidad ${unitNumber}`;
+    if (!unitNumber && !tower && !floor) {
+      return 'Sin unidad asignada';
+    }
+    const safeNumber = unitNumber ? `Unidad ${unitNumber}` : 'Unidad sin número';
+    let label = safeNumber;
     if (tower) label += ` - Torre ${tower}`;
     if (floor) label += ` - Piso ${floor}`;
     return label;
@@ -85,23 +88,26 @@ const UnitSection = ({ unitNumber, tower, floor, residents }) => {
     <section className="unit-section">
       <header
         className="unit-section__header"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={onToggle}
         role="button"
         tabIndex={0}
+        aria-expanded={isExpanded}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            setIsExpanded(!isExpanded);
+            onToggle();
           }
         }}
       >
         <div className="unit-section__title">
-          <span className="unit-section__icon">🏢</span>
+          <span className="unit-section__icon">
+            <Icon name="building" size={20} />
+          </span>
           <h3>{unitLabel}</h3>
           <span className="unit-section__count">{residents.length} persona{residents.length !== 1 ? 's' : ''}</span>
         </div>
         <span className={`unit-section__chevron ${isExpanded ? 'unit-section__chevron--open' : ''}`}>
-          ▼
+          <Icon name="chevronDown" size={14} />
         </span>
       </header>
       {isExpanded && (
@@ -124,6 +130,8 @@ const AdminResidents = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedUnits, setExpandedUnits] = useState(new Set());
+  const lastFetchKeyRef = useRef(null);
 
   const fetchResidents = useCallback(async () => {
     if (!user) return;
@@ -141,8 +149,13 @@ const AdminResidents = () => {
   }, [user]);
 
   useEffect(() => {
-    fetchResidents();
-  }, [fetchResidents, buildingVersion]);
+    if (!user) return;
+    const key = `${user.id || user.email || 'anon'}-${buildingVersion ?? '0'}`;
+    if (lastFetchKeyRef.current !== key) {
+      lastFetchKeyRef.current = key;
+      fetchResidents();
+    }
+  }, [fetchResidents, buildingVersion, user]);
 
   // Agrupar residentes por unidad
   const groupedResidents = useMemo(() => {
@@ -188,32 +201,56 @@ const AdminResidents = () => {
       .filter((group) => group.residents.length > 0);
   }, [groupedResidents, searchTerm]);
 
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      setExpandedUnits(new Set(filteredGroups.map((group) => group.unitId)));
+      return;
+    }
+    setExpandedUnits(new Set());
+  }, [searchTerm, filteredGroups]);
+
   // Estadísticas
-  const stats = useMemo(() => ({
-    totalResidents: residents.length,
-    totalUnits: groupedResidents.length,
-    activeResidents: residents.filter((r) => r.status === 'ACTIVE').length,
-  }), [residents, groupedResidents]);
+  const stats = useMemo(() => {
+    const unitsWithResidents = groupedResidents.filter((group) => group.unitId !== null && group.unitId !== undefined);
+    return {
+      totalResidents: residents.length,
+      totalUnits: unitsWithResidents.length,
+      activeResidents: residents.filter((r) => r.status === 'ACTIVE').length,
+    };
+  }, [residents, groupedResidents]);
+
+  const handleToggleUnit = (unitId) => {
+    setExpandedUnits((prev) => {
+      const next = new Set(prev);
+      if (next.has(unitId)) {
+        next.delete(unitId);
+      } else {
+        next.add(unitId);
+      }
+      return next;
+    });
+  };
+
+  const handleExpandAll = () => {
+    setExpandedUnits(new Set(filteredGroups.map((group) => group.unitId)));
+  };
+
+  const handleCollapseAll = () => {
+    setExpandedUnits(new Set());
+  };
 
   return (
     <ProtectedLayout allowedRoles={['admin', 'concierge']}>
-      <article className="admin-residents">
-        <header className="admin-residents__header">
+      <article className="admin-residents page-shell">
+        <header className="admin-residents__header page-header">
           <div className="admin-residents__title-section">
-            <h1>👥 Residentes</h1>
-            <p className="admin-residents__subtitle">
-              Lista de residentes del edificio, agrupados por unidad
+            <p className="admin-residents__eyebrow page-eyebrow">Comunidad</p>
+            <h1 className="page-title">Residentes y unidades</h1>
+            <p className="admin-residents__subtitle page-subtitle">
+              Visualiza residentes activos, agrupa por unidad y gestiona contactos rápido.
             </p>
           </div>
-          <div className="admin-residents__toolbar">
-            <div className="admin-residents__stats">
-              <span className="admin-residents__stat">
-                <strong>{stats.totalResidents}</strong> personas
-              </span>
-              <span className="admin-residents__stat">
-                <strong>{stats.totalUnits}</strong> unidades
-              </span>
-            </div>
+          <div className="admin-residents__actions page-actions">
             <button
               type="button"
               className="admin-residents__refresh"
@@ -221,28 +258,63 @@ const AdminResidents = () => {
               disabled={loading}
               title="Actualizar lista"
             >
-              {loading ? '...' : '↻'}
+              {loading ? 'Actualizando…' : 'Actualizar'}
             </button>
           </div>
         </header>
 
-        <div className="admin-residents__search">
-          <input
-            type="text"
-            placeholder="Buscar por nombre, email, teléfono o unidad..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="admin-residents__search-input"
-          />
-          {searchTerm && (
+        <section className="admin-residents__stats-grid page-stats" aria-label="Resumen de residentes">
+          <div className="admin-residents__stat-card page-stat">
+            <span>Total residentes</span>
+            <strong>{stats.totalResidents}</strong>
+          </div>
+          <div className="admin-residents__stat-card page-stat">
+            <span>Unidades con residentes</span>
+            <strong>{stats.totalUnits}</strong>
+          </div>
+          <div className="admin-residents__stat-card admin-residents__stat-card--accent page-stat">
+            <span>Activos</span>
+            <strong>{stats.activeResidents}</strong>
+          </div>
+        </section>
+
+        <div className="admin-residents__controls page-controls">
+          <div className="admin-residents__search">
+            <input
+              type="text"
+              placeholder="Buscar por nombre, email, teléfono o unidad..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="admin-residents__search-input"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                className="admin-residents__search-clear"
+                onClick={() => setSearchTerm('')}
+              >
+                <Icon name="close" size={12} />
+              </button>
+            )}
+          </div>
+          <div className="admin-residents__toggles">
             <button
               type="button"
-              className="admin-residents__search-clear"
-              onClick={() => setSearchTerm('')}
+              className="admin-residents__ghost"
+              onClick={handleExpandAll}
+              disabled={filteredGroups.length === 0}
             >
-              ✕
+              Expandir todo
             </button>
-          )}
+            <button
+              type="button"
+              className="admin-residents__ghost"
+              onClick={handleCollapseAll}
+              disabled={filteredGroups.length === 0}
+            >
+              Contraer todo
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -255,8 +327,27 @@ const AdminResidents = () => {
         )}
 
         {loading && residents.length === 0 && (
-          <div className="admin-residents__loading">
-            <p>Cargando residentes...</p>
+          <div className="admin-residents__skeleton" aria-hidden="true">
+            {[0, 1, 2].map((unitIndex) => (
+              <div key={unitIndex} className="admin-residents__skeleton-unit">
+                <div className="admin-residents__skeleton-header">
+                  <span className="admin-residents__skeleton-block admin-residents__skeleton-block--lg" />
+                  <span className="admin-residents__skeleton-block admin-residents__skeleton-block--xs" />
+                </div>
+                <div className="admin-residents__skeleton-cards">
+                  {[0, 1].map((cardIndex) => (
+                    <div key={cardIndex} className="admin-residents__skeleton-card">
+                      <span className="admin-residents__skeleton-avatar" />
+                      <div className="admin-residents__skeleton-lines">
+                        <span className="admin-residents__skeleton-block admin-residents__skeleton-block--md" />
+                        <span className="admin-residents__skeleton-block admin-residents__skeleton-block--sm" />
+                      </div>
+                      <span className="admin-residents__skeleton-pill" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -264,12 +355,16 @@ const AdminResidents = () => {
           <div className="admin-residents__empty">
             {searchTerm ? (
               <>
-                <span className="admin-residents__empty-icon">🔍</span>
+                <span className="admin-residents__empty-icon">
+                  <Icon name="search" size={40} />
+                </span>
                 <p>No se encontraron residentes que coincidan con "{searchTerm}"</p>
               </>
             ) : (
               <>
-                <span className="admin-residents__empty-icon">🏠</span>
+                <span className="admin-residents__empty-icon">
+                  <Icon name="home" size={40} />
+                </span>
                 <p>No hay residentes registrados en este edificio</p>
               </>
             )}
@@ -284,6 +379,8 @@ const AdminResidents = () => {
               tower={group.tower}
               floor={group.floor}
               residents={group.residents}
+              isExpanded={expandedUnits.has(group.unitId)}
+              onToggle={() => handleToggleUnit(group.unitId)}
             />
           ))}
         </div>

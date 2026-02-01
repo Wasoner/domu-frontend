@@ -1,26 +1,6 @@
 .admin-ggcc {
-  padding: 2.5rem 3vw 4rem;
+  padding: 0;
   color: var(--color-black);
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-  }
-
-  &__eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.7rem;
-    color: var(--color-gray);
-  }
-
-  &__subtitle {
-    max-width: 620px;
-    margin-top: 0.75rem;
-  }
 
   &__summary {
     display: grid;
@@ -61,6 +41,57 @@
     }
   }
 
+  &__tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__tab {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 0.8rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-orange);
+      outline-offset: 2px;
+    }
+
+    &--active {
+      border-color: rgba(245, 121, 0, 0.45);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 243, 230, 0.9) 100%);
+    }
+  }
+
+  &__tab-title {
+    display: block;
+    font-weight: 700;
+    color: var(--color-black);
+  }
+
+  &__tab-caption {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--color-gray-dark);
+  }
+
+  &__panel {
+    display: grid;
+    gap: 1.5rem;
+  }
+
   &__grid {
     display: grid;
     gap: 2rem;
@@ -73,12 +104,6 @@
   }
 
   &__card {
-    background: var(--color-bg-primary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border-light);
-    box-shadow: var(--shadow-sm);
-    padding: 1.6rem;
-
     h2 {
       margin-bottom: 1rem;
     }
@@ -243,8 +268,6 @@
 
 @media (max-width: 768px) {
   .admin-ggcc {
-    padding: 1.5rem 1.5rem 3rem;
-
     &__header {
       flex-direction: column;
     }
