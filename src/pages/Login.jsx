@@ -169,7 +169,7 @@ const Login = () => {
                             ← Volver al inicio
                         </Link>
                     </div>
-                )}
+                </div>
             </MainContent>
             <Footer />
         </div>
