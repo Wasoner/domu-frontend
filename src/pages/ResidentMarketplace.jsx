@@ -8,10 +8,11 @@ import './ResidentMarketplace.scss';
 
 const CATEGORIES = [
     { id: null, name: 'Todo', icon: 'archiveBox' },
-    { id: 1, name: 'Hogar', icon: 'home' },
+    { id: 1, name: 'Hogar y Muebles', icon: 'home' },
     { id: 2, name: 'Tecnología', icon: 'cpuChip' },
     { id: 3, name: 'Servicios', icon: 'wrench' },
     { id: 4, name: 'Alimentos', icon: 'shoppingBag' },
+    { id: 5, name: 'Otros', icon: 'archiveBox' },
 ];
 
 const ResidentMarketplace = () => {
@@ -43,15 +44,6 @@ const ResidentMarketplace = () => {
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    const handleContact = async (item) => {
-        try {
-            const response = await api.chat.startConversation(item.userId, item.id);
-            navigate(ROUTES.RESIDENT_CHAT, { state: { roomId: response.roomId } });
-        } catch (err) {
-            console.error("Error starting conversation", err);
-        }
-    };
 
     return (
         <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
