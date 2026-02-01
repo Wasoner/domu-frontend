@@ -625,6 +625,22 @@ export const api = {
         }),
       });
     },
+    updateAvatar: async (file) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return fetchWrapper('/users/me/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    updatePrivacyAvatar: async (file) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return fetchWrapper('/users/me/privacy-avatar', {
+        method: 'POST',
+        body: formData,
+      });
+    },
   },
 
   amenities: {
@@ -798,10 +814,30 @@ export const api = {
       const suffix = query.toString() ? `?${query.toString()}` : '';
       return fetchWrapper(`/market/items${suffix}`, { method: 'GET' });
     },
+    getItem: async (id) => fetchWrapper(`/market/items/${id}`, { method: 'GET' }),
+    updateItem: async (id, data) => {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'images') {
+          value.forEach(file => formData.append('images', file));
+        } else if (key === 'deletedImageUrls') {
+          formData.append(key, JSON.stringify(value));
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+      return fetchWrapper(`/market/items/${id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+    },
+    deleteItem: async (id) => fetchWrapper(`/market/items/${id}`, { method: 'DELETE' }),
     createItem: async (data) => {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
+        if (key === 'images') {
+          value.forEach(file => formData.append('images', file));
+        } else if (value !== null && value !== undefined) {
           formData.append(key, value);
         }
       });
@@ -815,6 +851,7 @@ export const api = {
   chat: {
     listRooms: async () => fetchWrapper('/chat/rooms', { method: 'GET' }),
     getMessages: async (roomId) => fetchWrapper(`/chat/rooms/${roomId}/messages`, { method: 'GET' }),
+    listNeighbors: async () => fetchWrapper('/chat/neighbors', { method: 'GET' }),
     startConversation: async (sellerId, itemId) => {
       const params = new URLSearchParams();
       params.set('sellerId', sellerId);

@@ -26,6 +26,8 @@ const ResidentProfile = () => {
     const [changingPass, setChangingPass] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [uploadingPrivacy, setUploadingPrivacy] = useState(false);
 
     const displayName = useMemo(() => (user?.firstName
         ? `${user.firstName} ${user?.lastName || ''}`.trim()
@@ -38,6 +40,33 @@ const ResidentProfile = () => {
         if (user?.email) return user.email.trim()[0].toUpperCase();
         return 'D';
     }, [user]);
+
+    const handleAvatarUpload = async (e, isPrivacy = false) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setError('');
+        setMessage('');
+        const setUploading = isPrivacy ? setUploadingPrivacy : setUploadingAvatar;
+
+        try {
+            setUploading(true);
+            if (isPrivacy) {
+                await api.users.updatePrivacyAvatar(file);
+                setMessage('Foto de privacidad actualizada.');
+            } else {
+                await api.users.updateAvatar(file);
+                setMessage('Foto de perfil actualizada.');
+            }
+            // Recargar datos de usuario
+            const updated = await api.auth.getCurrentUser();
+            setUser(updated);
+        } catch (err) {
+            setError(err.message || 'Error al subir la imagen.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const roleLabel = useMemo(() => {
         if (user?.userType === 'admin') return 'Administrador';
@@ -127,8 +156,16 @@ const ResidentProfile = () => {
                             <article className="resident-profile__card resident-profile__card--summary">
                                 <div className="profile-summary__top">
                                     <div className="profile-summary__identity">
-                                        <div className="profile-summary__avatar" aria-hidden="true">
-                                            {initials}
+                                        <div className="profile-summary__avatar-wrapper">
+                                            <div className="profile-summary__avatar" aria-hidden="true">
+                                                {user?.avatarBoxId ? (
+                                                    <img src={user.avatarBoxId} alt="Profile" />
+                                                ) : initials}
+                                            </div>
+                                            <label className="avatar-upload-label">
+                                                <input type="file" onChange={(e) => handleAvatarUpload(e, false)} hidden accept="image/*" />
+                                                {uploadingAvatar ? '...' : '📸'}
+                                            </label>
                                         </div>
                                         <div>
                                             <p className="profile-summary__eyebrow">Cuenta</p>
@@ -138,6 +175,23 @@ const ResidentProfile = () => {
                                     </div>
                                     <div className="profile-summary__badge">{unitLabel}</div>
                                 </div>
+                                
+                                <div className="profile-privacy-section">
+                                    <h3>Foto de Privacidad</h3>
+                                    <p className="resident-profile__hint">Esta es la foto que verán tus vecinos antes de que aceptes chatear con ellos.</p>
+                                    <div className="profile-summary__avatar-wrapper">
+                                        <div className="profile-summary__avatar is-privacy" aria-hidden="true">
+                                            {user?.privacyAvatarBoxId ? (
+                                                <img src={user.privacyAvatarBoxId} alt="Privacy" />
+                                            ) : '👤'}
+                                        </div>
+                                        <label className="avatar-upload-label">
+                                            <input type="file" onChange={(e) => handleAvatarUpload(e, true)} hidden accept="image/*" />
+                                            {uploadingPrivacy ? '...' : '📸'}
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div className="profile-summary__details">
                                     <div>
                                         <p className="profile-summary__label">Correo</p>

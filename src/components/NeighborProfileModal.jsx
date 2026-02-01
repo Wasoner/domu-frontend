@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import { Icon, Button, Spinner } from './index';
 import { api } from '../services';
+import { ROUTES } from '../constants';
 import './NeighborProfileModal.scss';
 
 const NeighborProfileModal = ({ userId, onClose, onContact }) => {
+    const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [requestMessage, setRequestMessage] = useState('');
@@ -38,6 +41,11 @@ const NeighborProfileModal = ({ userId, onClose, onContact }) => {
         } finally {
             setSendingRequest(false);
         }
+    };
+
+    const handleGoToChat = () => {
+        navigate(ROUTES.RESIDENT_CHAT, { state: { roomId: profile.activeChatRoomId } });
+        onClose();
     };
 
     if (loading) return (
@@ -90,7 +98,16 @@ const NeighborProfileModal = ({ userId, onClose, onContact }) => {
                     )}
 
                     <div className="neighbor-modal__action-box">
-                        {requestSent ? (
+                        {profile.activeChatRoomId ? (
+                            <Button 
+                                variant="secondary" 
+                                fullWidth 
+                                onClick={handleGoToChat}
+                                icon={<Icon name="chatBubbleLeftRight" size={18} />}
+                            >
+                                Ir al chat existente
+                            </Button>
+                        ) : requestSent ? (
                             <div className="neighbor-modal__success">
                                 <Icon name="check" size={20} />
                                 <span>¡Solicitud enviada! Espera a que acepte para chatear.</span>

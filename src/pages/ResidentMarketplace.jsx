@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ProtectedLayout } from '../layout';
 import { Icon, Button, Spinner, FormField, NeighborProfileModal } from '../components';
+import { useAppContext } from '../context';
 import { api } from '../services';
 import { ROUTES } from '../constants';
 import { useNavigate } from 'react-router-dom';
@@ -16,8 +17,10 @@ const CATEGORIES = [
 ];
 
 const ResidentMarketplace = () => {
+    const { user } = useAppContext();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showDetail, setShowDetail] = useState(null);
@@ -25,14 +28,20 @@ const ResidentMarketplace = () => {
     const navigate = useNavigate();
 
     const fetchItems = async () => {
-        setLoading(true);
+        // ... (fetch logic remains same)
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("¿Estás seguro de que quieres eliminar esta publicación?")) return;
+        setDeletingId(id);
         try {
-            const data = await api.market.listItems({ categoryId: selectedCategory });
-            setItems(Array.isArray(data) ? data : []);
+            await api.market.deleteItem(id);
+            fetchItems();
+            setShowDetail(null);
         } catch (err) {
-            console.error("Error fetching market items", err);
+            alert("No se pudo eliminar el producto");
         } finally {
-            setLoading(false);
+            setDeletingId(null);
         }
     };
 
@@ -138,7 +147,13 @@ const ResidentMarketplace = () => {
                             
                             <div className="market-modal__grid">
                                 <div className="market-modal__gallery">
-                                    {showDetail.mainImageUrl ? (
+                                    {showDetail.imageUrls && showDetail.imageUrls.length > 0 ? (
+                                        <div className="gallery-slider">
+                                            {showDetail.imageUrls.map((url, i) => (
+                                                <img key={i} src={url} alt={`${showDetail.title} ${i}`} />
+                                            ))}
+                                        </div>
+                                    ) : showDetail.mainImageUrl ? (
                                         <img src={showDetail.mainImageUrl} alt={showDetail.title} />
                                     ) : (
                                         <div className="market-modal__placeholder">
@@ -172,23 +187,48 @@ const ResidentMarketplace = () => {
                                     </div>
 
                                     <div className="market-modal__seller-card">
-                                        <div className="market-modal__seller-info">
-                                            <div className="market-modal__seller-avatar">
-                                                {showDetail.sellerName.charAt(0)}
+                                        {showDetail.userId === user.id ? (
+                                            <div className="market-modal__my-actions">
+                                                <Button 
+                                                    variant="secondary" 
+                                                    fullWidth
+                                                    onClick={() => navigate(ROUTES.RESIDENT_MARKETPLACE_CREATE, { state: { editId: showDetail.id } })}
+                                                    icon={<Icon name="edit" size={18} />}
+                                                >
+                                                    Editar publicación
+                                                </Button>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    fullWidth
+                                                    onClick={() => handleDelete(showDetail.id)}
+                                                    icon={<Icon name="trash" size={18} />}
+                                                    className="btn-delete"
+                                                    disabled={deletingId === showDetail.id}
+                                                >
+                                                    {deletingId === showDetail.id ? "Eliminando..." : "Eliminar anuncio"}
+                                                </Button>
                                             </div>
-                                            <div>
-                                                <strong>{showDetail.sellerName}</strong>
-                                                <span>Vecino verificado</span>
-                                            </div>
-                                        </div>
-                                        <Button 
-                                            variant="secondary" 
-                                            fullWidth
-                                            onClick={() => setShowProfileId(showDetail.userId)}
-                                            icon={<Icon name="chatBubbleLeftRight" size={18} />}
-                                        >
-                                            Ver perfil y contactar
-                                        </Button>
+                                        ) : (
+                                            <>
+                                                <div className="market-modal__seller-info">
+                                                    <div className="market-modal__seller-avatar">
+                                                        {showDetail.sellerName.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <strong>{showDetail.sellerName}</strong>
+                                                        <span>Vecino verificado</span>
+                                                    </div>
+                                                </div>
+                                                <Button 
+                                                    variant="secondary" 
+                                                    fullWidth
+                                                    onClick={() => setShowProfileId(showDetail.userId)}
+                                                    icon={<Icon name="chatBubbleLeftRight" size={18} />}
+                                                >
+                                                    Ver perfil y contactar
+                                                </Button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>

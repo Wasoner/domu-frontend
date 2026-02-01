@@ -16,6 +16,10 @@ const ChatHub = () => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
+    const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
+    const [neighbors, setNeighbors] = useState([]);
+    const [neighborSearch, setNeighborSearch] = useState('');
+    const [sendingRequest, setSendingRequest] = useState(false);
     
     const ws = useRef(null);
     const messagesEndRef = useRef(null);
@@ -108,6 +112,38 @@ const ChatHub = () => {
         }
     };
 
+    const openNewChatModal = async () => {
+        setIsNewChatModalOpen(true);
+        try {
+            const data = await api.chat.listNeighbors();
+            setNeighbors(data || []);
+        } catch (err) {
+            console.error("Error fetching neighbors", err);
+        }
+    };
+
+    const handleSendInitialRequest = async (neighborId) => {
+        try {
+            setSendingRequest(true);
+            await api.chat.sendRequest({
+                receiverId: neighborId,
+                initialMessage: "Hola, me gustaría chatear contigo."
+            });
+            setIsNewChatModalOpen(false);
+            fetchData();
+            setActiveTab('requests');
+        } catch (err) {
+            console.error("Error sending chat request", err);
+            alert("No se pudo enviar la solicitud: " + err.message);
+        } finally {
+            setSendingRequest(false);
+        }
+    };
+
+    const filteredNeighbors = neighbors.filter(n => 
+        n.unitNumber.toLowerCase().includes(neighborSearch.toLowerCase())
+    );
+
     if (loading) return (
         <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge', 'staff']}>
             <div className="chat-hub-loading"><Spinner /></div>
@@ -133,6 +169,9 @@ const ChatHub = () => {
                                 Solicitudes {requests.length > 0 && <span className="badge">{requests.length}</span>}
                             </button>
                         </div>
+                        <button className="btn-new-chat" onClick={openNewChatModal} title="Nuevo Chat">
+                            <Icon name="plus" size={20} />
+                        </button>
                     </div>
                     
                     <div className="chat-hub__scroll-area">
@@ -169,9 +208,13 @@ const ChatHub = () => {
                             <div className="chat-hub__requests-list">
                                 {requests.length > 0 ? requests.map(req => (
                                     <div key={req.id} className="request-item">
-                                        <div className="request-item__avatar">{req.senderName.charAt(0)}</div>
+                                        <div className="request-item__avatar">
+                                            {req.senderPrivacyPhoto ? (
+                                                <img src={req.senderPrivacyPhoto} alt="Privacy" />
+                                            ) : req.senderName.charAt(0)}
+                                        </div>
                                         <div className="request-item__info">
-                                            <strong>{req.senderName}</strong>
+                                            <strong>Unidad {req.senderUnitNumber}</strong>
                                             <p>{req.initialMessage}</p>
                                             <div className="request-item__actions">
                                                 <Button size="sm" variant="primary" onClick={() => handleRequestAction(req.id, 'APPROVED')}>Aceptar</Button>
@@ -250,6 +293,52 @@ const ChatHub = () => {
                     )}
                 </main>
             </div>
+
+            {isNewChatModalOpen && (
+                <div className="chat-modal-overlay">
+                    <div className="chat-modal">
+                        <header className="chat-modal__header">
+                            <h3>Nuevo Chat</h3>
+                            <button onClick={() => setIsNewChatModalOpen(false)}>&times;</button>
+                        </header>
+                        <div className="chat-modal__search">
+                            <input 
+                                type="text" 
+                                placeholder="Buscar por número de unidad..." 
+                                value={neighborSearch}
+                                onChange={(e) => setNeighborSearch(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="chat-modal__list">
+                            {filteredNeighbors.length > 0 ? filteredNeighbors.map(n => (
+                                <div key={n.id} className="neighbor-item">
+                                    <div className="neighbor-item__avatar">
+                                        {n.privacyAvatarBoxId ? (
+                                            <img src={n.privacyAvatarBoxId} alt="Privacy" />
+                                        ) : (
+                                            <Icon name="user" size={24} />
+                                        )}
+                                    </div>
+                                    <div className="neighbor-item__info">
+                                        <strong>Unidad {n.unitNumber}</strong>
+                                        <span>Solo podrás ver su nombre cuando acepte.</span>
+                                    </div>
+                                    <Button 
+                                        size="sm" 
+                                        onClick={() => handleSendInitialRequest(n.id)}
+                                        disabled={sendingRequest}
+                                    >
+                                        {sendingRequest ? '...' : 'Solicitar'}
+                                    </Button>
+                                </div>
+                            )) : (
+                                <p className="no-results">No se encontraron vecinos.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </ProtectedLayout>
     );
 };
