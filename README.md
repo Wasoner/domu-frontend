@@ -35,6 +35,21 @@ Una plataforma integral para la gestión de comunidades de edificios y comunidad
 - Node.js (v18 or higher)
 - npm (v9 or higher)
 
+## ⚙️ Environment Configuration
+
+Create a `.env` file in the root directory based on `.env.example`:
+
+```properties
+# Backend API URL (default for local dev)
+VITE_API_BASE_URL=/api
+
+# App Environment (development/production)
+VITE_APP_ENV=development
+
+# Feature Flags
+VITE_ENABLE_ANALYTICS=false
+```
+
 ## 🛠️ Getting Started
 
 ### Installation
@@ -95,15 +110,9 @@ domu-frontend/
 │   ├── pages/             # Page components (route-level)
 │   │   ├── Home.jsx       # Home page example
 │   │   └── index.js       # Page exports
-│   ├── hooks/             # Custom React hooks
-│   │   ├── useCounter.js  # Example custom hook
-│   │   └── index.js       # Hook exports
 │   ├── services/          # API calls and external services
 │   │   ├── api.js         # API service layer
 │   │   └── index.js       # Service exports
-│   ├── utils/             # Utility functions
-│   │   ├── helpers.js     # Helper functions
-│   │   └── index.js       # Utility exports
 │   ├── context/           # React Context providers
 │   │   ├── AppContext.jsx # App context provider
 │   │   ├── appContextDefinition.js # Context definition
@@ -141,14 +150,6 @@ Page-level components that represent entire routes/views in your application. Th
 import { Home } from './pages';
 ```
 
-### `/src/hooks`
-Custom React hooks for reusable stateful logic. Follow the `use` prefix naming convention.
-
-**Example:**
-```javascript
-import { useCounter } from './hooks';
-```
-
 ### `/src/services`
 API calls, external service integrations, and data fetching logic. Keeps API logic separate from components.
 
@@ -156,14 +157,6 @@ API calls, external service integrations, and data fetching logic. Keeps API log
 ```javascript
 import { api } from './services';
 const data = await api.get('/users');
-```
-
-### `/src/utils`
-Pure utility functions and helpers that don't depend on React. These should be framework-agnostic.
-
-**Example:**
-```javascript
-import { formatDate, debounce } from './utils';
 ```
 
 ### `/src/context`
