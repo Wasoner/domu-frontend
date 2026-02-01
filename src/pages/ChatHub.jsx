@@ -10,16 +10,20 @@ const ChatHub = () => {
     const { user } = useAppContext();
     const location = useLocation();
     const [rooms, setRooms] = useState([]);
+    const [requests, setRequests] = useState([]);
+    const [activeTab, setActiveTab] = useState('messages'); // 'messages' or 'requests'
     const [activeRoom, setActiveRoom] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
-    const [isTyping, setIsTyping] = useState(false);
+    const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
+    const [neighbors, setNeighbors] = useState([]);
+    const [neighborSearch, setNeighborSearch] = useState('');
+    const [sendingRequest, setSendingRequest] = useState(false);
     
     const ws = useRef(null);
     const messagesEndRef = useRef(null);
 
-    // Scroll al final cuando hay nuevos mensajes
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -28,28 +32,29 @@ const ChatHub = () => {
         scrollToBottom();
     }, [messages]);
 
-    // Cargar salas y conectar WebSocket
-    useEffect(() => {
-        const initChat = async () => {
-            try {
-                const data = await api.chat.listRooms();
-                setRooms(data);
-                
-                // Si venimos desde el marketplace, activar esa sala
-                if (location.state?.roomId) {
-                    const room = data.find(r => r.id === location.state.roomId);
-                    if (room) setActiveRoom(room);
-                }
-            } catch (err) {
-                console.error("Error loading chat rooms", err);
-            } finally {
-                setLoading(false);
+    const fetchData = async () => {
+        try {
+            const [roomsData, requestsData] = await Promise.all([
+                api.chat.listRooms(),
+                api.chat.listRequests()
+            ]);
+            setRooms(roomsData || []);
+            setRequests(requestsData || []);
+            
+            if (location.state?.roomId) {
+                const room = (roomsData || []).find(r => r.id === location.state.roomId);
+                if (room) setActiveRoom(room);
             }
-        };
+        } catch (err) {
+            console.error("Error loading chat data", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        initChat();
+    useEffect(() => {
+        fetchData();
 
-        // Conexión WebSocket
         const token = localStorage.getItem('authToken');
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = import.meta.env.DEV ? 'localhost:7000' : window.location.host;
@@ -62,7 +67,6 @@ const ChatHub = () => {
                 if (activeRoom?.id === data.roomId) {
                     setMessages(prev => [...prev, data.message]);
                 }
-                // Actualizar último mensaje en la lista de salas
                 setRooms(prev => prev.map(r => 
                     r.id === data.roomId ? { ...r, lastMessage: data.message, lastMessageAt: new Date().toISOString() } : r
                 ));
@@ -72,13 +76,12 @@ const ChatHub = () => {
         return () => ws.current?.close();
     }, [activeRoom?.id]);
 
-    // Cargar mensajes al cambiar de sala
     useEffect(() => {
         if (activeRoom) {
             const fetchMessages = async () => {
                 try {
                     const data = await api.chat.getMessages(activeRoom.id);
-                    setMessages(data.reverse());
+                    setMessages((data || []).reverse());
                 } catch (err) {
                     console.error("Error loading messages", err);
                 }
@@ -91,65 +94,139 @@ const ChatHub = () => {
         e.preventDefault();
         if (!newMessage.trim() || !activeRoom) return;
 
-        const payload = {
+        ws.current.send(JSON.stringify({
             type: 'SEND_MSG',
             roomId: activeRoom.id,
             content: newMessage,
             msgType: 'TEXT'
-        };
-
-        ws.current.send(JSON.stringify(payload));
+        }));
         setNewMessage('');
     };
 
-    const handleTyping = (e) => {
-        setNewMessage(e.target.value);
-        // Notificar que el usuario está escribiendo vía WS
-        ws.current.send(JSON.stringify({
-            type: 'TYPING',
-            roomId: activeRoom?.id,
-            isTyping: e.target.value.length > 0
-        }));
+    const handleRequestAction = async (requestId, status) => {
+        try {
+            await api.chat.updateRequestStatus(requestId, status);
+            fetchData();
+        } catch (err) {
+            console.error("Error updating request status", err);
+        }
     };
 
+    const openNewChatModal = async () => {
+        setIsNewChatModalOpen(true);
+        try {
+            const data = await api.chat.listNeighbors();
+            setNeighbors(data || []);
+        } catch (err) {
+            console.error("Error fetching neighbors", err);
+        }
+    };
+
+    const handleSendInitialRequest = async (neighborId) => {
+        try {
+            setSendingRequest(true);
+            await api.chat.sendRequest({
+                receiverId: neighborId,
+                initialMessage: "Hola, me gustaría chatear contigo."
+            });
+            setIsNewChatModalOpen(false);
+            fetchData();
+            setActiveTab('requests');
+        } catch (err) {
+            console.error("Error sending chat request", err);
+            alert("No se pudo enviar la solicitud: " + err.message);
+        } finally {
+            setSendingRequest(false);
+        }
+    };
+
+    const filteredNeighbors = neighbors.filter(n => 
+        n.unitNumber.toLowerCase().includes(neighborSearch.toLowerCase())
+    );
+
     if (loading) return (
-        <ProtectedLayout>
+        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge', 'staff']}>
             <div className="chat-hub-loading"><Spinner /></div>
         </ProtectedLayout>
     );
 
     return (
-        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
+        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge', 'staff']}>
             <div className="chat-hub">
                 <aside className="chat-hub__sidebar">
                     <div className="chat-hub__sidebar-header">
-                        <h2>Mis Mensajes</h2>
+                        <div className="chat-tabs">
+                            <button 
+                                className={activeTab === 'messages' ? 'is-active' : ''} 
+                                onClick={() => setActiveTab('messages')}
+                            >
+                                Mensajes
+                            </button>
+                            <button 
+                                className={activeTab === 'requests' ? 'is-active' : ''} 
+                                onClick={() => setActiveTab('requests')}
+                            >
+                                Solicitudes {requests.length > 0 && <span className="badge">{requests.length}</span>}
+                            </button>
+                        </div>
+                        <button className="btn-new-chat" onClick={openNewChatModal} title="Nuevo Chat">
+                            <Icon name="plus" size={20} />
+                        </button>
                     </div>
-                    <div className="chat-hub__room-list">
-                        {rooms.map(room => {
-                            const otherParticipant = room.participants.find(p => p.id !== user.id);
-                            return (
-                                <div 
-                                    key={room.id} 
-                                    className={`room-item ${activeRoom?.id === room.id ? 'is-active' : ''}`}
-                                    onClick={() => setActiveRoom(room)}
-                                >
-                                    <div className="room-item__avatar">
-                                        {otherParticipant?.name.charAt(0)}
-                                    </div>
-                                    <div className="room-item__info">
-                                        <div className="room-item__top">
-                                            <strong>{otherParticipant?.name}</strong>
-                                            <span>{new Date(room.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    
+                    <div className="chat-hub__scroll-area">
+                        {activeTab === 'messages' ? (
+                            <div className="chat-hub__room-list">
+                                {rooms.length > 0 ? rooms.map(room => {
+                                    const otherParticipant = room.participants.find(p => p.id !== user.id);
+                                    return (
+                                        <div 
+                                            key={room.id} 
+                                            className={`room-item ${activeRoom?.id === room.id ? 'is-active' : ''}`}
+                                            onClick={() => setActiveRoom(room)}
+                                        >
+                                            <div className="room-item__avatar">
+                                                {otherParticipant?.name.charAt(0)}
+                                            </div>
+                                            <div className="room-item__info">
+                                                <div className="room-item__top">
+                                                    <strong>{otherParticipant?.name}</strong>
+                                                    <span>{room.lastMessageAt ? new Date(room.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                                                </div>
+                                                <p className="room-item__preview">
+                                                    {room.itemTitle && <span className="item-tag">{room.itemTitle}: </span>}
+                                                    {room.lastMessage?.content || 'Inicia una conversación'}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <p className="room-item__preview">
-                                            {room.itemTitle && <span className="item-tag">{room.itemTitle}: </span>}
-                                            {room.lastMessage?.content || 'Inicia una conversación'}
-                                        </p>
+                                    );
+                                }) : (
+                                    <div className="requests-empty">No tienes mensajes aún</div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="chat-hub__requests-list">
+                                {requests.length > 0 ? requests.map(req => (
+                                    <div key={req.id} className="request-item">
+                                        <div className="request-item__avatar">
+                                            {req.senderPrivacyPhoto ? (
+                                                <img src={req.senderPrivacyPhoto} alt="Privacy" />
+                                            ) : req.senderName.charAt(0)}
+                                        </div>
+                                        <div className="request-item__info">
+                                            <strong>Unidad {req.senderUnitNumber}</strong>
+                                            <p>{req.initialMessage}</p>
+                                            <div className="request-item__actions">
+                                                <Button size="sm" variant="primary" onClick={() => handleRequestAction(req.id, 'APPROVED')}>Aceptar</Button>
+                                                <Button size="sm" variant="ghost" onClick={() => handleRequestAction(req.id, 'REJECTED')}>Rechazar</Button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                )) : (
+                                    <div className="requests-empty">No hay solicitudes pendientes</div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </aside>
 
@@ -199,7 +276,7 @@ const ChatHub = () => {
                                         type="text" 
                                         placeholder="Escribe un mensaje..." 
                                         value={newMessage}
-                                        onChange={handleTyping}
+                                        onChange={(e) => setNewMessage(e.target.value)}
                                     />
                                     <button type="submit" className="btn-send" disabled={!newMessage.trim()}>
                                         <Icon name="arrowRight" size={20} />
@@ -216,6 +293,52 @@ const ChatHub = () => {
                     )}
                 </main>
             </div>
+
+            {isNewChatModalOpen && (
+                <div className="chat-modal-overlay">
+                    <div className="chat-modal">
+                        <header className="chat-modal__header">
+                            <h3>Nuevo Chat</h3>
+                            <button onClick={() => setIsNewChatModalOpen(false)}>&times;</button>
+                        </header>
+                        <div className="chat-modal__search">
+                            <input 
+                                type="text" 
+                                placeholder="Buscar por número de unidad..." 
+                                value={neighborSearch}
+                                onChange={(e) => setNeighborSearch(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="chat-modal__list">
+                            {filteredNeighbors.length > 0 ? filteredNeighbors.map(n => (
+                                <div key={n.id} className="neighbor-item">
+                                    <div className="neighbor-item__avatar">
+                                        {n.privacyAvatarBoxId ? (
+                                            <img src={n.privacyAvatarBoxId} alt="Privacy" />
+                                        ) : (
+                                            <Icon name="user" size={24} />
+                                        )}
+                                    </div>
+                                    <div className="neighbor-item__info">
+                                        <strong>Unidad {n.unitNumber}</strong>
+                                        <span>Solo podrás ver su nombre cuando acepte.</span>
+                                    </div>
+                                    <Button 
+                                        size="sm" 
+                                        onClick={() => handleSendInitialRequest(n.id)}
+                                        disabled={sendingRequest}
+                                    >
+                                        {sendingRequest ? '...' : 'Solicitar'}
+                                    </Button>
+                                </div>
+                            )) : (
+                                <p className="no-results">No se encontraron vecinos.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </ProtectedLayout>
     );
 };

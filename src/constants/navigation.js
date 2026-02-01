@@ -42,6 +42,7 @@ export const NAV_SECTIONS = [
     roles: ['admin', 'concierge'],
     items: [
       { label: 'Dashboard', icon: 'chartBar', to: ROUTES.DASHBOARD, roles: ['admin', 'concierge'], exact: true },
+      { label: 'Registrar Usuario', icon: 'userPlus', to: ROUTES.ADMIN_CREATE_USER, roles: ['admin'], exact: true },
       { label: 'Residentes', icon: 'users', to: ROUTES.ADMIN_RESIDENTS, roles: ['admin', 'concierge'], exact: true },
       { label: 'Unidades', icon: 'homeModern', to: ROUTES.ADMIN_HOUSING_UNITS, roles: ['admin'], exact: true },
       { label: 'Cargar gastos', icon: 'banknotes', to: ROUTES.COMMON_CHARGES, roles: ['admin'], exact: true },
