@@ -459,6 +459,50 @@ body.is-dragging .kanban-column--can-drop .kanban-card:not(.kanban-card--draggin
   line-height: 1.5;
 }
 
+.kanban-card__assignment {
+  margin-bottom: 0.75rem;
+  display: flex;
+}
+
+.kanban-card__assign-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px dashed var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-gray-dark);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.kanban-card__assign-btn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-turquoise);
+  color: var(--color-turquoise);
+}
+
+.kanban-card__assign-btn.is-assigned {
+  border-style: solid;
+  border-color: var(--color-info);
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  font-weight: 500;
+}
+
+.kanban-card__assign-select {
+  width: 100%;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--color-turquoise);
+  border-radius: var(--radius-sm);
+  background: white;
+  font-size: 0.75rem;
+  color: var(--color-black);
+  outline: none;
+}
+
 .kanban-card__footer {
   display: flex;
   justify-content: space-between;

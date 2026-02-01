@@ -195,56 +195,117 @@
   align-self: start;
 }
 
+.resident-portal__notifications-table {
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.resident-portal__notifications-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  padding: 0.6rem 1.1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: #f8fafc;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-gray);
+}
+
 .resident-portal__notifications-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0;
   max-height: 520px;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  padding-right: 0.25rem;
 }
 
 .resident-portal__notification {
-  padding: 1rem 1.15rem;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #f9fafb;
-  transition: background var(--transition-fast);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: inset 3px 0 0 transparent;
 }
 
 .resident-portal__notification:hover {
-  background: #f1f3f4;
+  background: #f7f8fa;
 }
 
-.resident-portal__notification--high {
-  border-left: 4px solid var(--color-error);
+.resident-portal__notification:focus-visible {
+  outline: 2px solid rgba(83, 164, 151, 0.45);
+  outline-offset: -2px;
 }
 
-.resident-portal__notification--medium {
-  border-left: 4px solid var(--color-warning);
+.resident-portal__notification.is-new {
+  background: #f3fbf9;
 }
 
-.resident-portal__notification--low {
-  border-left: 4px solid var(--color-info);
+.resident-portal__notification[data-priority="high"] {
+  box-shadow: inset 3px 0 0 rgba(239, 68, 68, 0.7);
 }
 
-.resident-portal__notification-header {
+.resident-portal__notification[data-priority="medium"] {
+  box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.7);
+}
+
+.resident-portal__notification[data-priority="low"] {
+  box-shadow: inset 3px 0 0 rgba(34, 197, 94, 0.6);
+}
+
+.resident-portal__notification:last-child {
+  border-bottom: none;
+}
+
+.resident-portal__notification-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--notif-bg, rgba(83, 164, 151, 0.12));
+  color: var(--notif-color, var(--color-turquoise));
+  flex-shrink: 0;
+}
+
+.resident-portal__notification-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.resident-portal__notification-body {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
 }
 
-.resident-portal__notification-info h3 {
+.resident-portal__notification-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.resident-portal__notification-title-row h3 {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-black);
-}
-
-.resident-portal__notification-date {
-  font-size: 0.75rem;
-  color: var(--color-gray-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .resident-portal__notification-message {
@@ -252,7 +313,86 @@
   color: var(--color-gray-dark);
   line-height: 1.5;
   margin: 0;
-  padding-left: 2rem;
+}
+
+.resident-portal__notification-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.resident-portal__notification-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(83, 164, 151, 0.12);
+  color: var(--color-turquoise);
+}
+
+.resident-portal__notification-tag--muted {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--color-gray-dark);
+  font-weight: 500;
+}
+
+.resident-portal__notification-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-gray-dark);
+}
+
+.resident-portal__notification-pill--high {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+.resident-portal__notification-pill--medium {
+  background: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+}
+
+.resident-portal__notification-pill--low {
+  background: rgba(34, 197, 94, 0.16);
+  color: #15803d;
+}
+
+.resident-portal__notification-new {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0f766e;
+  background: rgba(15, 118, 110, 0.12);
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.resident-portal__notification-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  color: var(--color-gray);
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+
+.resident-portal__notification-date {
+  font-size: 0.72rem;
+  color: var(--color-gray);
+  white-space: nowrap;
+}
+
+.resident-portal__notification-chevron {
+  color: var(--color-gray);
 }
 
 .resident-portal__upcoming-list {
@@ -379,7 +519,19 @@
     text-align: center;
   }
 
-  .resident-portal__notification-message {
-    padding-left: 0;
+  .resident-portal__notification {
+    grid-template-columns: auto 1fr;
+  }
+
+  .resident-portal__notification-aside {
+    display: none;
+  }
+
+  .resident-portal__notification-title-row h3 {
+    white-space: normal;
+  }
+
+  .resident-portal__notifications-head {
+    display: none;
   }
 }

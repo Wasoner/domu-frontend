@@ -47,16 +47,7 @@ const getInitialFormState = () => {
   };
 };
 
-const formatDate = (isoString) => {
-  try {
-    return new Intl.DateTimeFormat('es-CL', {
-      dateStyle: 'long',
-      timeStyle: 'short',
-    }).format(new Date(isoString));
-  } catch {
-    return 'Fecha no disponible';
-  }
-};
+
 
 const formatShortDate = (isoString) => {
   try {

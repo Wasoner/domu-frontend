@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
 import { Icon } from '../components';
 import { api } from '../services';
+import { ROUTES } from '../constants';
 import './AdminResidents.scss';
 
 /**
@@ -260,6 +262,10 @@ const AdminResidents = () => {
             >
               {loading ? 'Actualizando…' : 'Actualizar'}
             </button>
+            <Link to={ROUTES.ADMIN_CREATE_USER} className="button button--primary">
+              <Icon name="userPlus" size={18} />
+              Registrar Residente
+            </Link>
           </div>
         </header>
 
