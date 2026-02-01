@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
+import { Icon } from '../components';
 import { api } from '../services';
 import './AdminAmenities.scss';
 
@@ -242,7 +243,7 @@ const AdminAmenities = () => {
           key={step}
           className={`stepper__step ${currentStep === step ? 'stepper__step--active' : ''} ${currentStep > step ? 'stepper__step--completed' : ''}`}
         >
-          <div className="stepper__circle">{currentStep > step ? '✓' : step}</div>
+          <div className="stepper__circle">{currentStep > step ? <Icon name="check" size={16} /> : step}</div>
           <span className="stepper__label">
             {step === 1 && 'Información básica'}
             {step === 2 && 'Detalles'}
@@ -413,16 +414,16 @@ const AdminAmenities = () => {
 
   return (
     <ProtectedLayout allowedRoles={['admin', 'concierge']}>
-      <article className="admin-amenities">
-        <header className="admin-amenities__header">
+      <article className="admin-amenities page-shell">
+        <header className="admin-amenities__header page-header">
           <div>
-            <p className="admin-amenities__eyebrow">Gestión</p>
-            <h1>Áreas Comunes</h1>
-            <p className="admin-amenities__subtitle">
+            <p className="admin-amenities__eyebrow page-eyebrow">Gestión</p>
+            <h1 className="page-title">Áreas Comunes</h1>
+            <p className="admin-amenities__subtitle page-subtitle">
               Crea, configura y administra las áreas comunes de tu comunidad.
             </p>
           </div>
-          <div className="admin-amenities__actions">
+          <div className="admin-amenities__actions page-actions">
             <button type="button" onClick={fetchAmenities} disabled={loading}>
               {loading ? 'Cargando...' : 'Actualizar'}
             </button>
@@ -507,7 +508,7 @@ const AdminAmenities = () => {
             <div className="modal__card modal__card--stepper">
               <header className="modal__header">
                 <h2>{editingAmenity ? 'Editar área común' : 'Nueva área común'}</h2>
-                <button type="button" className="modal__close" onClick={handleCloseForm}>✕</button>
+                <button type="button" className="modal__close" onClick={handleCloseForm}><Icon name="close" size={16} /></button>
               </header>
 
               {renderStepIndicator()}
@@ -548,7 +549,7 @@ const AdminAmenities = () => {
             <div className="modal__card modal__card--wide">
               <header className="modal__header">
                 <h2>Configurar horarios: {selectedAmenity.name}</h2>
-                <button type="button" className="modal__close" onClick={() => setShowSlotForm(false)}>✕</button>
+                <button type="button" className="modal__close" onClick={() => setShowSlotForm(false)}><Icon name="close" size={16} /></button>
               </header>
               <div className="slot-form">
                 <div className="slot-form__add">
@@ -614,7 +615,7 @@ const AdminAmenities = () => {
             <div className="modal__card modal__card--wide">
               <header className="modal__header">
                 <h2>Reservas: {selectedAmenity.name}</h2>
-                <button type="button" className="modal__close" onClick={() => setShowReservations(false)}>✕</button>
+                <button type="button" className="modal__close" onClick={() => setShowReservations(false)}><Icon name="close" size={16} /></button>
               </header>
               <div className="reservations-list">
                 {reservations.length === 0 && (

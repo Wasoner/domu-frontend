@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
+import { Icon } from '../components';
 import { api } from '../services';
 import './AdminIncidentsBoard.scss';
 
@@ -13,7 +14,7 @@ const COLUMNS = [
     title: 'Reportados',
     status: 'REPORTED',
     color: '#f59e0b',
-    icon: '📋',
+    icon: 'clipboard',
     description: 'Nuevos incidentes pendientes de revisión',
   },
   {
@@ -21,7 +22,7 @@ const COLUMNS = [
     title: 'En Progreso',
     status: 'IN_PROGRESS',
     color: '#0ea5e9',
-    icon: '🔧',
+    icon: 'screwdriver',
     description: 'Incidentes siendo atendidos',
   },
   {
@@ -29,7 +30,7 @@ const COLUMNS = [
     title: 'Cerrados',
     status: 'CLOSED',
     color: '#22c55e',
-    icon: '✓',
+    icon: 'check',
     description: 'Incidentes resueltos',
   },
 ];
@@ -38,15 +39,15 @@ const COLUMNS = [
  * Mapeo de categorías a iconos
  */
 const CATEGORY_ICONS = {
-  maintenance: '🔧',
-  noise: '🔊',
-  security: '🔒',
-  cleaning: '🧹',
-  parking: '🚗',
-  elevator: '🛗',
-  water: '💧',
-  electricity: '⚡',
-  general: '📌',
+  maintenance: 'wrench',
+  noise: 'speakerWave',
+  security: 'lock',
+  cleaning: 'sparkles',
+  parking: 'car',
+  elevator: 'arrowsUpDown',
+  water: 'water',
+  electricity: 'bolt',
+  general: 'clipboard',
 };
 
 /**
@@ -85,7 +86,7 @@ const IncidentCard = ({ incident, onDragStart, onDragEnd, isDragging }) => {
     >
       <div className="kanban-card__header">
         <span className="kanban-card__category">
-          <span aria-hidden="true">{categoryIcon}</span>
+          <Icon name={categoryIcon} size={14} />
           {incident.category || 'general'}
         </span>
         <span className="kanban-card__id">#{incident.id}</span>
@@ -132,9 +133,11 @@ const KanbanColumn = ({
   onDrop,
   isDragOver,
   draggingIncident,
+  isLoading,
 }) => {
-  const isEmpty = incidents.length === 0;
+  const isEmpty = incidents.length === 0 && !isLoading;
   const canDrop = draggingIncident && draggingIncident.status !== column.status;
+  const skeletonCards = Array.from({ length: 3 }, (_, index) => index);
 
   return (
     <div
@@ -147,7 +150,7 @@ const KanbanColumn = ({
       <div className="kanban-column__header">
         <div className="kanban-column__title-row">
           <span className="kanban-column__icon" aria-hidden="true">
-            {column.icon}
+            <Icon name={column.icon} size={18} />
           </span>
           <h3>{column.title}</h3>
           <span className="kanban-column__count">{incidents.length}</span>
@@ -160,10 +163,29 @@ const KanbanColumn = ({
         role="list"
         aria-label={`Lista de incidentes ${column.title}`}
       >
+        {isLoading && incidents.length === 0 && (
+          <div className="kanban-column__skeleton" aria-hidden="true">
+            {skeletonCards.map((key) => (
+              <div key={key} className="kanban-card kanban-card--skeleton">
+                <div className="kanban-card__skeleton-row">
+                  <span className="skeleton-block skeleton-block--xs" />
+                  <span className="skeleton-block skeleton-block--sm" />
+                </div>
+                <span className="skeleton-block skeleton-block--lg" />
+                <span className="skeleton-block skeleton-block--md" />
+                <div className="kanban-card__skeleton-row">
+                  <span className="skeleton-block skeleton-block--sm" />
+                  <span className="skeleton-block skeleton-block--sm" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {isEmpty && !isDragOver && (
           <div className="kanban-column__empty">
             <span className="kanban-column__empty-icon" aria-hidden="true">
-              {column.icon}
+              <Icon name={column.icon} size={32} />
             </span>
             <p>Sin incidentes</p>
           </div>
@@ -202,10 +224,12 @@ const AdminIncidentsBoard = () => {
   const [dragOverColumn, setDragOverColumn] = useState(null);
   const [lastAction, setLastAction] = useState(null);
   const dragCounterRef = useRef({});
+  const lastFetchKeyRef = useRef(null);
 
   const totalIncidents = useMemo(() => {
     return kanban.reported.length + kanban.inProgress.length + kanban.closed.length;
   }, [kanban]);
+  const isInitialLoading = loading && totalIncidents === 0;
 
   const fetchKanban = useCallback(async () => {
     if (!user) return;
@@ -239,8 +263,13 @@ const AdminIncidentsBoard = () => {
   }, [user]);
 
   useEffect(() => {
-    fetchKanban();
-  }, [fetchKanban, buildingVersion]); // Recargar cuando cambia el edificio
+    if (!user) return;
+    const key = `${user.id || user.email || 'anon'}-${buildingVersion ?? '0'}`;
+    if (lastFetchKeyRef.current !== key) {
+      lastFetchKeyRef.current = key;
+      fetchKanban();
+    }
+  }, [fetchKanban, buildingVersion, user]); // Recargar cuando cambia el edificio
 
   // Auto-ocultar mensaje de acción después de 3 segundos
   useEffect(() => {
@@ -337,23 +366,29 @@ const AdminIncidentsBoard = () => {
 
   return (
     <ProtectedLayout allowedRoles={['admin', 'concierge']}>
-      <article className="incidents-board">
+      <article className="incidents-board page-shell page-shell--wide">
         {/* Header */}
-        <header className="incidents-board__header">
+        <header className="incidents-board__header page-header">
           <div className="incidents-board__title-section">
-            <h1>Gestión de Incidentes</h1>
-            <p className="incidents-board__subtitle">
+            <h1 className="page-title">Gestión de Incidentes</h1>
+            <p className="incidents-board__subtitle page-subtitle">
               Arrastra las tarjetas entre columnas para cambiar su estado
             </p>
           </div>
 
-          <div className="incidents-board__toolbar">
+          <div className="incidents-board__toolbar page-actions">
             <div className="incidents-board__stats">
               <span className="incidents-board__stat">
-                <strong>{totalIncidents}</strong> total
+                <strong className={isInitialLoading ? 'skeleton-inline' : ''}>
+                  {isInitialLoading ? '' : totalIncidents}
+                </strong>
+                total
               </span>
               <span className="incidents-board__stat incidents-board__stat--warning">
-                <strong>{kanban.reported.length}</strong> pendientes
+                <strong className={isInitialLoading ? 'skeleton-inline' : ''}>
+                  {isInitialLoading ? '' : kanban.reported.length}
+                </strong>
+                pendientes
               </span>
             </div>
 
@@ -364,7 +399,9 @@ const AdminIncidentsBoard = () => {
               disabled={loading || saving}
               aria-label="Actualizar tablero"
             >
-              <span className={loading ? 'is-spinning' : ''}>↻</span>
+              <span className={loading ? 'is-spinning' : ''}>
+                <Icon name="refresh" size={16} />
+              </span>
               {loading ? 'Cargando...' : 'Actualizar'}
             </button>
           </div>
@@ -378,7 +415,7 @@ const AdminIncidentsBoard = () => {
             aria-live="polite"
           >
             <span className="incidents-board__toast-icon">
-              {lastAction.type === 'success' ? '✓' : '!'}
+              <Icon name={lastAction.type === 'success' ? 'check' : 'exclamation'} size={14} />
             </span>
             {lastAction.message}
           </div>
@@ -406,6 +443,7 @@ const AdminIncidentsBoard = () => {
                 onDrop={handleDrop}
                 isDragOver={dragOverColumn === column.key}
                 draggingIncident={draggingIncident}
+                isLoading={isInitialLoading}
               />
             ))}
           </div>

@@ -76,6 +76,56 @@
   border: 1px dashed var(--color-border-medium);
 }
 
+.amenity-preview--skeleton {
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.amenity-preview--skeleton .amenity-preview__image {
+  background: var(--color-bg-secondary);
+}
+
+.amenities-skeleton-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.amenities-skeleton-block {
+  display: block;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f1f3f5 25%, #e7eaee 45%, #f1f3f5 65%);
+  background-size: 200% 100%;
+  animation: amenities-shimmer 1.4s ease infinite;
+}
+
+.amenities-skeleton-block--xs {
+  width: 60px;
+}
+
+.amenities-skeleton-block--sm {
+  width: 140px;
+}
+
+.amenities-skeleton-block--md {
+  width: 200px;
+}
+
+.amenities-skeleton-block--lg {
+  width: 260px;
+  height: 16px;
+}
+
+@keyframes amenities-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* Amenity Preview Card */
 .amenity-preview {
   background: var(--color-bg-primary);
@@ -186,6 +236,11 @@
   color: var(--color-gray-dark);
 }
 
+.my-reservations__skeleton {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .my-reservations__section-title {
   margin: 0.5rem 0 0;
   font-size: 1rem;
@@ -214,6 +269,11 @@
 
 .reservation-card--past {
   opacity: 0.7;
+}
+
+.reservation-card--skeleton {
+  border-style: dashed;
+  background: var(--color-bg-secondary);
 }
 
 .reservation-card__main h4 {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
+import { Icon } from '../components';
 import './Sidebar.scss';
 
 const Sidebar = ({ navSections }) => {
@@ -44,7 +45,7 @@ const Sidebar = ({ navSections }) => {
                         }
                       >
                         <span aria-hidden="true" className="app-sidebar__icon">
-                          {item.icon}
+                          {item.icon && <Icon name={item.icon} size={18} />}
                         </span>
                         <span className="app-sidebar__link-label">{item.label}</span>
                       </NavLink>
@@ -55,7 +56,7 @@ const Sidebar = ({ navSections }) => {
                         className="app-sidebar__link app-sidebar__link--static"
                       >
                         <span aria-hidden="true" className="app-sidebar__icon">
-                          {item.icon}
+                          {item.icon && <Icon name={item.icon} size={18} />}
                         </span>
                         <span className="app-sidebar__link-label">{item.label}</span>
                       </button>
@@ -92,6 +93,5 @@ Sidebar.defaultProps = {
 };
 
 export default Sidebar;
-
 
 

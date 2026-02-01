@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
+import { Icon } from '../components';
 import { api } from '../services';
 import './AdminHousingUnits.scss';
 
@@ -12,11 +14,15 @@ const AdminHousingUnits = () => {
   const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showResidentsModal, setShowResidentsModal] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [availableResidents, setAvailableResidents] = useState([]);
   const [loadingResidents, setLoadingResidents] = useState(false);
+  const [residentDirectory, setResidentDirectory] = useState([]);
+  const [residentDirectoryLoaded, setResidentDirectoryLoaded] = useState(false);
+  const lastFetchKeyRef = useRef(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedResidentId, setSelectedResidentId] = useState('');
   const [formData, setFormData] = useState({
@@ -29,25 +35,47 @@ const AdminHousingUnits = () => {
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  const ModalPortal = ({ children }) => {
+    if (typeof document === 'undefined') return null;
+    return createPortal(children, document.body);
+  };
+
   // Fetch units
   const fetchUnits = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return [];
+    }
     setLoading(true);
     setError(null);
     try {
       const data = await api.housingUnits.list();
-      setUnits(data || []);
+      const nextUnits = data || [];
+      setUnits(nextUnits);
+      return nextUnits;
     } catch (err) {
       console.error('Error cargando unidades:', err);
       setError(err.message || 'Error al cargar las unidades');
+      return [];
     } finally {
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    fetchUnits();
-  }, [fetchUnits, buildingVersion]);
+    if (!user) return;
+    const key = `${user.id || user.email || 'anon'}-${buildingVersion ?? '0'}`;
+    if (lastFetchKeyRef.current !== key) {
+      lastFetchKeyRef.current = key;
+      fetchUnits();
+    }
+  }, [fetchUnits, buildingVersion, user]);
+
+  useEffect(() => {
+    setResidentDirectory([]);
+    setResidentDirectoryLoaded(false);
+    setAvailableResidents([]);
+  }, [buildingVersion]);
 
   // Abrir modal de crear
   const handleOpenCreate = () => {
@@ -149,10 +177,21 @@ const AdminHousingUnits = () => {
   };
 
   // Cargar residentes disponibles (sin unidad o del mismo edificio)
-  const loadAvailableResidents = async (unit) => {
+  const loadResidentDirectory = useCallback(async (force = false) => {
+    if (residentDirectoryLoaded && !force) {
+      return residentDirectory;
+    }
+    const residents = await api.adminUsers.getResidents();
+    const safeResidents = residents || [];
+    setResidentDirectory(safeResidents);
+    setResidentDirectoryLoaded(true);
+    return safeResidents;
+  }, [residentDirectoryLoaded, residentDirectory]);
+
+  const loadAvailableResidents = async (unit, forceDirectoryReload = false) => {
     setLoadingResidents(true);
     try {
-      const residents = await api.adminUsers.getResidents();
+      const residents = await loadResidentDirectory(forceDirectoryReload);
       // Filtrar residentes que no están asignados a esta unidad específica
       // Incluye: residentes sin unidad o residentes asignados a otras unidades
       const currentResidentIds = (unit.residents || []).map(r => r.id);
@@ -176,9 +215,7 @@ const AdminHousingUnits = () => {
 
     try {
       await api.housingUnits.unlinkResident(selectedUnit.unit.id, residentId);
-      await fetchUnits();
-      // Actualizar el modal con los nuevos datos
-      const updatedUnits = await api.housingUnits.list();
+      const updatedUnits = await fetchUnits();
       const updatedUnit = updatedUnits.find(u => u.unit.id === selectedUnit.unit.id);
       if (updatedUnit) {
         setSelectedUnit(updatedUnit);
@@ -232,11 +269,7 @@ const AdminHousingUnits = () => {
       // Esperar un momento para asegurar que la base de datos se actualizó
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Recargar unidades para obtener datos actualizados
-      await fetchUnits();
-
-      // Actualizar el modal con los nuevos datos
-      const updatedUnits = await api.housingUnits.list();
+      const updatedUnits = await fetchUnits();
       const updatedUnit = updatedUnits.find(u => u.unit.id === selectedUnit.unit.id);
 
       if (updatedUnit) {
@@ -246,7 +279,6 @@ const AdminHousingUnits = () => {
         console.warn('No se encontró la unidad actualizada');
       }
 
-      // Recargar residentes disponibles
       await loadAvailableResidents(updatedUnit || selectedUnit);
 
       // Cerrar modal de asignación y limpiar selección
@@ -259,18 +291,26 @@ const AdminHousingUnits = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <ProtectedLayout allowedRoles={['admin']}>
-        <div className="admin-housing-units__loading">
-          <div className="spinner"></div>
-          <p>Cargando unidades...</p>
-        </div>
-      </ProtectedLayout>
-    );
-  }
+  const filteredUnits = useMemo(() => {
+    if (!searchTerm.trim()) return units;
+    const term = searchTerm.toLowerCase();
+    return units.filter((item) => (
+      item.unit.number?.toLowerCase().includes(term)
+      || item.unit.tower?.toLowerCase().includes(term)
+      || item.unit.floor?.toLowerCase().includes(term)
+      || item.unit.createdByUserName?.toLowerCase().includes(term)
+    ));
+  }, [units, searchTerm]);
 
-  if (error) {
+  const stats = useMemo(() => {
+    const totalUnits = units.length;
+    const occupiedUnits = units.filter((item) => (item.unit.residentCount || 0) > 0).length;
+    const vacantUnits = totalUnits - occupiedUnits;
+    return { totalUnits, occupiedUnits, vacantUnits };
+  }, [units]);
+  const isInitialLoading = loading && units.length === 0;
+
+  if (error && units.length === 0 && !loading) {
     return (
       <ProtectedLayout allowedRoles={['admin']}>
         <div className="admin-housing-units__error">
@@ -286,27 +326,89 @@ const AdminHousingUnits = () => {
 
   return (
     <ProtectedLayout allowedRoles={['admin']}>
-      <div className="admin-housing-units">
-        <header className="admin-housing-units__header">
+      <div className="admin-housing-units page-shell page-shell--wide">
+        <header className="admin-housing-units__header page-header">
           <div>
-            <h1>Gestión de Unidades</h1>
-            <p>Administra las unidades habitacionales del edificio</p>
+            <p className="admin-housing-units__eyebrow page-eyebrow">Edificio</p>
+            <h1 className="page-title">Unidades habitacionales</h1>
+            <p className="page-subtitle">Administra unidades, residentes asociados y métricas de ocupación.</p>
           </div>
-          <button onClick={handleOpenCreate} className="button button--primary">
-            + Crear Unidad
-          </button>
+          <div className="admin-housing-units__header-actions page-actions">
+            <button onClick={fetchUnits} className="button button--secondary" disabled={loading}>
+              {loading ? 'Actualizando…' : 'Actualizar'}
+            </button>
+            <button onClick={handleOpenCreate} className="button button--primary">
+              + Crear Unidad
+            </button>
+          </div>
         </header>
 
-        {units.length === 0 ? (
+        {error && (
+          <div className="admin-housing-units__error-banner">
+            <p>{error}</p>
+          </div>
+        )}
+
+        <section className="admin-housing-units__stats page-stats" aria-label="Resumen de unidades">
+          <div className="admin-housing-units__stat page-stat">
+            <span>Total unidades</span>
+            <strong className={isInitialLoading ? 'skeleton-block skeleton-block--lg' : ''}>
+              {isInitialLoading ? '' : stats.totalUnits}
+            </strong>
+          </div>
+          <div className="admin-housing-units__stat page-stat">
+            <span>Con residentes</span>
+            <strong className={isInitialLoading ? 'skeleton-block skeleton-block--lg' : ''}>
+              {isInitialLoading ? '' : stats.occupiedUnits}
+            </strong>
+          </div>
+          <div className="admin-housing-units__stat admin-housing-units__stat--accent page-stat">
+            <span>Disponibles</span>
+            <strong className={isInitialLoading ? 'skeleton-block skeleton-block--lg' : ''}>
+              {isInitialLoading ? '' : stats.vacantUnits}
+            </strong>
+          </div>
+        </section>
+
+        <div className="admin-housing-units__controls page-controls">
+          <div className="admin-housing-units__search">
+            <input
+              type="text"
+              placeholder="Buscar por número, torre, piso o creador..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="admin-housing-units__search-input"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                className="admin-housing-units__search-clear"
+                onClick={() => setSearchTerm('')}
+              >
+                <Icon name="close" size={12} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {filteredUnits.length === 0 && !isInitialLoading ? (
           <div className="admin-housing-units__empty">
-            <div className="admin-housing-units__empty-icon">🏠</div>
-            <div>
-              <h3>No hay unidades registradas</h3>
-              <p>Comienza gestionando las unidades habitacionales de tu edificio. Crea tu primera unidad para empezar.</p>
+            <div className="admin-housing-units__empty-icon">
+              <Icon name={searchTerm ? 'search' : 'home'} size={48} />
             </div>
-            <button onClick={handleOpenCreate} className="button button--primary">
-              + Crear primera unidad
-            </button>
+            <div>
+              <h3>{searchTerm ? 'No encontramos unidades' : 'No hay unidades registradas'}</h3>
+              <p>
+                {searchTerm
+                  ? `No hay resultados para "${searchTerm}".`
+                  : 'Comienza gestionando las unidades habitacionales de tu edificio. Crea tu primera unidad para empezar.'}
+              </p>
+            </div>
+            {!searchTerm && (
+              <button onClick={handleOpenCreate} className="button button--primary">
+                + Crear primera unidad
+              </button>
+            )}
           </div>
         ) : (
           <div className="admin-housing-units__table-container">
@@ -324,42 +426,60 @@ const AdminHousingUnits = () => {
                 </tr>
               </thead>
               <tbody>
-                {units.map((item) => (
-                  <tr key={item.unit.id}>
-                    <td><strong>{item.unit.number}</strong></td>
-                    <td>{item.unit.tower}</td>
-                    <td>{item.unit.floor}</td>
-                    <td>{item.unit.aliquotPercentage ? `${item.unit.aliquotPercentage}%` : '-'}</td>
-                    <td>{item.unit.squareMeters ? `${item.unit.squareMeters} m²` : '-'}</td>
-                    <td>
-                      <button
-                        className="button button--link"
-                        onClick={() => handleOpenResidents(item)}
-                      >
-                        {item.unit.residentCount || 0} residente(s)
-                      </button>
-                    </td>
-                    <td className="admin-housing-units__creator">
-                      {item.unit.createdByUserName || '-'}
-                    </td>
-                    <td className="admin-housing-units__actions">
-                      <button
-                        onClick={() => handleOpenEdit(item)}
-                        className="button button--small button--secondary"
-                        title="Editar"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUnit(item)}
-                        className="button button--small button--danger"
-                        title="Eliminar"
-                      >
-                        🗑️
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {isInitialLoading
+                  ? Array.from({ length: 4 }, (_, index) => (
+                    <tr key={`skeleton-${index}`} className="admin-housing-units__row-skeleton" aria-hidden="true">
+                      <td><span className="skeleton-block skeleton-block--sm" /></td>
+                      <td><span className="skeleton-block skeleton-block--xs" /></td>
+                      <td><span className="skeleton-block skeleton-block--xs" /></td>
+                      <td><span className="skeleton-block skeleton-block--xs" /></td>
+                      <td><span className="skeleton-block skeleton-block--xs" /></td>
+                      <td><span className="skeleton-block skeleton-block--sm" /></td>
+                      <td><span className="skeleton-block skeleton-block--md" /></td>
+                      <td>
+                        <div className="admin-housing-units__skeleton-actions">
+                          <span className="skeleton-block skeleton-block--xs" />
+                          <span className="skeleton-block skeleton-block--xs" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                  : filteredUnits.map((item) => (
+                    <tr key={item.unit.id}>
+                      <td><strong>{item.unit.number}</strong></td>
+                      <td>{item.unit.tower}</td>
+                      <td>{item.unit.floor}</td>
+                      <td>{item.unit.aliquotPercentage ? `${item.unit.aliquotPercentage}%` : '-'}</td>
+                      <td>{item.unit.squareMeters ? `${item.unit.squareMeters} m²` : '-'}</td>
+                      <td>
+                        <button
+                          className="button button--link"
+                          onClick={() => handleOpenResidents(item)}
+                        >
+                          {item.unit.residentCount || 0} residente(s)
+                        </button>
+                      </td>
+                      <td className="admin-housing-units__creator">
+                        {item.unit.createdByUserName || '-'}
+                      </td>
+                      <td className="admin-housing-units__actions">
+                        <button
+                          onClick={() => handleOpenEdit(item)}
+                          className="button button--small button--secondary"
+                          title="Editar"
+                        >
+                          <Icon name="edit" size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUnit(item)}
+                          className="button button--small button--danger"
+                          title="Eliminar"
+                        >
+                          <Icon name="trash" size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -367,19 +487,20 @@ const AdminHousingUnits = () => {
 
         {/* Modal de crear/editar */}
         {showCreateModal && (
-          <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal__header">
-                <h2>{selectedUnit ? 'Editar Unidad' : 'Crear Nueva Unidad'}</h2>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="modal__close"
-                >
-                  ✕
-                </button>
-              </div>
+          <ModalPortal>
+            <div className="admin-housing-units__modal-overlay" onClick={() => setShowCreateModal(false)}>
+              <div className="admin-housing-units__modal" onClick={(e) => e.stopPropagation()}>
+                <div className="admin-housing-units__modal-header">
+                  <h2>{selectedUnit ? 'Editar Unidad' : 'Crear Nueva Unidad'}</h2>
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="admin-housing-units__modal-close"
+                  >
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
               <form onSubmit={handleSaveUnit}>
-                <div className="modal__body">
+                <div className="admin-housing-units__modal-body">
                   <div className="form-group">
                     <label htmlFor="number">Número de Unidad *</label>
                     <input
@@ -456,7 +577,7 @@ const AdminHousingUnits = () => {
                   )}
                 </div>
 
-                <div className="modal__footer">
+                <div className="admin-housing-units__modal-footer">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
@@ -476,22 +597,24 @@ const AdminHousingUnits = () => {
               </form>
             </div>
           </div>
+          </ModalPortal>
         )}
 
         {/* Modal de residentes */}
         {showResidentsModal && selectedUnit && (
-          <div className="modal-overlay" onClick={() => setShowResidentsModal(false)}>
-            <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
-              <div className="modal__header">
-                <h2>Residentes de Unidad {selectedUnit.unit.number}</h2>
-                <button
-                  onClick={() => setShowResidentsModal(false)}
-                  className="modal__close"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="modal__body">
+          <ModalPortal>
+            <div className="admin-housing-units__modal-overlay" onClick={() => setShowResidentsModal(false)}>
+              <div className="admin-housing-units__modal admin-housing-units__modal--large" onClick={(e) => e.stopPropagation()}>
+                <div className="admin-housing-units__modal-header">
+                  <h2>Residentes de Unidad {selectedUnit.unit.number}</h2>
+                  <button
+                    onClick={() => setShowResidentsModal(false)}
+                    className="admin-housing-units__modal-close"
+                  >
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+              <div className="admin-housing-units__modal-body">
                 {/* Sección de residentes asignados */}
                 <div className="residents-section">
                   <div className="residents-section__header">
@@ -542,39 +665,41 @@ const AdminHousingUnits = () => {
                   )}
                 </div>
               </div>
-              <div className="modal__footer">
-                <button
-                  onClick={() => {
-                    setShowResidentsModal(false);
-                    setShowAssignModal(false);
-                    setSelectedResidentId('');
-                  }}
-                  className="button button--secondary"
-                >
-                  Cerrar
-                </button>
+                <div className="admin-housing-units__modal-footer">
+                  <button
+                    onClick={() => {
+                      setShowResidentsModal(false);
+                      setShowAssignModal(false);
+                      setSelectedResidentId('');
+                    }}
+                    className="button button--secondary"
+                  >
+                    Cerrar
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </ModalPortal>
         )}
 
         {/* Modal de asignar residente */}
         {showAssignModal && selectedUnit && (
-          <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal__header">
-                <h2>Asignar Residente a Unidad {selectedUnit.unit.number}</h2>
-                <button
-                  onClick={() => {
-                    setShowAssignModal(false);
-                    setSelectedResidentId('');
-                  }}
-                  className="modal__close"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="modal__body">
+          <ModalPortal>
+            <div className="admin-housing-units__modal-overlay" onClick={() => setShowAssignModal(false)}>
+              <div className="admin-housing-units__modal" onClick={(e) => e.stopPropagation()}>
+                <div className="admin-housing-units__modal-header">
+                  <h2>Asignar Residente a Unidad {selectedUnit.unit.number}</h2>
+                  <button
+                    onClick={() => {
+                      setShowAssignModal(false);
+                      setSelectedResidentId('');
+                    }}
+                    className="admin-housing-units__modal-close"
+                  >
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+              <div className="admin-housing-units__modal-body">
                 {loadingResidents ? (
                   <div className="loading-state">
                     <div className="spinner"></div>
@@ -609,28 +734,29 @@ const AdminHousingUnits = () => {
                   </div>
                 )}
               </div>
-              <div className="modal__footer">
-                <button
-                  onClick={() => {
-                    setShowAssignModal(false);
-                    setSelectedResidentId('');
-                  }}
-                  className="button button--secondary"
-                >
-                  Cancelar
-                </button>
-                {availableResidents.length > 0 && (
+                <div className="admin-housing-units__modal-footer">
                   <button
-                    onClick={handleLinkResident}
-                    className="button button--primary"
-                    disabled={!selectedResidentId}
+                    onClick={() => {
+                      setShowAssignModal(false);
+                      setSelectedResidentId('');
+                    }}
+                    className="button button--secondary"
                   >
-                    Asignar
+                    Cancelar
                   </button>
-                )}
+                  {availableResidents.length > 0 && (
+                    <button
+                      onClick={handleLinkResident}
+                      className="button button--primary"
+                      disabled={!selectedResidentId}
+                    >
+                      Asignar
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          </ModalPortal>
         )}
       </div>
     </ProtectedLayout>

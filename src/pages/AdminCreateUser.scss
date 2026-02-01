@@ -1,32 +1,7 @@
 .admin-create-user {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.admin-create-user__header .eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-gray);
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.admin-create-user__header h1 {
-  margin: 0 0 4px;
-  font-size: 28px;
-}
-
-.admin-create-user__header .subtitle {
-  margin: 0;
-  color: var(--color-gray-dark);
-}
-
-.admin-create-user__card {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  padding: 24px;
+  gap: 1.5rem;
 }
 
 .admin-create-user__form {

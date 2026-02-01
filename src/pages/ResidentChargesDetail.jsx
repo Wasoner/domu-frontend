@@ -7,7 +7,7 @@ const ResidentChargesDetail = () => {
   const [periods, setPeriods] = useState([]);
   const [selectedPeriodId, setSelectedPeriodId] = useState('');
   const [detail, setDetail] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -141,7 +141,47 @@ const ResidentChargesDetail = () => {
         </div>
 
         {loading ? (
-          <div className="resident-charges-detail__loading">Cargando detalle...</div>
+          <div className="resident-charges-detail__skeleton" aria-hidden="true">
+            <div className="resident-charges-detail__summary resident-charges-detail__summary--skeleton">
+              {Array.from({ length: 4 }, (_, index) => (
+                <div key={`summary-skeleton-${index}`} className="resident-charges-detail__summary-card resident-charges-detail__summary-card--skeleton">
+                  <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--sm" />
+                  <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--lg" />
+                </div>
+              ))}
+            </div>
+
+            <section className="resident-charges-detail__table">
+              <div className="resident-charges-detail__skeleton-title">
+                <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--md" />
+              </div>
+              <div className="resident-charges-detail__table-grid resident-charges-detail__table-grid--skeleton">
+                <div className="resident-charges-detail__table-row resident-charges-detail__table-row--skeleton">
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <span key={`head-skeleton-${index}`} className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--xs" />
+                  ))}
+                </div>
+                {Array.from({ length: 4 }, (_, rowIndex) => (
+                  <div key={`row-skeleton-${rowIndex}`} className="resident-charges-detail__table-row resident-charges-detail__table-row--skeleton">
+                    <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--sm" />
+                    <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--sm" />
+                    <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--lg" />
+                    <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--sm" />
+                    <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--xs" />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="resident-charges-detail__history resident-charges-detail__history--skeleton">
+              <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--md" />
+              <div className="resident-charges-detail__skeleton-lines">
+                <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--lg" />
+                <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--md" />
+                <span className="resident-charges-detail__skeleton-block resident-charges-detail__skeleton-block--lg" />
+              </div>
+            </section>
+          </div>
         ) : detail ? (
           <div className="resident-charges-detail__content">
             <div className="resident-charges-detail__summary">
