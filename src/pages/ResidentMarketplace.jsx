@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ProtectedLayout } from '../layout';
-import { Icon, Button, Spinner, FormField, NeighborProfileModal } from '../components';
+import { Icon, Button, Spinner, FormField, NeighborProfileModal, MarketCard } from '../components';
 import { useAppContext } from '../context';
 import { api } from '../services';
 import { ROUTES } from '../constants';
@@ -28,7 +28,15 @@ const ResidentMarketplace = () => {
     const navigate = useNavigate();
 
     const fetchItems = async () => {
-        // ... (fetch logic remains same)
+        setLoading(true);
+        try {
+            const data = await api.market.listItems({ categoryId: selectedCategory });
+            setItems(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error("Error fetching market items", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDelete = async (id) => {
@@ -97,36 +105,20 @@ const ResidentMarketplace = () => {
 
                 {loading ? (
                     <div className="resident-marketplace__loading">
-                        <Spinner />
-                        <p>Cargando productos...</p>
+                        <div className="resident-marketplace__grid">
+                            {[1, 2, 3, 4, 5, 6].map(i => (
+                                <div key={i} className="market-card-skeleton" />
+                            ))}
+                        </div>
                     </div>
                 ) : filteredItems.length > 0 ? (
                     <div className="resident-marketplace__grid">
                         {filteredItems.map(item => (
-                            <div key={item.id} className="market-card" onClick={() => setShowDetail(item)}>
-                                <div className="market-card__image">
-                                    {item.mainImageUrl ? (
-                                        <img src={item.mainImageUrl} alt={item.title} />
-                                    ) : (
-                                        <div className="market-card__placeholder">
-                                            <Icon name="archiveBox" size={40} />
-                                        </div>
-                                    )}
-                                    <span className="market-card__price">
-                                        ${new Intl.NumberFormat('es-CL').format(item.price)}
-                                    </span>
-                                </div>
-                                <div className="market-card__content">
-                                    <span className="market-card__category">{item.categoryName}</span>
-                                    <h3>{item.title}</h3>
-                                    <div className="market-card__seller">
-                                        <div className="market-card__avatar">
-                                            {item.sellerName.charAt(0)}
-                                        </div>
-                                        <span>{item.sellerName}</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <MarketCard 
+                                key={item.id} 
+                                item={item} 
+                                onClick={() => setShowDetail(item)} 
+                            />
                         ))}
                     </div>
                 ) : (
@@ -167,7 +159,7 @@ const ResidentMarketplace = () => {
                                         <span className="market-modal__category-tag">{showDetail.categoryName}</span>
                                         <h1>{showDetail.title}</h1>
                                         <strong className="market-modal__price">
-                                            ${new Intl.NumberFormat('es-CL').format(showDetail.price)}
+                                            {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(showDetail.price)}
                                         </strong>
                                     </div>
 
