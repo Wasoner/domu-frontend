@@ -6,6 +6,7 @@ export { default as Button } from './Button';
 export { default as FormField } from './FormField';
 export { default as Icon } from './Icon';
 export { default as MarketCarousel } from './MarketCarousel';
+export { default as MarketCard } from './MarketCard';
 export { default as VisitRegistrationPanel } from './VisitRegistrationPanel';
 export { default as LocationPicker } from './LocationPicker';
 export { default as Seo } from './Seo';
