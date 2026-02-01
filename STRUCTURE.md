@@ -9,9 +9,9 @@ This React application follows a **feature-based structure** with clear separati
 ```
 Frontend Architecture
 ├── Presentation Layer (Components, Pages)
-├── Business Logic Layer (Hooks, Context)
+├── Business Logic Layer (Context)
 ├── Service Layer (API, Services)
-└── Utilities Layer (Utils, Constants)
+└── Utilities Layer (Constants)
 ```
 
 ## Directory Deep Dive
@@ -57,29 +57,6 @@ import { Home } from './pages';
 
 ---
 
-### 🪝 `/src/hooks`
-**Purpose**: Custom React hooks for reusable stateful logic
-
-**Characteristics**:
-- Follow the `use` prefix convention
-- Encapsulate complex logic
-- Can be composed together
-- Framework-dependent (React)
-
-**Example Usage**:
-```jsx
-import { useCounter } from './hooks';
-
-function Component() {
-  const { count, increment, decrement } = useCounter(0);
-  return <button onClick={increment}>{count}</button>;
-}
-```
-
-**Naming Convention**: camelCase with `use` prefix (e.g., `useCounter.js`, `useFetch.js`)
-
----
-
 ### 🌐 `/src/services`
 **Purpose**: API calls and external service integrations
 
@@ -88,6 +65,17 @@ function Component() {
 - Error handling
 - Request/response transformation
 - Framework-agnostic
+
+**Available Modules (`api.js`)**:
+- **auth**: `login`, `logout`, `register`, `getCurrentUser`
+- **finance**: `getMyCharges`, `listPeriods`, `createPeriod`, `addCharges`, `uploadChargeReceipt`
+- **buildings**: `createRequest` (Registration)
+- **visits**: `create`, `listMine`, `checkIn`, `contacts` (management)
+- **incidents**: `listMine`, `create`, `updateStatus`
+- **polls**: `list`, `create`, `vote`, `close`, `exportCsv`
+- **amenities**: `list`, `getAvailability`, `reserve`, `configureTimeSlots`
+- **housingUnits**: `list`, `create`, `linkResident`
+- **users**: `updateProfile`, `changePassword`
 
 **Example Usage**:
 ```jsx
@@ -100,27 +88,6 @@ async function fetchUsers() {
 ```
 
 **Naming Convention**: camelCase (e.g., `api.js`, `authService.js`)
-
----
-
-### 🔧 `/src/utils`
-**Purpose**: Pure utility functions and helpers
-
-**Characteristics**:
-- No side effects
-- Framework-agnostic
-- Easily testable
-- Reusable across projects
-
-**Example Usage**:
-```jsx
-import { formatDate, debounce } from './utils';
-
-const formattedDate = formatDate(new Date());
-const debouncedSearch = debounce(searchFunction, 300);
-```
-
-**Naming Convention**: camelCase (e.g., `helpers.js`, `validation.js`)
 
 ---
 

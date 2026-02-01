@@ -87,80 +87,26 @@
   color: var(--color-black);
 }
 
-.login-loading {
-  display: flex;
+/* Botón en estado de carga */
+.login-form .btn-loading {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: clamp(320px, 55vh, 560px);
-  padding: 1.5rem;
+  gap: 0.625rem;
+  pointer-events: none;
+  opacity: 0.85;
+  background: var(--color-turquoise);
+  cursor: wait;
 }
 
-.login-loading-panel {
-  width: min(420px, 92vw);
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-lg);
-  padding: clamp(1.75rem, 4vw, 2.75rem);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  text-align: center;
+.login-form .btn-loading .spinner {
+  flex-shrink: 0;
 }
 
-.login-loading-panel .spinner {
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.login-loading-panel .spinner__label {
-  font-size: clamp(1rem, 2.6vw, 1.125rem);
-  color: var(--color-black);
-}
-
-.login-loading-text {
-  margin: 0;
-  color: var(--color-gray-dark);
-  font-size: clamp(0.9rem, 2.3vw, 1rem);
-}
-
-.login-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: clamp(320px, 55vh, 560px);
-  padding: 1.5rem;
-}
-
-.login-loading-panel {
-  width: min(420px, 92vw);
-  background: #ffffff;
-  border-radius: 18px;
-  padding: clamp(1.75rem, 4vw, 2.75rem);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  text-align: center;
-}
-
-.login-loading-panel .spinner {
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.login-loading-panel .spinner__label {
-  font-size: clamp(1rem, 2.6vw, 1.125rem);
-  color: var(--color-black);
-}
-
-.login-loading-text {
-  margin: 0;
-  color: var(--color-gray-dark);
-  font-size: clamp(0.9rem, 2.3vw, 1rem);
+.login-form .btn-loading .spinner__icon {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
 }
 
 .login-form {
