@@ -60,6 +60,17 @@ export const NAV_SECTIONS = [
     ],
 
   },
+  {
+
+    title: 'Propiedad',
+
+    roles: ['resident'],
+
+    items: [
+      { label: 'Gastos comunes', icon: '💳', to: ROUTES.RESIDENT_CHARGES_DETAIL_VIEW, roles: ['resident'], exact: true },
+    ],
+
+  },
 
   {
 
