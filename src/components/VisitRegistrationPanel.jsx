@@ -528,7 +528,9 @@ const VisitRegistrationPanel = ({ user }) => {
 
                   {resolvedRole !== 'resident' && (
                     <label className="visit-form__field">
-                      <span>Unidad / Depto <span className="required">*</span></span>
+                          <div className="form-field__label">
+                            <span>Unidad <span className="required">*</span></span>
+                          </div>
                       <input
                         type="text"
                         name="unit"

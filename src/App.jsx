@@ -27,6 +27,7 @@ import {
   ResidentFunds,
   ResidentLibrary,
   ResidentMarketplace,
+  ResidentMarketplaceCreate,
   ChatHub,
   Votaciones,
   UserTypeConserjeria,
@@ -87,6 +88,7 @@ function App() {
           <Route path={ROUTES.RESIDENT_FUNDS} element={<ResidentFunds />} />
           <Route path={ROUTES.RESIDENT_LIBRARY} element={<ResidentLibrary />} />
           <Route path={ROUTES.RESIDENT_MARKETPLACE} element={<ResidentMarketplace />} />
+          <Route path={ROUTES.RESIDENT_MARKETPLACE_CREATE} element={<ResidentMarketplaceCreate />} />
           <Route path={ROUTES.RESIDENT_CHAT} element={<ChatHub />} />
         </Routes>
       </BrowserRouter>

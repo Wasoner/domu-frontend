@@ -32,6 +32,7 @@ export { default as ResidentExpenses } from './ResidentExpenses';
 export { default as ResidentFunds } from './ResidentFunds';
 export { default as ResidentLibrary } from './ResidentLibrary';
 export { default as ResidentMarketplace } from './ResidentMarketplace';
+export { default as ResidentMarketplaceCreate } from './ResidentMarketplaceCreate';
 export { default as ChatHub } from './ChatHub';
 export { default as Votaciones } from './Votaciones';
 

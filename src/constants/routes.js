@@ -67,6 +67,7 @@ export const ROUTES = {
   RESIDENT_FUNDS: '/resident/fondos',
   RESIDENT_LIBRARY: '/resident/biblioteca',
   RESIDENT_MARKETPLACE: '/resident/marketplace',
+  RESIDENT_MARKETPLACE_CREATE: '/resident/marketplace/nuevo',
   RESIDENT_CHAT: '/resident/chat',
 };
 

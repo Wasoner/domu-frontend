@@ -289,7 +289,7 @@ const AdminCreateUser = () => {
                       <option value="">Selecciona una unidad...</option>
                       {units.map((unit) => (
                         <option key={unit.id} value={unit.id}>
-                          {unit.tower ? `${unit.tower} - ` : ''} Depto {unit.number}
+                          {unit.tower ? `${unit.tower} - ` : ''} Unidad {unit.number}
                         </option>
                       ))}
                     </select>

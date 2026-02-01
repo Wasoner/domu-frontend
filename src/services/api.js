@@ -603,12 +603,13 @@ export const api = {
   },
 
   users: {
+    getProfile: async (userId) => fetchWrapper(`/users/${userId}/profile`, { method: 'GET' }),
     updateProfile: async (data) => {
       const payload = {
-        firstName: String(data.firstName || '').trim(),
-        lastName: String(data.lastName || '').trim(),
-        phone: String(data.phone || '').trim(),
-        documentNumber: String(data.documentNumber || '').trim(),
+        firstName: String(userData.firstName || '').trim(),
+        lastName: String(userData.lastName || '').trim(),
+        phone: String(userData.phone || '').trim(),
+        documentNumber: String(userData.documentNumber || '').trim(),
       };
       return fetchWrapper('/users/me/profile', {
         method: 'PUT',
@@ -622,6 +623,22 @@ export const api = {
           currentPassword,
           newPassword,
         }),
+      });
+    },
+    updateAvatar: async (file) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return fetchWrapper('/users/me/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    updatePrivacyAvatar: async (file) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return fetchWrapper('/users/me/privacy-avatar', {
+        method: 'POST',
+        body: formData,
       });
     },
   },
@@ -797,10 +814,30 @@ export const api = {
       const suffix = query.toString() ? `?${query.toString()}` : '';
       return fetchWrapper(`/market/items${suffix}`, { method: 'GET' });
     },
+    getItem: async (id) => fetchWrapper(`/market/items/${id}`, { method: 'GET' }),
+    updateItem: async (id, data) => {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'images') {
+          value.forEach(file => formData.append('images', file));
+        } else if (key === 'deletedImageUrls') {
+          formData.append(key, JSON.stringify(value));
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+      return fetchWrapper(`/market/items/${id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+    },
+    deleteItem: async (id) => fetchWrapper(`/market/items/${id}`, { method: 'DELETE' }),
     createItem: async (data) => {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
+        if (key === 'images') {
+          value.forEach(file => formData.append('images', file));
+        } else if (value !== null && value !== undefined) {
           formData.append(key, value);
         }
       });
@@ -814,11 +851,21 @@ export const api = {
   chat: {
     listRooms: async () => fetchWrapper('/chat/rooms', { method: 'GET' }),
     getMessages: async (roomId) => fetchWrapper(`/chat/rooms/${roomId}/messages`, { method: 'GET' }),
+    listNeighbors: async () => fetchWrapper('/chat/neighbors', { method: 'GET' }),
     startConversation: async (sellerId, itemId) => {
       const params = new URLSearchParams();
       params.set('sellerId', sellerId);
       if (itemId) params.set('itemId', itemId);
       return fetchWrapper(`/chat/rooms?${params.toString()}`, { method: 'POST' });
     },
+    listRequests: async () => fetchWrapper('/chat/requests/me', { method: 'GET' }),
+    sendRequest: async (data) => fetchWrapper('/chat/requests', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    updateRequestStatus: async (requestId, status) => fetchWrapper(`/chat/requests/${requestId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
   },
 };
