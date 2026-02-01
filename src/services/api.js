@@ -603,12 +603,13 @@ export const api = {
   },
 
   users: {
+    getProfile: async (userId) => fetchWrapper(`/users/${userId}/profile`, { method: 'GET' }),
     updateProfile: async (data) => {
       const payload = {
-        firstName: String(data.firstName || '').trim(),
-        lastName: String(data.lastName || '').trim(),
-        phone: String(data.phone || '').trim(),
-        documentNumber: String(data.documentNumber || '').trim(),
+        firstName: String(userData.firstName || '').trim(),
+        lastName: String(userData.lastName || '').trim(),
+        phone: String(userData.phone || '').trim(),
+        documentNumber: String(userData.documentNumber || '').trim(),
       };
       return fetchWrapper('/users/me/profile', {
         method: 'PUT',
@@ -820,5 +821,14 @@ export const api = {
       if (itemId) params.set('itemId', itemId);
       return fetchWrapper(`/chat/rooms?${params.toString()}`, { method: 'POST' });
     },
+    listRequests: async () => fetchWrapper('/chat/requests/me', { method: 'GET' }),
+    sendRequest: async (data) => fetchWrapper('/chat/requests', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    updateRequestStatus: async (requestId, status) => fetchWrapper(`/chat/requests/${requestId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
   },
 };

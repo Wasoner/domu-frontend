@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ProtectedLayout } from '../layout';
-import { Icon, Button, Spinner, FormField } from '../components';
+import { Icon, Button, Spinner, FormField, NeighborProfileModal } from '../components';
 import { api } from '../services';
 import { ROUTES } from '../constants';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,7 @@ const ResidentMarketplace = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showDetail, setShowDetail] = useState(null);
+    const [showProfileId, setShowProfileId] = useState(null);
     const navigate = useNavigate();
 
     const fetchItems = async () => {
@@ -191,16 +192,23 @@ const ResidentMarketplace = () => {
                                         <Button 
                                             variant="secondary" 
                                             fullWidth
-                                            onClick={() => handleContact(showDetail)}
+                                            onClick={() => setShowProfileId(showDetail.userId)}
                                             icon={<Icon name="chatBubbleLeftRight" size={18} />}
                                         >
-                                            Contactar vendedor
+                                            Ver perfil y contactar
                                         </Button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                )}
+
+                {showProfileId && (
+                    <NeighborProfileModal 
+                        userId={showProfileId} 
+                        onClose={() => setShowProfileId(null)} 
+                    />
                 )}
             </div>
         </ProtectedLayout>
