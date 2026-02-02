@@ -70,35 +70,6 @@ const fetchWrapper = async (url, options = {}) => {
     const selectedBuildingId = getSelectedBuildingId();
     if (selectedBuildingId) {
       headers.set('X-Building-Id', selectedBuildingId);
-      if (import.meta.env.DEV) {
-        console.log('[API] Agregando header X-Building-Id:', selectedBuildingId, 'para endpoint:', url);
-      }
-    } else {
-      if (import.meta.env.DEV) {
-        console.warn('[API] No hay selectedBuildingId en localStorage para endpoint:', url);
-      }
-    }
-
-    // Log para debugging (solo en desarrollo)
-    if (import.meta.env.DEV) {
-      let bodyForLog = undefined;
-      if (options.body) {
-        if (isFormData) {
-          bodyForLog = '[FormData]';
-        } else if (typeof options.body === 'string') {
-          try {
-            bodyForLog = JSON.parse(options.body);
-          } catch {
-            bodyForLog = options.body;
-          }
-        } else {
-          bodyForLog = options.body;
-        }
-      }
-      console.log(`[API] ${options.method || 'GET'} ${API_BASE_URL}${url}`, {
-        headers: Object.fromEntries(headers.entries()),
-        body: bodyForLog,
-      });
     }
 
     const response = await fetch(`${API_BASE_URL}${url}`, {
@@ -134,11 +105,19 @@ const fetchWrapper = async (url, options = {}) => {
 
     // Si la respuesta está vacía, retornar null
     const contentType = response.headers.get('content-type');
+    const contentLength = response.headers.get('content-length');
+    if (response.status === 204 || contentLength === '0') {
+      return null;
+    }
     if (!contentType || !contentType.includes('application/json')) {
       return null;
     }
 
-    return await response.json();
+    const text = await response.text();
+    if (!text) {
+      return null;
+    }
+    return JSON.parse(text);
   } catch (error) {
     // Mejorar mensajes de error para problemas de red/CORS
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
@@ -281,6 +260,22 @@ export const api = {
           if (responseData.user && responseData.user.roleId) {
             const userType = roleIdToUserType(responseData.user.roleId);
             localStorage.setItem('userType', userType);
+          }
+        }
+
+        // Resolver y guardar buildingId válido al iniciar sesión
+        if (responseData.user) {
+          const storedBuildingId = localStorage.getItem('selectedBuildingId');
+          const storedBuildingNum = storedBuildingId ? Number(storedBuildingId) : undefined;
+          const buildingIds = (responseData.user.buildings || []).map((b) => b.id);
+          const hasStoredBuilding = storedBuildingNum !== undefined && buildingIds.includes(storedBuildingNum);
+          const fallbackBuildingId = responseData.user.activeBuildingId ?? responseData.user.selectedBuildingId ?? responseData.user.buildings?.[0]?.id;
+          const resolvedBuildingId = hasStoredBuilding ? storedBuildingNum : fallbackBuildingId;
+
+          if (resolvedBuildingId !== undefined && resolvedBuildingId !== null) {
+            localStorage.setItem('selectedBuildingId', resolvedBuildingId);
+          } else {
+            localStorage.removeItem('selectedBuildingId');
           }
         }
 
@@ -850,6 +845,19 @@ export const api = {
         body: formData,
       });
     },
+  },
+
+  forum: {
+    list: async () => fetchWrapper('/forum/threads', { method: 'GET' }),
+    create: async (data) => fetchWrapper('/forum/threads', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: async (id, data) => fetchWrapper(`/forum/threads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+    delete: async (id) => fetchWrapper(`/forum/threads/${id}`, { method: 'DELETE' }),
   },
 
   chat: {

@@ -49,14 +49,16 @@ export const AppProvider = ({ children }) => {
           // Intentar obtener información actualizada del usuario
           const userData = await api.auth.getCurrentUser();
           if (userData) {
-            // Determinar el buildingId a usar
+            // Determinar el buildingId a usar (validar contra buildings)
             const storedBuildingId = localStorage.getItem('selectedBuildingId');
-            const buildingId = storedBuildingId
-              ? Number(storedBuildingId)
-              : (userData.activeBuildingId || (userData.buildings?.[0]?.id));
+            const storedBuildingNum = storedBuildingId ? Number(storedBuildingId) : undefined;
+            const buildingIds = (userData.buildings || []).map((b) => b.id);
+            const hasStoredBuilding = storedBuildingNum !== undefined && buildingIds.includes(storedBuildingNum);
+            const fallbackBuildingId = userData.activeBuildingId ?? userData.buildings?.[0]?.id;
+            const buildingId = hasStoredBuilding ? storedBuildingNum : fallbackBuildingId;
 
-            // Guardar en localStorage si no estaba
-            if (buildingId && !storedBuildingId) {
+            // Guardar en localStorage si no estaba o si era inválido (permitir 0 como válido)
+            if (buildingId !== undefined && buildingId !== null && (!storedBuildingId || !hasStoredBuilding)) {
               localStorage.setItem('selectedBuildingId', buildingId);
             }
 
@@ -82,14 +84,27 @@ export const AppProvider = ({ children }) => {
 
   // Función para actualizar el usuario
   const updateUser = (userData) => {
+    const storedBuildingId = localStorage.getItem('selectedBuildingId');
+    const storedBuildingNum = storedBuildingId ? Number(storedBuildingId) : undefined;
+    const buildingIds = (userData?.buildings || []).map((b) => b.id);
+    const hasStoredBuilding = storedBuildingNum !== undefined && buildingIds.includes(storedBuildingNum);
+
+    const resolvedBuildingId = userData
+      ? (
+        (hasStoredBuilding ? storedBuildingNum : undefined) ??
+        userData.selectedBuildingId ??
+        userData.activeBuildingId ??
+        user?.selectedBuildingId ??
+        userData.buildings?.[0]?.id
+      )
+      : undefined;
+
     const normalizedUser = userData
       ? {
         ...userData,
         userType: resolveUserType(userData),
         isAuthenticated: true,
-        selectedBuildingId: userData.selectedBuildingId || userData.activeBuildingId || userData.activeBuildingId === 0
-          ? userData.activeBuildingId
-          : (user?.selectedBuildingId || undefined),
+        selectedBuildingId: resolvedBuildingId,
       }
       : null;
 
@@ -97,7 +112,7 @@ export const AppProvider = ({ children }) => {
     if (normalizedUser) {
       localStorage.setItem('userEmail', normalizedUser.email || '');
       localStorage.setItem('userType', normalizedUser.userType || 'resident');
-      if (normalizedUser.selectedBuildingId) {
+      if (normalizedUser.selectedBuildingId !== undefined && normalizedUser.selectedBuildingId !== null) {
         localStorage.setItem('selectedBuildingId', normalizedUser.selectedBuildingId);
       }
     }

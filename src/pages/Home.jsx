@@ -38,23 +38,7 @@ const residentQuickActions = [
   },
 ];
 
-const communityFeed = [
-  {
-    date: '17 Nov 2025',
-    title: 'Información de interés para la comunidad',
-    description: 'Recordatorio sobre mantenciones y uso responsable de espacios comunes.',
-  },
-  {
-    date: '02 Oct 2025',
-    title: 'Corte de gas programado',
-    description: 'El servicio se suspenderá el viernes 03-10-2025 desde las 23:00 hrs.',
-  },
-  {
-    date: '29 Sept 2025',
-    title: 'Cotizaciones de trabajos',
-    description: 'Revisa el detalle de los trabajos aprobados para áreas comunes.',
-  },
-];
+
 
 const upcomingEvent = {
   title: 'Próximo evento',
@@ -99,6 +83,7 @@ const ResidentHome = ({ user }) => {
   const [charges, setCharges] = useState([]);
   const [chargesError, setChargesError] = useState(null);
   const [loadingCharges, setLoadingCharges] = useState(true);
+  const [communityFeed, setCommunityFeed] = useState([]);
 
   useEffect(() => {
     const fetchCharges = async () => {
@@ -111,7 +96,24 @@ const ResidentHome = ({ user }) => {
         setLoadingCharges(false);
       }
     };
+
+    const fetchFeed = async () => {
+      try {
+        const data = await api.forum.list();
+        if (Array.isArray(data)) {
+          setCommunityFeed(data.slice(0, 3).map((item) => ({
+            date: new Date(item.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
+            title: item.title,
+            description: item.content,
+          })));
+        }
+      } catch (error) {
+        console.error('Error loading community feed', error);
+      }
+    };
+
     fetchCharges();
+    fetchFeed();
   }, []);
 
   const totalPending = useMemo(

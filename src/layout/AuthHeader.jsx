@@ -81,6 +81,16 @@ const AuthHeader = ({ user }) => {
     }
   }, [showNotificationsDropdown, notificationsPreview, markRead]);
 
+  // Asegurar que exista un building seleccionado para el header y la API
+  useEffect(() => {
+    if (buildingOptions.length === 0) return;
+    const desiredBuildingId = user?.selectedBuildingId ?? user?.activeBuildingId ?? buildingOptions[0]?.id;
+    if (desiredBuildingId === undefined || desiredBuildingId === null) return;
+    if (user?.selectedBuildingId !== desiredBuildingId) {
+      selectBuilding(desiredBuildingId);
+    }
+  }, [buildingOptions, user?.selectedBuildingId, user?.activeBuildingId, selectBuilding]);
+
   // Navegar al panel principal según el tipo de usuario
   const handleLogoClick = () => {
     if (user?.userType === 'admin') {
