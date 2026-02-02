@@ -12,6 +12,7 @@ import {
   AdminResidents,
   AdminHousingUnits,
   AdminCommonExpenses,
+  AdminParcels,
   UserConfirmation,
   ResidentPortal,
   ResidentVisits,
@@ -67,6 +68,7 @@ function App() {
           <Route path={ROUTES.ADMIN_RESIDENTS} element={<AdminResidents />} />
           <Route path={ROUTES.ADMIN_HOUSING_UNITS} element={<AdminHousingUnits />} />
           <Route path={ROUTES.COMMON_CHARGES} element={<AdminCommonExpenses />} />
+          <Route path={ROUTES.ADMIN_PARCELS} element={<AdminParcels />} />
 
           {/* Protected Routes - Resident */}
           <Route path={ROUTES.RESIDENT_PORTAL} element={<ResidentPortal />} />
