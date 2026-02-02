@@ -551,6 +551,53 @@ export const api = {
     }),
   },
 
+  parcels: {
+    listMine: async (status) => {
+      const query = new URLSearchParams();
+      if (status) query.set('status', status);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/parcels/my${suffix}`, { method: 'GET' });
+    },
+    listAdmin: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.status) query.set('status', params.status);
+      if (params.unitId) query.set('unitId', params.unitId);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/parcels${suffix}`, { method: 'GET' });
+    },
+    create: async (data) => {
+      const payload = {
+        unitId: data.unitId ? Number(data.unitId) : null,
+        sender: String(data.sender || '').trim(),
+        description: String(data.description || '').trim(),
+        receivedAt: data.receivedAt || null,
+      };
+      return fetchWrapper('/parcels', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (parcelId, data) => {
+      const payload = {
+        unitId: data.unitId ? Number(data.unitId) : null,
+        sender: String(data.sender || '').trim(),
+        description: String(data.description || '').trim(),
+        receivedAt: data.receivedAt || null,
+      };
+      return fetchWrapper(`/parcels/${parcelId}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    updateStatus: async (parcelId, status) => fetchWrapper(`/parcels/${parcelId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+    delete: async (parcelId) => fetchWrapper(`/parcels/${parcelId}`, {
+      method: 'DELETE',
+    }),
+  },
+
   adminInvites: {
     getInfo: async (code) => {
       if (!code) {
@@ -602,6 +649,7 @@ export const api = {
   },
 
   users: {
+    getMyUnit: async () => fetchWrapper('/users/me/unit', { method: 'GET' }),
     getProfile: async (userId) => fetchWrapper(`/users/${userId}/profile`, { method: 'GET' }),
     updateProfile: async (data) => {
       const payload = {
