@@ -12,6 +12,7 @@ export const NAV_SECTIONS = [
     title: 'Comunidad',
     roles: ['resident', 'admin', 'concierge', 'staff'],
     items: [
+      { label: 'Publicaciones', icon: 'newspaper', to: ROUTES.RESIDENT_PUBLICATIONS, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
       { label: 'Tienda comunidad', icon: 'shoppingBag', to: ROUTES.RESIDENT_MARKETPLACE, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
       { label: 'Mensajes / Chat', icon: 'chatBubbleLeftRight', to: ROUTES.RESIDENT_CHAT, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
       {
