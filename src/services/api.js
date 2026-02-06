@@ -449,6 +449,24 @@ export const api = {
       });
     },
     downloadChargeReceipt: async (chargeId) => fetchBlob(`/finance/charges/${chargeId}/receipt`, { method: 'GET' }),
+    paySimulated: async (chargeId) => fetchWrapper(`/finance/charges/${chargeId}/pay-simulated`, {
+      method: 'POST',
+    }),
+  },
+
+  tasks: {
+    list: async () => fetchWrapper('/tasks', { method: 'GET' }),
+    create: async (data) => fetchWrapper('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: async (id, data) => fetchWrapper(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+    delete: async (id) => fetchWrapper(`/tasks/${id}`, {
+      method: 'DELETE',
+    }),
   },
 
   buildings: {
@@ -646,6 +664,42 @@ export const api = {
       });
     },
     getResidents: async () => fetchWrapper('/admin/residents', { method: 'GET' }),
+  },
+
+  adminStaff: {
+    list: async () => fetchWrapper('/admin/staff', { method: 'GET' }),
+    listActive: async () => fetchWrapper('/admin/staff/active', { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        rut: String(data.rut || '').trim(),
+        email: data.email ? String(data.email).trim() : null,
+        phone: data.phone ? String(data.phone).trim() : null,
+        position: String(data.position || '').trim(),
+        active: data.active !== undefined ? Boolean(data.active) : true,
+      };
+      return fetchWrapper('/admin/staff', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (id, data) => {
+      const payload = {
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        rut: String(data.rut || '').trim(),
+        email: data.email ? String(data.email).trim() : null,
+        phone: data.phone ? String(data.phone).trim() : null,
+        position: String(data.position || '').trim(),
+        active: data.active !== undefined ? Boolean(data.active) : true,
+      };
+      return fetchWrapper(`/admin/staff/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (id) => fetchWrapper(`/admin/staff/${id}`, { method: 'DELETE' }),
   },
 
   users: {
