@@ -47,6 +47,8 @@ export const NAV_SECTIONS = [
       { label: 'Residentes', icon: 'users', to: ROUTES.ADMIN_RESIDENTS, roles: ['admin', 'concierge'], exact: true },
       { label: 'Encomiendas', icon: 'cube', to: ROUTES.ADMIN_PARCELS, roles: ['admin', 'concierge'], exact: true },
       { label: 'Unidades', icon: 'homeModern', to: ROUTES.ADMIN_HOUSING_UNITS, roles: ['admin'], exact: true },
+      { label: 'Personal', icon: 'userGroup', to: ROUTES.ADMIN_STAFF, roles: ['admin'], exact: true },
+      { label: 'Tareas Staff', icon: 'clipboardDocumentCheck', to: ROUTES.ADMIN_TASKS, roles: ['admin'], exact: true },
       { label: 'Cargar gastos', icon: 'banknotes', to: ROUTES.COMMON_CHARGES, roles: ['admin'], exact: true },
     ],
   },

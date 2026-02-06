@@ -39,6 +39,8 @@ export const ROUTES = {
   ADMIN_INCIDENTS: '/dashboard/incidents',
   ADMIN_INCIDENT_STATS: '/dashboard/incidents/stats',
   ADMIN_PARCELS: '/dashboard/encomiendas',
+  ADMIN_TASKS: '/dashboard/tasks',
+  ADMIN_STAFF: '/dashboard/staff',
   SETTINGS: '/dashboard/settings',
 
   // Protected routes - Resident
