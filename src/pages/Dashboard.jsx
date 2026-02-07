@@ -44,6 +44,22 @@ const quickAccessModules = [
         accentColor: 'var(--color-success)',
     },
     {
+        id: 'parcels',
+        title: 'Encomiendas',
+        description: 'Gestión de paquetes',
+        icon: 'archiveBox',
+        to: ROUTES.ADMIN_PARCELS,
+        accentColor: 'var(--color-info)',
+    },
+    {
+        id: 'tasks',
+        title: 'Tareas Staff',
+        description: 'Asignar y monitorear',
+        icon: 'clipboardDocumentCheck',
+        to: ROUTES.ADMIN_TASKS,
+        accentColor: 'var(--color-primary)',
+    },
+    {
         id: 'users',
         title: 'Usuarios',
         description: 'Crear y administrar cuentas',

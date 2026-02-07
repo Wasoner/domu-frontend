@@ -70,35 +70,6 @@ const fetchWrapper = async (url, options = {}) => {
     const selectedBuildingId = getSelectedBuildingId();
     if (selectedBuildingId) {
       headers.set('X-Building-Id', selectedBuildingId);
-      if (import.meta.env.DEV) {
-        console.log('[API] Agregando header X-Building-Id:', selectedBuildingId, 'para endpoint:', url);
-      }
-    } else {
-      if (import.meta.env.DEV) {
-        console.warn('[API] No hay selectedBuildingId en localStorage para endpoint:', url);
-      }
-    }
-
-    // Log para debugging (solo en desarrollo)
-    if (import.meta.env.DEV) {
-      let bodyForLog = undefined;
-      if (options.body) {
-        if (isFormData) {
-          bodyForLog = '[FormData]';
-        } else if (typeof options.body === 'string') {
-          try {
-            bodyForLog = JSON.parse(options.body);
-          } catch {
-            bodyForLog = options.body;
-          }
-        } else {
-          bodyForLog = options.body;
-        }
-      }
-      console.log(`[API] ${options.method || 'GET'} ${API_BASE_URL}${url}`, {
-        headers: Object.fromEntries(headers.entries()),
-        body: bodyForLog,
-      });
     }
 
     const response = await fetch(`${API_BASE_URL}${url}`, {
@@ -134,11 +105,19 @@ const fetchWrapper = async (url, options = {}) => {
 
     // Si la respuesta está vacía, retornar null
     const contentType = response.headers.get('content-type');
+    const contentLength = response.headers.get('content-length');
+    if (response.status === 204 || contentLength === '0') {
+      return null;
+    }
     if (!contentType || !contentType.includes('application/json')) {
       return null;
     }
 
-    return await response.json();
+    const text = await response.text();
+    if (!text) {
+      return null;
+    }
+    return JSON.parse(text);
   } catch (error) {
     // Mejorar mensajes de error para problemas de red/CORS
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
@@ -281,6 +260,22 @@ export const api = {
           if (responseData.user && responseData.user.roleId) {
             const userType = roleIdToUserType(responseData.user.roleId);
             localStorage.setItem('userType', userType);
+          }
+        }
+
+        // Resolver y guardar buildingId válido al iniciar sesión
+        if (responseData.user) {
+          const storedBuildingId = localStorage.getItem('selectedBuildingId');
+          const storedBuildingNum = storedBuildingId ? Number(storedBuildingId) : undefined;
+          const buildingIds = (responseData.user.buildings || []).map((b) => b.id);
+          const hasStoredBuilding = storedBuildingNum !== undefined && buildingIds.includes(storedBuildingNum);
+          const fallbackBuildingId = responseData.user.activeBuildingId ?? responseData.user.selectedBuildingId ?? responseData.user.buildings?.[0]?.id;
+          const resolvedBuildingId = hasStoredBuilding ? storedBuildingNum : fallbackBuildingId;
+
+          if (resolvedBuildingId !== undefined && resolvedBuildingId !== null) {
+            localStorage.setItem('selectedBuildingId', resolvedBuildingId);
+          } else {
+            localStorage.removeItem('selectedBuildingId');
           }
         }
 
@@ -454,6 +449,24 @@ export const api = {
       });
     },
     downloadChargeReceipt: async (chargeId) => fetchBlob(`/finance/charges/${chargeId}/receipt`, { method: 'GET' }),
+    paySimulated: async (chargeId) => fetchWrapper(`/finance/charges/${chargeId}/pay-simulated`, {
+      method: 'POST',
+    }),
+  },
+
+  tasks: {
+    list: async () => fetchWrapper('/tasks', { method: 'GET' }),
+    create: async (data) => fetchWrapper('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: async (id, data) => fetchWrapper(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+    delete: async (id) => fetchWrapper(`/tasks/${id}`, {
+      method: 'DELETE',
+    }),
   },
 
   buildings: {
@@ -556,6 +569,53 @@ export const api = {
     }),
   },
 
+  parcels: {
+    listMine: async (status) => {
+      const query = new URLSearchParams();
+      if (status) query.set('status', status);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/parcels/my${suffix}`, { method: 'GET' });
+    },
+    listAdmin: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.status) query.set('status', params.status);
+      if (params.unitId) query.set('unitId', params.unitId);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/parcels${suffix}`, { method: 'GET' });
+    },
+    create: async (data) => {
+      const payload = {
+        unitId: data.unitId ? Number(data.unitId) : null,
+        sender: String(data.sender || '').trim(),
+        description: String(data.description || '').trim(),
+        receivedAt: data.receivedAt || null,
+      };
+      return fetchWrapper('/parcels', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (parcelId, data) => {
+      const payload = {
+        unitId: data.unitId ? Number(data.unitId) : null,
+        sender: String(data.sender || '').trim(),
+        description: String(data.description || '').trim(),
+        receivedAt: data.receivedAt || null,
+      };
+      return fetchWrapper(`/parcels/${parcelId}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    updateStatus: async (parcelId, status) => fetchWrapper(`/parcels/${parcelId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+    delete: async (parcelId) => fetchWrapper(`/parcels/${parcelId}`, {
+      method: 'DELETE',
+    }),
+  },
+
   adminInvites: {
     getInfo: async (code) => {
       if (!code) {
@@ -606,7 +666,44 @@ export const api = {
     getResidents: async () => fetchWrapper('/admin/residents', { method: 'GET' }),
   },
 
+  adminStaff: {
+    list: async () => fetchWrapper('/admin/staff', { method: 'GET' }),
+    listActive: async () => fetchWrapper('/admin/staff/active', { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        rut: String(data.rut || '').trim(),
+        email: data.email ? String(data.email).trim() : null,
+        phone: data.phone ? String(data.phone).trim() : null,
+        position: String(data.position || '').trim(),
+        active: data.active !== undefined ? Boolean(data.active) : true,
+      };
+      return fetchWrapper('/admin/staff', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (id, data) => {
+      const payload = {
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        rut: String(data.rut || '').trim(),
+        email: data.email ? String(data.email).trim() : null,
+        phone: data.phone ? String(data.phone).trim() : null,
+        position: String(data.position || '').trim(),
+        active: data.active !== undefined ? Boolean(data.active) : true,
+      };
+      return fetchWrapper(`/admin/staff/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (id) => fetchWrapper(`/admin/staff/${id}`, { method: 'DELETE' }),
+  },
+
   users: {
+    getMyUnit: async () => fetchWrapper('/users/me/unit', { method: 'GET' }),
     getProfile: async (userId) => fetchWrapper(`/users/${userId}/profile`, { method: 'GET' }),
     updateProfile: async (data) => {
       const payload = {
@@ -850,6 +947,19 @@ export const api = {
         body: formData,
       });
     },
+  },
+
+  forum: {
+    list: async () => fetchWrapper('/forum/threads', { method: 'GET' }),
+    create: async (data) => fetchWrapper('/forum/threads', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: async (id, data) => fetchWrapper(`/forum/threads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+    delete: async (id) => fetchWrapper(`/forum/threads/${id}`, { method: 'DELETE' }),
   },
 
   chat: {

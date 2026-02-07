@@ -16,6 +16,9 @@ export { default as AdminHousingUnits } from './AdminHousingUnits';
 export { default as UserConfirmation } from './UserConfirmation';
 export { default as AdminAmenities } from './AdminAmenities';
 export { default as AdminCommonExpenses } from './AdminCommonExpenses';
+export { default as AdminParcels } from './AdminParcels';
+export { default as AdminTasks } from './AdminTasks';
+export { default as AdminStaff } from './AdminStaff';
 
 // Resident pages
 export { default as ResidentPortal } from './ResidentPortal';

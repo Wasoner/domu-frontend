@@ -12,3 +12,4 @@ export { default as LocationPicker } from './LocationPicker';
 export { default as Seo } from './Seo';
 export { default as Spinner } from './Spinner';
 export { default as NeighborProfileModal } from './NeighborProfileModal';
+export { default as CreatePublicationModal } from './CreatePublicationModal';

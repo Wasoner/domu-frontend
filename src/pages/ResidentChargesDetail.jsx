@@ -98,6 +98,28 @@ const ResidentChargesDetail = () => {
     }
   };
 
+  const handleSimulatedPay = async () => {
+    if (!detail || !detail.charges || detail.charges.length === 0) return;
+    
+    setLoadingDetail(true);
+    try {
+      // Para fines de la demo, pagamos el primer cargo pendiente que encontremos
+      // En una implementación real, esto sería más granular.
+      const pendingCharges = detail.charges.filter(c => c.amount > 0); // Simplificado
+      if (pendingCharges.length > 0) {
+        await api.finance.paySimulated(pendingCharges[0].id);
+        // Recargar detalle
+        const data = await api.finance.getMyPeriodDetail(selectedPeriodId);
+        setDetail(data);
+        alert('Pago simulado con éxito. El estado se ha actualizado.');
+      }
+    } catch (err) {
+      setError(err.message || 'Error al procesar el pago simulado.');
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
   const selectedPeriodLabel = detail ? `${String(detail.month).padStart(2, '0')}/${detail.year}` : '';
 
   const isLoading = loadingPeriods || loadingDetail;
@@ -115,6 +137,16 @@ const ResidentChargesDetail = () => {
             </p>
           </div>
           <div className="resident-charges-detail__actions">
+            {detail && detail.unitPending > 0 && (
+              <button
+                type="button"
+                className="resident-charges-detail__secondary"
+                onClick={handleSimulatedPay}
+                style={{ marginRight: '10px', backgroundColor: '#0070f3', color: 'white' }}
+              >
+                Pagar online (Simulado)
+              </button>
+            )}
             <button
               type="button"
               className="resident-charges-detail__primary"
