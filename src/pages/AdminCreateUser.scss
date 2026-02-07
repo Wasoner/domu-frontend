@@ -1,0 +1,224 @@
+.admin-create-user {
+  max-width: 1000px;
+  margin: 0 auto;
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-gray-dark);
+    margin-bottom: 1.25rem;
+    display: block;
+  }
+}
+
+.admin-create-user__content {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  margin-top: 1rem;
+}
+
+/* Role Selector Grid */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 1.5rem;
+  background: white;
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    color: var(--color-gray-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    transition: all var(--transition-normal);
+  }
+
+  &__info {
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: var(--color-black);
+    }
+
+    p {
+      font-size: 0.85rem;
+      color: var(--color-gray);
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  &__check {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-turquoise);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all var(--transition-normal);
+  }
+
+  &:hover {
+    border-color: var(--color-border-medium);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+
+    .role-card__icon {
+      background: var(--color-bg-accent);
+      color: var(--color-turquoise);
+    }
+  }
+
+  &.is-selected {
+    border-color: var(--color-turquoise);
+    background: var(--color-bg-accent);
+
+    .role-card__icon {
+      background: var(--color-turquoise);
+      color: white;
+    }
+
+    .role-card__check {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    h3 {
+      color: var(--color-turquoise);
+    }
+  }
+}
+
+/* Form Styles */
+.admin-create-user__form {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-gray-dark);
+
+    .required {
+      color: var(--color-error);
+      margin-left: 2px;
+    }
+  }
+
+  input, select {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-turquoise);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-turquoise) 15%, transparent);
+    }
+
+    &::placeholder {
+      color: var(--color-gray-light);
+    }
+
+    &:disabled {
+      background: var(--color-bg-secondary);
+      cursor: not-allowed;
+    }
+  }
+}
+
+.admin-create-user__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border-light);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+}
+
+.info-box {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  flex: 1;
+
+  p {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.btn-lg {
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}

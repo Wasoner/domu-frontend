@@ -1,31 +1,68 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentParcels.css';
+import { useAppContext } from '../context';
+import { Skeleton } from '../components';
+import { api } from '../services';
+import './ResidentParcels.scss';
 
 /**
  * Resident Parcels Page Component
  * View and manage parcel deliveries
  */
 const ResidentParcels = () => {
+  const { user } = useAppContext();
   const [filter, setFilter] = useState('all');
+  const [parcels, setParcels] = useState([]);
+  const [unitInfo, setUnitInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [unitError, setUnitError] = useState(null);
 
-  // Mock data - replace with API call
-  const parcels = [
-    { id: 1, sender: 'Amazon', date: '2026-01-20', status: 'pending', description: 'Paquete pequeño' },
-    { id: 2, sender: 'MercadoLibre', date: '2026-01-18', status: 'collected', description: 'Caja mediana' },
-    { id: 3, sender: 'Correos de Chile', date: '2026-01-15', status: 'collected', description: 'Sobre certificado' },
-    { id: 4, sender: 'Falabella', date: '2026-01-22', status: 'pending', description: 'Paquete grande' },
-  ];
+  const fetchParcels = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.parcels.listMine();
+      setParcels(response || []);
+    } catch (err) {
+      setError(err.message || 'No pudimos cargar las encomiendas.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredParcels = filter === 'all' 
-    ? parcels 
-    : parcels.filter((p) => p.status === filter);
+  const fetchUnitInfo = async () => {
+    setUnitError(null);
+    try {
+      const response = await api.users.getMyUnit();
+      setUnitInfo(response || null);
+    } catch (err) {
+      setUnitError(err.message || 'No pudimos cargar la unidad asociada.');
+    }
+  };
 
-  const pendingCount = parcels.filter((p) => p.status === 'pending').length;
+  useEffect(() => {
+    fetchParcels();
+    fetchUnitInfo();
+  }, []);
+
+  const normalizedParcels = useMemo(
+    () => parcels.map((parcel) => ({
+      ...parcel,
+      uiStatus: parcel.status === 'COLLECTED' ? 'collected' : 'pending',
+    })),
+    [parcels],
+  );
+
+  const filteredParcels = filter === 'all'
+    ? normalizedParcels
+    : normalizedParcels.filter((p) => p.uiStatus === filter);
+
+  const pendingCount = normalizedParcels.filter((p) => p.uiStatus === 'pending').length;
 
   return (
-    <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
-      <article className="resident-parcels">
+    <ProtectedLayout allowedRoles={['resident']}>
+      <article className="resident-parcels page-shell">
         <header className="resident-parcels__header">
           <div>
             <h1>Encomiendas</h1>
@@ -37,6 +74,21 @@ const ResidentParcels = () => {
             </div>
           )}
         </header>
+
+        {error && <p className="resident-parcels__error">{error}</p>}
+        {unitError && <p className="resident-parcels__error">{unitError}</p>}
+        {unitInfo && (
+          <div className="resident-parcels__unit-hint">
+            <strong>Tu unidad:</strong>{' '}
+            {`Depto ${unitInfo.number || ''}${unitInfo.tower ? ` • Torre ${unitInfo.tower}` : ''}${unitInfo.floor ? ` • Piso ${unitInfo.floor}` : ''}`}
+            {unitInfo.buildingId ? ` • Edificio ${unitInfo.buildingId}` : ''}
+            {user?.selectedBuildingId && unitInfo.buildingId && user.selectedBuildingId !== unitInfo.buildingId && (
+              <span className="resident-parcels__unit-warning">
+                Edificio seleccionado no coincide con tu unidad.
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="resident-parcels__filters">
           <button
@@ -59,7 +111,9 @@ const ResidentParcels = () => {
           </button>
         </div>
 
-        {filteredParcels.length === 0 ? (
+        {loading ? (
+          <Skeleton.Cards count={3} />
+        ) : filteredParcels.length === 0 ? (
           <div className="resident-parcels__empty">
             <span className="resident-parcels__empty-icon">📦</span>
             <p>No hay encomiendas en esta categoría</p>
@@ -67,24 +121,26 @@ const ResidentParcels = () => {
         ) : (
           <div className="resident-parcels__grid">
             {filteredParcels.map((parcel) => (
-              <div key={parcel.id} className={`resident-parcels__card ${parcel.status === 'pending' ? 'is-pending' : ''}`}>
+              <div key={parcel.id} className={`resident-parcels__card ${parcel.uiStatus === 'pending' ? 'is-pending' : ''}`}>
                 <div className="resident-parcels__card-header">
                   <span className="resident-parcels__card-icon">
-                    {parcel.status === 'pending' ? '📬' : '📦'}
+                    {parcel.uiStatus === 'pending' ? '📬' : '📦'}
                   </span>
-                  <span className={`resident-parcels__status resident-parcels__status--${parcel.status}`}>
-                    {parcel.status === 'pending' ? 'Por retirar' : 'Retirada'}
+                  <span className={`resident-parcels__status resident-parcels__status--${parcel.uiStatus}`}>
+                    {parcel.uiStatus === 'pending' ? 'Por retirar' : 'Retirada'}
                   </span>
                 </div>
                 <h3 className="resident-parcels__sender">{parcel.sender}</h3>
                 <p className="resident-parcels__description">{parcel.description}</p>
                 <p className="resident-parcels__date">
-                  Recibido: {new Date(parcel.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  Recibido: {parcel.receivedAt
+                    ? new Date(parcel.receivedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : 'Sin fecha'}
                 </p>
-                {parcel.status === 'pending' && (
-                  <button className="resident-parcels__collect-btn">
-                    Marcar como retirada
-                  </button>
+                {parcel.retrievedAt && (
+                  <p className="resident-parcels__date">
+                    Retirado: {new Date(parcel.retrievedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
                 )}
               </div>
             ))}

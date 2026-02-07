@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services';
-import './ResidentIncidents.css';
+import './ResidentIncidents.scss';
 
 /**
  * Configuración de categorías de incidentes
@@ -182,6 +182,20 @@ const ClosedIllustration = () => (
   </svg>
 );
 
+const ResidentIncidentsSkeleton = () => (
+  <div className="resident-incidents__panel-list">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="resident-incidents__incident-item resident-incidents__incident-item--skeleton">
+        <div className="resident-incidents__incident-category">
+          <span className="dashboard__skeleton-block" style={{ width: '80px', height: '20px' }} />
+        </div>
+        <span className="dashboard__skeleton-block" style={{ width: '60%', height: '16px' }} />
+        <span className="dashboard__skeleton-block" style={{ width: '40px', height: '12px' }} />
+      </div>
+    ))}
+  </div>
+);
+
 /**
  * Resident Incidents Page Component
  * Page for managing and tracking incidents
@@ -255,7 +269,6 @@ const ResidentIncidents = () => {
 
   useEffect(() => {
     fetchIncidents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, dateFilter]);
 
   const handleReportIncident = async (e) => {
@@ -287,11 +300,18 @@ const ResidentIncidents = () => {
     year: 'Último año'
   };
 
+  const panelCounts = {
+    reported: filteredIncidents.reported.length,
+    inProgress: filteredIncidents.inProgress.length,
+    closed: filteredIncidents.closed.length,
+  };
+
   return (
-    <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
-      <article className="resident-incidents">
+    <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge', 'staff']}>
+      <article className="resident-incidents page-shell page-shell--wide">
         <header className="resident-incidents__header">
           <div className="resident-incidents__title-section">
+            <p className="resident-incidents__eyebrow">Centro de incidentes</p>
             <h1>Incidentes</h1>
             <p className="resident-incidents__subtitle">
               Seguimiento de los problemas y consultas a tu administración
@@ -299,60 +319,64 @@ const ResidentIncidents = () => {
           </div>
 
           <div className="resident-incidents__toolbar">
-            <div className="resident-incidents__search">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" />
-                <path d="m15 15-3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Buscar"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="resident-incidents__filters">
+              <div className="resident-incidents__search">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="m15 15-3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Buscar"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <div className="resident-incidents__date-filter">
+                <button
+                  type="button"
+                  className="resident-incidents__date-filter-btn"
+                  onClick={() => setShowDateDropdown(!showDateDropdown)}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M2 6h12" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M5 1v3M11 1v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                  <span>Filtrar por fecha</span>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="resident-incidents__chevron">
+                    <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                {showDateDropdown && (
+                  <div className="resident-incidents__date-dropdown">
+                    {Object.entries(dateFilterLabels).map(([key, label]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`resident-incidents__date-option ${dateFilter === key ? 'is-active' : ''}`}
+                        onClick={() => {
+                          setDateFilter(key);
+                          setShowDateDropdown(false);
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="resident-incidents__date-filter">
+            <div className="resident-incidents__actions">
               <button
-                type="button"
-                className="resident-incidents__date-filter-btn"
-                onClick={() => setShowDateDropdown(!showDateDropdown)}
+                className="resident-incidents__report-btn"
+                onClick={() => setShowReportModal(true)}
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M2 6h12" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M5 1v3M11 1v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-                <span>Filtrar por fecha</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="resident-incidents__chevron">
-                  <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                Reportar incidente
               </button>
-              {showDateDropdown && (
-                <div className="resident-incidents__date-dropdown">
-                  {Object.entries(dateFilterLabels).map(([key, label]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      className={`resident-incidents__date-option ${dateFilter === key ? 'is-active' : ''}`}
-                      onClick={() => {
-                        setDateFilter(key);
-                        setShowDateDropdown(false);
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
-
-            <button
-              className="resident-incidents__report-btn"
-              onClick={() => setShowReportModal(true)}
-            >
-              Reportar incidente
-            </button>
           </div>
         </header>
 
@@ -360,13 +384,16 @@ const ResidentIncidents = () => {
 
         <div className="resident-incidents__panels">
           {/* Panel Reportados */}
-          <section className="resident-incidents__panel">
+          <section className="resident-incidents__panel resident-incidents__panel--reported">
             <div className="resident-incidents__panel-header">
-              <h2>Reportados</h2>
+              <div className="resident-incidents__panel-title">
+                <h2>Reportados</h2>
+                <span className="resident-incidents__panel-count">{panelCounts.reported}</span>
+              </div>
             </div>
             <div className="resident-incidents__panel-body">
               {loading ? (
-                <p className="resident-incidents__loading">Cargando...</p>
+                <ResidentIncidentsSkeleton />
               ) : filteredIncidents.reported.length > 0 ? (
                 <div className="resident-incidents__panel-list">
                   {filteredIncidents.reported.map((incident) => (
@@ -384,9 +411,12 @@ const ResidentIncidents = () => {
           </section>
 
           {/* Panel En progreso */}
-          <section className="resident-incidents__panel">
+          <section className="resident-incidents__panel resident-incidents__panel--in-progress">
             <div className="resident-incidents__panel-header">
-              <h2>En progreso</h2>
+              <div className="resident-incidents__panel-title">
+                <h2>En progreso</h2>
+                <span className="resident-incidents__panel-count">{panelCounts.inProgress}</span>
+              </div>
               <span className="resident-incidents__info-icon" title="Incidentes siendo atendidos">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
@@ -396,7 +426,7 @@ const ResidentIncidents = () => {
             </div>
             <div className="resident-incidents__panel-body">
               {loading ? (
-                <p className="resident-incidents__loading">Cargando...</p>
+                <ResidentIncidentsSkeleton />
               ) : filteredIncidents.inProgress.length > 0 ? (
                 <div className="resident-incidents__panel-list">
                   {filteredIncidents.inProgress.map((incident) => (
@@ -414,13 +444,16 @@ const ResidentIncidents = () => {
           </section>
 
           {/* Panel Cerrados */}
-          <section className="resident-incidents__panel">
+          <section className="resident-incidents__panel resident-incidents__panel--closed">
             <div className="resident-incidents__panel-header">
-              <h2>Cerrados</h2>
+              <div className="resident-incidents__panel-title">
+                <h2>Cerrados</h2>
+                <span className="resident-incidents__panel-count">{panelCounts.closed}</span>
+              </div>
             </div>
             <div className="resident-incidents__panel-body">
               {loading ? (
-                <p className="resident-incidents__loading">Cargando...</p>
+                <ResidentIncidentsSkeleton />
               ) : filteredIncidents.closed.length > 0 ? (
                 <div className="resident-incidents__panel-list">
                   {filteredIncidents.closed.map((incident) => (
@@ -561,4 +594,3 @@ const ResidentIncidents = () => {
 };
 
 export default ResidentIncidents;
-

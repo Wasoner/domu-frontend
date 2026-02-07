@@ -1,4 +1,4 @@
-import './MainContent.css';
+import './MainContent.scss';
 
 const MainContent = ({ children, fullWidth = false }) => {
   return (

@@ -1,17 +1,14 @@
-import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
-import { ROUTES } from '../constants';
 import { api } from '../services';
-import './ResidentProfile.css';
+import './ResidentProfile.scss';
 
 /**
  * Resident Profile Page Component
  * Displays user profile information and allows editing
  */
 const ResidentProfile = () => {
-    const navigate = useNavigate();
     const { user, setUser } = useAppContext();
     const [activeTab, setActiveTab] = useState('overview');
     const [editData, setEditData] = useState({
@@ -19,6 +16,7 @@ const ResidentProfile = () => {
         lastName: user?.lastName || '',
         phone: user?.phone || '',
         documentNumber: user?.documentNumber || '',
+        displayName: user?.displayName || '',
     });
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -29,10 +27,49 @@ const ResidentProfile = () => {
     const [changingPass, setChangingPass] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [uploadingPrivacy, setUploadingPrivacy] = useState(false);
 
-    const displayName = useMemo(() => (user?.firstName
-        ? `${user.firstName} ${user?.lastName || ''}`.trim()
-        : user?.email || 'Usuario Domu'), [user]);
+    const displayName = useMemo(() => {
+        if (user?.displayName) return user.displayName;
+        if (user?.firstName) return `${user.firstName} ${user?.lastName || ''}`.trim();
+        return user?.email || 'Usuario Domu';
+    }, [user]);
+
+    const initials = useMemo(() => {
+        const first = user?.firstName?.trim()?.[0];
+        const last = user?.lastName?.trim()?.[0];
+        if (first || last) return `${first || ''}${last || ''}`.toUpperCase();
+        if (user?.email) return user.email.trim()[0].toUpperCase();
+        return 'D';
+    }, [user]);
+
+    const handleAvatarUpload = async (e, isPrivacy = false) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setError('');
+        setMessage('');
+        const setUploading = isPrivacy ? setUploadingPrivacy : setUploadingAvatar;
+
+        try {
+            setUploading(true);
+            if (isPrivacy) {
+                await api.users.updatePrivacyAvatar(file);
+                setMessage('Foto de privacidad actualizada.');
+            } else {
+                await api.users.updateAvatar(file);
+                setMessage('Foto de perfil actualizada.');
+            }
+            // Recargar datos de usuario
+            const updated = await api.auth.getCurrentUser();
+            setUser(updated);
+        } catch (err) {
+            setError(err.message || 'Error al subir la imagen.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const roleLabel = useMemo(() => {
         if (user?.userType === 'admin') return 'Administrador';
@@ -41,31 +78,6 @@ const ResidentProfile = () => {
     }, [user]);
 
     const unitLabel = user?.unitId ? `Unidad ${user.unitId}` : 'Sin unidad asignada';
-
-    // Determinar la ruta del panel principal según el tipo de usuario
-    const getMainPanelRoute = () => {
-        if (user?.userType === 'admin') {
-            return ROUTES.DASHBOARD;
-        }
-        return ROUTES.RESIDENT_PORTAL;
-    };
-
-    const handleGoBack = () => {
-        navigate(getMainPanelRoute());
-    };
-
-    const backButton = (
-        <button
-            className="resident-profile__back-button"
-            onClick={handleGoBack}
-            aria-label="Volver al panel principal"
-        >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Volver
-        </button>
-    );
 
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
@@ -104,10 +116,14 @@ const ResidentProfile = () => {
     };
 
     return (
-        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']} bodyActions={backButton}>
-            <article className="resident-profile">
+        <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
+            <article className="resident-profile page-shell">
                 <header className="resident-profile__header">
-                    <h1>Mi Perfil</h1>
+                    <div>
+                        <p className="resident-profile__eyebrow">Cuenta y seguridad</p>
+                        <h1>Mi Perfil</h1>
+                        <p className="resident-profile__subtitle">Administra tus datos personales y credenciales.</p>
+                    </div>
                 </header>
 
                 {(error || message) && (
@@ -139,17 +155,51 @@ const ResidentProfile = () => {
                     </div>
 
                     {activeTab === 'overview' && (
-                        <div className="resident-profile__grid">
+                        <div className="resident-profile__grid resident-profile__grid--overview">
                             <article className="resident-profile__card resident-profile__card--summary">
                                 <div className="profile-summary__top">
-                                    <div>
-                                        <p className="profile-summary__eyebrow">Cuenta</p>
-                                        <h2>{displayName}</h2>
-                                        <p className="profile-summary__role">{roleLabel}</p>
+                                    <div className="profile-summary__identity">
+                                        <div className="profile-summary__avatar-wrapper">
+                                            <div className="profile-summary__avatar" aria-hidden="true">
+                                                {user?.avatarBoxId ? (
+                                                    <img src={user.avatarBoxId} alt="Profile" />
+                                                ) : initials}
+                                            </div>
+                                            <label className="avatar-upload-label">
+                                                <input type="file" onChange={(e) => handleAvatarUpload(e, false)} hidden accept="image/*" />
+                                                {uploadingAvatar ? '...' : '📸'}
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <p className="profile-summary__eyebrow">Cuenta</p>
+                                            <h2>{displayName}</h2>
+                                            <p className="profile-summary__role">{roleLabel}</p>
+                                        </div>
                                     </div>
                                     <div className="profile-summary__badge">{unitLabel}</div>
                                 </div>
+                                
+                                <div className="profile-privacy-section">
+                                    <h3>Foto de Privacidad</h3>
+                                    <p className="resident-profile__hint">Esta es la foto que verán tus vecinos antes de que aceptes chatear con ellos.</p>
+                                    <div className="profile-summary__avatar-wrapper">
+                                        <div className="profile-summary__avatar is-privacy" aria-hidden="true">
+                                            {user?.privacyAvatarBoxId ? (
+                                                <img src={user.privacyAvatarBoxId} alt="Privacy" />
+                                            ) : '👤'}
+                                        </div>
+                                        <label className="avatar-upload-label">
+                                            <input type="file" onChange={(e) => handleAvatarUpload(e, true)} hidden accept="image/*" />
+                                            {uploadingPrivacy ? '...' : '📸'}
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div className="profile-summary__details">
+                                    <div>
+                                        <p className="profile-summary__label">Nombre público</p>
+                                        <p className="profile-summary__value">{user?.displayName || 'No configurado — se mostrará tu nombre real'}</p>
+                                    </div>
                                     <div>
                                         <p className="profile-summary__label">Correo</p>
                                         <p className="profile-summary__value">{user?.email || 'Sin correo'}</p>
@@ -164,11 +214,34 @@ const ResidentProfile = () => {
                                     </div>
                                 </div>
                             </article>
+
+                            <article className="resident-profile__card resident-profile__card--actions">
+                                <h2>Acciones rápidas</h2>
+                                <p className="resident-profile__hint">
+                                    Mantén tu información actualizada y protege tu cuenta.
+                                </p>
+                                <div className="resident-profile__action-buttons">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() => setActiveTab('edit')}
+                                    >
+                                        Editar datos
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-ghost"
+                                        onClick={() => setActiveTab('edit')}
+                                    >
+                                        Cambiar contraseña
+                                    </button>
+                                </div>
+                            </article>
                         </div>
                     )}
 
                     {activeTab === 'edit' && (
-                        <div className="resident-profile__grid">
+                        <div className="resident-profile__grid resident-profile__grid--edit">
                             <article className="resident-profile__card resident-profile__card--form">
                                 <h2>Editar información y seguridad</h2>
                                 <form className="resident-profile__form" onSubmit={handleProfileSubmit}>
@@ -188,6 +261,16 @@ const ResidentProfile = () => {
                                                 value={editData.lastName}
                                                 onChange={(e) => setEditData((p) => ({ ...p, lastName: e.target.value }))}
                                                 required
+                                                disabled={saving}
+                                            />
+                                        </div>
+                                        <div className="resident-profile__info-item">
+                                            <label>Nombre público (chat y comunidad)</label>
+                                            <input
+                                                value={editData.displayName}
+                                                onChange={(e) => setEditData((p) => ({ ...p, displayName: e.target.value }))}
+                                                placeholder="Ej: Juan P. — visible para vecinos"
+                                                maxLength={100}
                                                 disabled={saving}
                                             />
                                         </div>
@@ -265,4 +348,3 @@ const ResidentProfile = () => {
 };
 
 export default ResidentProfile;
-

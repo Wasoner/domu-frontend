@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Header, MainContent, Footer } from '../layout';
-import { Button, Seo, Spinner } from '../components';
+import { Button, Seo, Skeleton } from '../components';
 import { ROUTES } from '../constants';
 import { api } from '../services';
-import './AdminInviteRegister.css';
+import './AdminInviteRegister.scss';
 
 const MIN_PASSWORD_LENGTH = 10;
 
@@ -137,7 +137,7 @@ const AdminInviteRegister = () => {
           )}
 
           {loadingInvite ? (
-            <p className="admin-invite-loading">Cargando datos de la invitación…</p>
+            <Skeleton.Form fields={5} />
           ) : (
             <form className="admin-invite-form" onSubmit={handleSubmit}>
               <div className="form-row">
@@ -237,7 +237,7 @@ const AdminInviteRegister = () => {
               </div>
 
               <Button type="submit" variant="primary" disabled={submitting}>
-                {submitting ? <Spinner size="sm" inline label="Creando cuenta…" /> : 'Crear cuenta'}
+                {submitting ? <Skeleton.Inline width="80px" label="Creando cuenta…" /> : 'Crear cuenta'}
               </Button>
 
               <p className="admin-invite-back">

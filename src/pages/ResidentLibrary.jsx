@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentLibrary.css';
+import './ResidentLibrary.scss';
 
 /**
  * Resident Library Page Component
@@ -36,7 +36,7 @@ const ResidentLibrary = () => {
 
   return (
     <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
-      <article className="resident-library">
+      <article className="resident-library page-shell">
         <header className="resident-library__header">
           <div>
             <h1>Biblioteca</h1>

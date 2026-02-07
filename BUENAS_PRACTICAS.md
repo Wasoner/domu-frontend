@@ -13,10 +13,8 @@
 src/
 ├── components/    # Componentes reutilizables
 ├── pages/         # Páginas completas
-├── hooks/         # Custom hooks
 ├── services/      # Servicios API
 ├── context/       # Context providers
-├── utils/         # Funciones utilitarias
 ├── constants/     # Constantes
 └── styles/        # Estilos globales
 ```
@@ -55,6 +53,40 @@ MyComponent.propTypes = {
 };
 
 export default MyComponent;
+```
+
+## 🧩 Catálogo de Componentes Base
+
+### Button (`src/components/Button.jsx`)
+Botón reutilizable con variantes y tamaños.
+
+```jsx
+import { Button } from './components';
+
+<Button 
+  variant="primary" // primary, secondary, ghost, danger
+  size="default"    // small, default, large
+  onClick={handler}
+  disabled={isLoading}
+>
+  Guardar cambios
+</Button>
+```
+
+### FormField (`src/components/FormField.jsx`)
+Wrapper para inputs que maneja labels, errores y hints automáticamente.
+
+```jsx
+import { FormField } from './components';
+
+<FormField
+  label="Correo electrónico"
+  name="email"
+  type="email"
+  hint="Usaremos este correo para contactarte"
+  error={errors.email} // Muestra mensaje de error si existe
+  onChange={handleChange}
+/>
 ```
 
 ## 🎯 Estándares de Código

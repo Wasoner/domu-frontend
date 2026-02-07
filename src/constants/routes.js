@@ -9,6 +9,7 @@ export const ROUTES = {
   ABOUT: '/about',
   LOGIN: '/login',
   REGISTER: '/register',
+  CONFIRM_USER: '/confirmar',
   ADMIN_INVITE: '/registrar-admin',
   FEATURES: '/features',
   PRICING: '/pricing',
@@ -24,6 +25,8 @@ export const ROUTES = {
   // Protected routes - Admin
   DASHBOARD: '/dashboard',
   ADMIN_CREATE_USER: '/dashboard/users/create',
+  ADMIN_RESIDENTS: '/dashboard/residents',
+  ADMIN_HOUSING_UNITS: '/dashboard/unidades',
   COMMUNITIES: '/dashboard/communities',
   COMMUNITY_DETAIL: '/dashboard/communities/:id',
   RESIDENTS: '/dashboard/residents',
@@ -34,6 +37,10 @@ export const ROUTES = {
   EVENTS: '/dashboard/events',
   REPORTS: '/dashboard/reports',
   ADMIN_INCIDENTS: '/dashboard/incidents',
+  ADMIN_INCIDENT_STATS: '/dashboard/incidents/stats',
+  ADMIN_PARCELS: '/dashboard/encomiendas',
+  ADMIN_TASKS: '/dashboard/tasks',
+  ADMIN_STAFF: '/dashboard/staff',
   SETTINGS: '/dashboard/settings',
 
   // Protected routes - Resident
@@ -62,6 +69,12 @@ export const ROUTES = {
   RESIDENT_EXPENSES: '/resident/egresos',
   RESIDENT_FUNDS: '/resident/fondos',
   RESIDENT_LIBRARY: '/resident/biblioteca',
+  RESIDENT_MARKETPLACE: '/resident/marketplace',
+  RESIDENT_MARKETPLACE_CREATE: '/resident/marketplace/nuevo',
+  RESIDENT_CHAT: '/resident/chat',
+
+  // Payment Flow
+  RESIDENT_PAYMENT: '/resident/pagar',
 };
 
 /**
@@ -94,6 +107,7 @@ export const ROUTE_CATEGORIES = {
     ROUTES.EVENTS,
     ROUTES.REPORTS,
     ROUTES.ADMIN_AMENITIES,
+    ROUTES.ADMIN_PARCELS,
     ROUTES.SETTINGS,
   ],
   RESIDENT: [

@@ -1,0 +1,129 @@
+.payment-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.payment-success__icon {
+  margin-bottom: 1.5rem;
+}
+
+.payment-success__icon-circle {
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+}
+
+@keyframes successPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.payment-success__title {
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-black);
+  animation: fadeInUp 0.5s ease 0.2s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.payment-success__details {
+  width: 100%;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.5s ease 0.3s both;
+}
+
+.payment-success__detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-light);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.payment-success__detail-label {
+  font-size: 0.875rem;
+  color: var(--color-gray-dark);
+}
+
+.payment-success__detail-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-black);
+}
+
+.payment-success__notice {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: var(--color-gray-dark);
+  animation: fadeInUp 0.5s ease 0.4s both;
+}
+
+.payment-success__redirect {
+  margin: 0 0 1.5rem;
+  font-size: 0.875rem;
+  color: var(--color-turquoise);
+  font-weight: 500;
+  animation: fadeInUp 0.5s ease 0.5s both;
+}
+
+.payment-success__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: var(--color-turquoise);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  animation: fadeInUp 0.5s ease 0.6s both;
+  box-shadow: var(--shadow-turquoise);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(83, 164, 151, 0.35);
+  }
+}

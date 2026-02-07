@@ -1,14 +1,14 @@
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { VisitRegistrationPanel } from '../components';
-import './ResidentVisits.css';
+import './ResidentVisits.scss';
 
 const ResidentVisits = () => {
     const { user } = useAppContext();
 
     return (
         <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
-            <article className="resident-visits">
+            <article className="resident-visits page-shell">
                 <header className="resident-visits__intro">
                     <p className="resident-visits__eyebrow">Visitas</p>
                     <h1>Registro de visitas</h1>

@@ -1,0 +1,338 @@
+.admin-parcels {
+}
+
+.admin-parcels__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-parcels__header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.admin-parcels__subtitle {
+  color: var(--color-gray-dark);
+  font-size: 0.9375rem;
+}
+
+.admin-parcels__badge {
+  background: var(--color-orange);
+  color: var(--color-white);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.admin-parcels__badge span {
+  font-weight: 700;
+}
+
+.admin-parcels__error,
+.admin-parcels__success {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.admin-parcels__error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.admin-parcels__success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.admin-parcels__form-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-parcels__form-header h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-parcels__form-header p {
+  color: var(--color-gray-dark);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-parcels__form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.admin-parcels__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.admin-parcels__form-group label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.admin-parcels__form-group input,
+.admin-parcels__form-group select,
+.admin-parcels__form-group textarea {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.admin-parcels__form-group textarea {
+  resize: vertical;
+}
+
+.admin-parcels__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.admin-parcels__form-actions button {
+  padding: 0.65rem 1.5rem;
+  background: var(--color-turquoise);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-parcels__cancel-btn {
+  padding: 0.65rem 1.25rem;
+  background: transparent;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-parcels__cancel-btn:hover {
+  border-color: var(--color-turquoise);
+  color: var(--color-turquoise);
+}
+
+.admin-parcels__form-actions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.admin-parcels__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-parcels__filter-btn {
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.admin-parcels__filter-btn:hover {
+  border-color: var(--color-turquoise);
+  color: var(--color-turquoise);
+}
+
+.admin-parcels__filter-btn.is-active {
+  background: var(--color-turquoise);
+  border-color: var(--color-turquoise);
+  color: var(--color-white);
+}
+
+.admin-parcels__unit-filter {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  font-size: 0.875rem;
+}
+
+.admin-parcels__empty {
+  text-align: center;
+  padding: 2.5rem 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+.admin-parcels__empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.admin-parcels__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.admin-parcels__card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: all var(--transition-normal);
+}
+
+.admin-parcels__card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.admin-parcels__card.is-pending {
+  border-color: var(--color-orange);
+  background: var(--color-warning-bg);
+}
+
+.admin-parcels__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.admin-parcels__card-icon {
+  font-size: 2rem;
+}
+
+.admin-parcels__status {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.admin-parcels__status--pending {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.admin-parcels__status--collected {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.admin-parcels__sender {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.admin-parcels__unit {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-dark);
+  margin-bottom: 0.5rem;
+}
+
+.admin-parcels__description {
+  color: var(--color-gray-dark);
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-parcels__date {
+  font-size: 0.8125rem;
+  color: var(--color-gray);
+  margin-bottom: 0.5rem;
+}
+
+.admin-parcels__collect-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--color-turquoise);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-normal);
+}
+
+.admin-parcels__collect-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.admin-parcels__collect-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.admin-parcels__card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.admin-parcels__secondary-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-medium);
+  background: var(--color-bg-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-parcels__secondary-btn.is-danger {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--color-danger);
+}
+
+.admin-parcels__secondary-btn:hover:not(:disabled) {
+  border-color: var(--color-turquoise);
+  color: var(--color-turquoise);
+}
+
+.admin-parcels__secondary-btn.is-danger:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.admin-parcels__secondary-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .admin-parcels {
+    padding: 1.5rem;
+  }
+
+  .admin-parcels__grid {
+    grid-template-columns: 1fr;
+  }
+}
