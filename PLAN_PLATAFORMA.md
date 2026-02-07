@@ -8,13 +8,13 @@ Desarrollar una plataforma integral para la gestión de comunidades de edificios
 ### 1. Gestión de Comunidades
 - [x] Estructura básica de navegación
 - [ ] Creación y configuración de comunidades
-- [ ] Gestión de edificios y unidades
+- [x] Gestión de edificios y unidades
 - [ ] Configuración de reglas y normativas
 - [ ] Gestión de administradores
 
 ### 2. Portal de Residentes
 - [x] Estructura básica del portal
-- [ ] Consulta de gastos comunes
+- [x] Consulta de gastos comunes
 - [ ] Pago online de gastos comunes
 - [ ] Comunicaciones y avisos
 - [ ] Eventos y actividades
@@ -23,7 +23,7 @@ Desarrollar una plataforma integral para la gestión de comunidades de edificios
 
 ### 3. Dashboard Administrativo
 - [x] Estructura básica del dashboard
-- [ ] Gestión de residentes
+- [x] Gestión de residentes
 - [ ] Gestión de gastos comunes
 - [ ] Facturación y cobranza
 - [ ] Generación de reportes

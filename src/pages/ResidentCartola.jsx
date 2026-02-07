@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services';
-import './ResidentCartola.css';
+import './ResidentCartola.scss';
 
 /**
  * Resident Cartola Page Component
@@ -10,7 +10,7 @@ import './ResidentCartola.css';
  */
 const ResidentCartola = () => {
   const { user } = useAppContext();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cartola, setCartola] = useState({
     balance: 0,
@@ -20,7 +20,10 @@ const ResidentCartola = () => {
 
   useEffect(() => {
     const fetchCartola = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       setError(null);
       try {
@@ -49,7 +52,7 @@ const ResidentCartola = () => {
 
   return (
     <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
-      <article className="resident-cartola">
+      <article className="resident-cartola page-shell">
         <header className="resident-cartola__header">
           <div>
             <h1>Cartola</h1>
@@ -60,7 +63,42 @@ const ResidentCartola = () => {
         {error && <p className="resident-cartola__error">{error}</p>}
 
         {loading ? (
-          <div className="resident-cartola__loading">Cargando tu cartola...</div>
+          <>
+            <div className="resident-cartola__summary resident-cartola__summary--skeleton" aria-hidden="true">
+              {Array.from({ length: 2 }, (_, index) => (
+                <div key={`summary-skeleton-${index}`} className="resident-cartola__card resident-cartola__card--skeleton">
+                  <span className="resident-cartola__skeleton-circle" />
+                  <div className="resident-cartola__skeleton-lines">
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--sm" />
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--lg" />
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--xs" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <section className="resident-cartola__movements resident-cartola__movements--skeleton" aria-hidden="true">
+              <div className="resident-cartola__skeleton-title">
+                <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--md" />
+              </div>
+              <div className="resident-cartola__table-skeleton">
+                <div className="resident-cartola__table-skeleton-row resident-cartola__table-skeleton-row--header">
+                  {Array.from({ length: 6 }, (_, index) => (
+                    <span key={`head-skeleton-${index}`} className="resident-cartola__skeleton-block resident-cartola__skeleton-block--xs" />
+                  ))}
+                </div>
+                {Array.from({ length: 4 }, (_, rowIndex) => (
+                  <div key={`row-skeleton-${rowIndex}`} className="resident-cartola__table-skeleton-row">
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--sm" />
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--md" />
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--sm" />
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--sm" />
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--sm" />
+                    <span className="resident-cartola__skeleton-block resident-cartola__skeleton-block--xs" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          </>
         ) : (
           <>
             <div className="resident-cartola__summary">

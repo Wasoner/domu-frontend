@@ -1,26 +1,53 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import { Seo, Spinner } from '../components';
+import { Seo, Skeleton, Icon } from '../components';
 import { api } from '../services';
-import './AdminCreateUser.css';
+import './AdminCreateUser.scss';
 
-const MIN_PASSWORD_LENGTH = 10;
-
-const roleOptions = [
-  { value: 3, label: 'Conserje', resident: false },
-  { value: 4, label: 'Funcionario', resident: false },
+const ROLE_TYPES = [
+  { 
+    id: 'resident', 
+    roleId: 2, 
+    label: 'Residente', 
+    icon: 'home', 
+    description: 'Propietarios o arrendatarios que viven en el edificio.',
+    resident: true
+  },
+  { 
+    id: 'concierge', 
+    roleId: 3, 
+    label: 'Conserje', 
+    icon: 'shieldCheck', 
+    description: 'Personal de seguridad y recepción.',
+    resident: false
+  },
+  { 
+    id: 'staff', 
+    roleId: 4, 
+    label: 'Funcionario', 
+    icon: 'clipboardCheck', 
+    description: 'Personal de mantenimiento, aseo o administración interna.',
+    resident: false
+  },
+  { 
+    id: 'admin', 
+    roleId: 1, 
+    label: 'Administrador', 
+    icon: 'userGroup', 
+    description: 'Personal con permisos totales de gestión.',
+    resident: false
+  },
 ];
 
 const AdminCreateUser = () => {
+  const [selectedType, setSelectedType] = useState(ROLE_TYPES[0]);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     documentNumber: '',
-    roleId: 3,
-    resident: false,
-    unitId: '',
+    unitNumber: '',
     birthDate: '',
   });
   const [loading, setLoading] = useState(false);
@@ -28,22 +55,17 @@ const AdminCreateUser = () => {
   const [success, setSuccess] = useState('');
 
   const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    const nextValue = type === 'checkbox' ? checked : value;
+    const { name, value } = event.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: nextValue,
+      [name]: value,
     }));
   };
 
-  const handleRoleChange = (event) => {
-    const selected = Number(event.target.value);
-    const role = roleOptions.find((r) => r.value === selected);
-    setFormData((prev) => ({
-      ...prev,
-      roleId: selected,
-      resident: role?.resident ?? false,
-    }));
+  const handleTypeSelect = (type) => {
+    setSelectedType(type);
+    setError('');
+    setSuccess('');
   };
 
   const validate = () => {
@@ -53,14 +75,8 @@ const AdminCreateUser = () => {
     if (!formData.email.trim()) {
       return 'El correo es obligatorio.';
     }
-    if (!formData.phone.trim()) {
-      return 'El teléfono es obligatorio.';
-    }
-    if (!formData.documentNumber.trim()) {
-      return 'El documento es obligatorio.';
-    }
-    if (!formData.roleId) {
-      return 'Selecciona un rol.';
+    if (selectedType.id === 'resident' && !formData.unitNumber.trim()) {
+      return 'Para un residente es obligatorio indicar la unidad.';
     }
     return null;
   };
@@ -79,23 +95,25 @@ const AdminCreateUser = () => {
     try {
       await api.adminUsers.create({
         ...formData,
-        unitId: formData.unitId || null,
+        roleId: selectedType.roleId,
+        resident: selectedType.resident,
+        unitNumber: formData.unitNumber.trim() || null,
         birthDate: formData.birthDate || null,
         password: '1234567890',
       });
-      setSuccess('Usuario creado con contraseña por defecto 1234567890. Se envió correo con credenciales.');
-      setFormData((prev) => ({
-        ...prev,
+      
+      setSuccess(`${selectedType.label} creado exitosamente con contraseña por defecto 1234567890.`);
+      
+      // Limpiar formulario excepto unidad si es útil
+      setFormData({
         firstName: '',
         lastName: '',
         email: '',
         phone: '',
         documentNumber: '',
-        roleId: 3,
-        resident: false,
-        unitId: '',
+        unitNumber: '',
         birthDate: '',
-      }));
+      });
     } catch (submitError) {
       setError(submitError.message || 'No pudimos crear el usuario.');
     } finally {
@@ -106,136 +124,180 @@ const AdminCreateUser = () => {
   return (
     <ProtectedLayout allowedRoles={['admin']}>
       <Seo
-        title="Crear usuarios internos | Domu"
-        description="Panel privado para crear cuentas de conserjes y funcionarios en Domu."
-        canonicalPath="/admin/create-user"
+        title="Gestión de Usuarios | Domu"
+        description="Panel para crear residentes, conserjes y administradores."
         noindex
       />
-      <section className="admin-create-user">
-        <header className="admin-create-user__header">
-          <div>
-            <p className="eyebrow">Usuarios</p>
-            <h1>Crear nuevo usuario</h1>
-            <p className="subtitle">Conserjes y funcionarios del condominio.</p>
+      
+      <section className="admin-create-user page-shell">
+        <header className="admin-create-user__header page-header">
+          <div className="admin-create-user__title-group">
+            <p className="eyebrow page-eyebrow">Administración</p>
+            <h1 className="page-title">Crear Nuevo Usuario</h1>
+            <p className="subtitle page-subtitle">
+              Registra residentes o personal del edificio en la plataforma.
+            </p>
           </div>
         </header>
 
-        <div className="admin-create-user__card">
-          <form className="admin-create-user__form" onSubmit={handleSubmit}>
-            {error && <div className="alert alert--error">{error}</div>}
-            {success && <div className="alert alert--success">{success}</div>}
-
-            <div className="form-row">
-              <label className="form-field">
-                <span>Nombre</span>
-                <input
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </label>
-              <label className="form-field">
-                <span>Apellido</span>
-                <input
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </label>
-            </div>
-
-            <div className="form-row">
-              <label className="form-field">
-                <span>Correo</span>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </label>
-              <label className="form-field">
-                <span>Teléfono</span>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </label>
-            </div>
-
-            <div className="form-row">
-              <label className="form-field">
-                <span>Documento</span>
-                <input
-                  name="documentNumber"
-                  value={formData.documentNumber}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </label>
-              <label className="form-field">
-                <span>Rol</span>
-                <select
-                  name="roleId"
-                  value={formData.roleId}
-                  onChange={handleRoleChange}
-                  disabled={loading}
-                  required
+        <div className="admin-create-user__content">
+          {/* Selector de tipo de usuario */}
+          <div className="admin-create-user__type-selector">
+            <h2 className="section-title">1. Selecciona el tipo de perfil</h2>
+            <div className="role-grid">
+              {ROLE_TYPES.map((type) => (
+                <button
+                  key={type.id}
+                  type="button"
+                  className={`role-card ${selectedType.id === type.id ? 'is-selected' : ''}`}
+                  onClick={() => handleTypeSelect(type)}
                 >
-                  {roleOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  <div className="role-card__icon">
+                    <Icon name={type.icon} size={24} />
+                  </div>
+                  <div className="role-card__info">
+                    <h3>{type.label}</h3>
+                    <p>{type.description}</p>
+                  </div>
+                  <div className="role-card__check">
+                    <Icon name="check" size={16} />
+                  </div>
+                </button>
+              ))}
             </div>
+          </div>
 
-            <div className="form-row">
-              <label className="form-field">
-                <span>Fecha de nacimiento (opcional)</span>
-                <input
-                  type="date"
-                  name="birthDate"
-                  value={formData.birthDate}
-                  onChange={handleChange}
-                  disabled={loading}
-                  max={new Date().toISOString().split('T')[0]}
-                />
-              </label>
-              <label className="form-field">
-                <span>ID de unidad (opcional)</span>
-                <input
-                  type="number"
-                  name="unitId"
-                  value={formData.unitId}
-                  onChange={handleChange}
-                  disabled={loading}
-                  min="1"
-                />
-              </label>
-            </div>
+          {/* Formulario de datos */}
+          <div className="admin-create-user__form-container">
+            <h2 className="section-title">2. Completa la información del {selectedType.label.toLowerCase()}</h2>
+            
+            <form className="admin-create-user__form card" onSubmit={handleSubmit}>
+              {error && <div className="alert alert--error">{error}</div>}
+              {success && <div className="alert alert--success">{success}</div>}
 
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? <Spinner size="sm" inline label="Creando usuario..." /> : 'Crear usuario'}
-              </button>
-              <p className="helper-text">
-                Se creará con contraseña por defecto 1234567890. Pídele que la cambie en su perfil.
-              </p>
-            </div>
-          </form>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="firstName">Nombre</label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="Ej. Juan"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="lastName">Apellido</label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Ej. Pérez"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="email">Correo electrónico</label>
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="juan.perez@email.com"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="phone">Teléfono de contacto</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+56 9 1234 5678"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="documentNumber">RUT / Documento</label>
+                  <input
+                    id="documentNumber"
+                    name="documentNumber"
+                    value={formData.documentNumber}
+                    onChange={handleChange}
+                    placeholder="12.345.678-9"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="birthDate">Fecha de nacimiento (opcional)</label>
+                  <input
+                    id="birthDate"
+                    type="date"
+                    name="birthDate"
+                    value={formData.birthDate}
+                    onChange={handleChange}
+                    disabled={loading}
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+
+                {(selectedType.id === 'resident' || selectedType.id === 'staff') && (
+                  <div className="form-group form-group--full">
+                    <label htmlFor="unitNumber">
+                      Unidad {selectedType.id === 'resident' && <span className="required">*</span>}
+                    </label>
+                    <input
+                      id="unitNumber"
+                      type="number"
+                      name="unitNumber"
+                      value={formData.unitNumber}
+                      onChange={handleChange}
+                      placeholder="Ej. 101"
+                      min="1"
+                      disabled={loading}
+                      required={selectedType.id === 'resident'}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="admin-create-user__footer">
+                <div className="info-box">
+                  <Icon name="info" size={16} />
+                  <p>
+                    Se enviará un correo con las credenciales de acceso. 
+                    Contraseña temporal: <strong>1234567890</strong>
+                  </p>
+                </div>
+                
+                <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
+                  {loading ? (
+                    <Skeleton.Inline width="70px" label="Creando..." />
+                  ) : (
+                    <>
+                      <Icon name="userPlus" size={18} />
+                      Crear {selectedType.label}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </section>
     </ProtectedLayout>
@@ -243,5 +305,3 @@ const AdminCreateUser = () => {
 };
 
 export default AdminCreateUser;
-
-

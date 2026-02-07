@@ -38,6 +38,8 @@ export const AppProvider = ({ children }) => {
 
   const [theme, setTheme] = useState('light');
   const [isLoading, setIsLoading] = useState(true);
+  // Contador para detectar cambios de edificio y forzar recarga de datos
+  const [buildingVersion, setBuildingVersion] = useState(0);
 
   // Verificar autenticación al cargar la aplicación
   useEffect(() => {
@@ -47,10 +49,24 @@ export const AppProvider = ({ children }) => {
           // Intentar obtener información actualizada del usuario
           const userData = await api.auth.getCurrentUser();
           if (userData) {
+            // Determinar el buildingId a usar (validar contra buildings)
+            const storedBuildingId = localStorage.getItem('selectedBuildingId');
+            const storedBuildingNum = storedBuildingId ? Number(storedBuildingId) : undefined;
+            const buildingIds = (userData.buildings || []).map((b) => b.id);
+            const hasStoredBuilding = storedBuildingNum !== undefined && buildingIds.includes(storedBuildingNum);
+            const fallbackBuildingId = userData.activeBuildingId ?? userData.buildings?.[0]?.id;
+            const buildingId = hasStoredBuilding ? storedBuildingNum : fallbackBuildingId;
+
+            // Guardar en localStorage si no estaba o si era inválido (permitir 0 como válido)
+            if (buildingId !== undefined && buildingId !== null && (!storedBuildingId || !hasStoredBuilding)) {
+              localStorage.setItem('selectedBuildingId', buildingId);
+            }
+
             setUser({
               ...userData,
               userType: resolveUserType(userData),
               isAuthenticated: true,
+              selectedBuildingId: buildingId,
             });
           }
         } catch (error) {
@@ -68,14 +84,27 @@ export const AppProvider = ({ children }) => {
 
   // Función para actualizar el usuario
   const updateUser = (userData) => {
+    const storedBuildingId = localStorage.getItem('selectedBuildingId');
+    const storedBuildingNum = storedBuildingId ? Number(storedBuildingId) : undefined;
+    const buildingIds = (userData?.buildings || []).map((b) => b.id);
+    const hasStoredBuilding = storedBuildingNum !== undefined && buildingIds.includes(storedBuildingNum);
+
+    const resolvedBuildingId = userData
+      ? (
+        (hasStoredBuilding ? storedBuildingNum : undefined) ??
+        userData.selectedBuildingId ??
+        userData.activeBuildingId ??
+        user?.selectedBuildingId ??
+        userData.buildings?.[0]?.id
+      )
+      : undefined;
+
     const normalizedUser = userData
       ? {
         ...userData,
         userType: resolveUserType(userData),
         isAuthenticated: true,
-        selectedBuildingId: userData.selectedBuildingId || userData.activeBuildingId || userData.activeBuildingId === 0
-          ? userData.activeBuildingId
-          : (user?.selectedBuildingId || undefined),
+        selectedBuildingId: resolvedBuildingId,
       }
       : null;
 
@@ -83,7 +112,7 @@ export const AppProvider = ({ children }) => {
     if (normalizedUser) {
       localStorage.setItem('userEmail', normalizedUser.email || '');
       localStorage.setItem('userType', normalizedUser.userType || 'resident');
-      if (normalizedUser.selectedBuildingId) {
+      if (normalizedUser.selectedBuildingId !== undefined && normalizedUser.selectedBuildingId !== null) {
         localStorage.setItem('selectedBuildingId', normalizedUser.selectedBuildingId);
       }
     }
@@ -96,6 +125,8 @@ export const AppProvider = ({ children }) => {
       localStorage.setItem('selectedBuildingId', buildingId ?? '');
       return next;
     });
+    // Incrementar versión para que los componentes detecten el cambio y recarguen datos
+    setBuildingVersion((v) => v + 1);
   };
 
   // Función para cerrar sesión
@@ -108,6 +139,7 @@ export const AppProvider = ({ children }) => {
     user,
     setUser: updateUser,
     selectBuilding,
+    buildingVersion, // Usado para detectar cambios de edificio y recargar datos
     logout,
     theme,
     setTheme,

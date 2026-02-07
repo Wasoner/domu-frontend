@@ -1,7 +1,7 @@
 import { Header, MainContent, Footer } from '../layout';
 import { Button, Seo } from '../components';
 import { ROUTES } from '../constants';
-import './UserTypeLanding.css';
+import './UserTypeLanding.scss';
 
 const features = [
   {

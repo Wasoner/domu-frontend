@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Header, MainContent, Footer } from '../layout';
-import { Button, Seo, Spinner } from '../components';
+import { Button, Seo, Skeleton } from '../components';
 import { ROUTES } from '../constants';
 import { api } from '../services';
 import { useAppContext } from '../context';
-import './Register.css';
+import './Register.scss';
 
 /**
  * Register Page Component
@@ -408,7 +408,7 @@ const Register = () => {
                             variant="primary"
                             disabled={loading}
                         >
-                            {loading ? <Spinner size="sm" inline label="Registrando..." /> : 'Crear Cuenta'}
+                            {loading ? <Skeleton.Inline width="80px" label="Registrando..." /> : 'Crear Cuenta'}
                         </Button>
                     </form>
 

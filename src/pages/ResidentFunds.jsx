@@ -1,5 +1,5 @@
 import { ProtectedLayout } from '../layout';
-import './ResidentFunds.css';
+import './ResidentFunds.scss';
 
 /**
  * Resident Funds Page Component
@@ -58,7 +58,7 @@ const ResidentFunds = () => {
 
   return (
     <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
-      <article className="resident-funds">
+      <article className="resident-funds page-shell">
         <header className="resident-funds__header">
           <div>
             <h1>Fondos</h1>

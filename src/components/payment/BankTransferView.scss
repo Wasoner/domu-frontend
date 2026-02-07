@@ -1,0 +1,224 @@
+.bank-transfer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.bank-transfer__countdown {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-pill);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-black);
+  font-variant-numeric: tabular-nums;
+
+  &--warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: #f59e0b;
+    color: #b45309;
+  }
+
+  &--danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #dc2626;
+    animation: pulse 1s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.bank-transfer__header {
+  text-align: center;
+  padding-top: 2.5rem;
+
+  h2 {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-black);
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--color-gray-dark);
+  }
+}
+
+.bank-transfer__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.bank-transfer__data {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.bank-transfer__row {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--color-border-light);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--highlight {
+    background: rgba(83, 164, 151, 0.08);
+
+    .bank-transfer__value {
+      color: var(--color-turquoise);
+      font-weight: 700;
+      font-size: 1.125rem;
+    }
+  }
+}
+
+.bank-transfer__label {
+  flex: 0 0 120px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-gray-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.bank-transfer__value {
+  flex: 1;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-black);
+}
+
+.bank-transfer__copy {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  color: var(--color-gray-dark);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--color-turquoise);
+    border-color: var(--color-turquoise);
+    color: white;
+  }
+
+  &--copied {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+  }
+}
+
+.bank-transfer__copy-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: var(--color-turquoise);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-turquoise);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(83, 164, 151, 0.35);
+  }
+
+  &--copied {
+    background: #10b981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+}
+
+.bank-transfer__notice {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-md);
+  color: #1d4ed8;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+}
+
+.bank-transfer__cancel {
+  background: transparent;
+  border: none;
+  color: var(--color-gray-dark);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.75rem;
+  text-align: center;
+  transition: color var(--transition-fast);
+
+  &:hover {
+    color: var(--color-black);
+  }
+}
+
+@media (max-width: 480px) {
+  .bank-transfer__label {
+    flex: 0 0 90px;
+    font-size: 0.75rem;
+  }
+
+  .bank-transfer__value {
+    font-size: 0.875rem;
+  }
+}

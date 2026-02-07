@@ -1,6 +1,6 @@
 import { Header, MainContent, Footer } from '../layout';
 import { Seo } from '../components';
-import './About.css';
+import './About.scss';
 
 const About = () => {
   return (

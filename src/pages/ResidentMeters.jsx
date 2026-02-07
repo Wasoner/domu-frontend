@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentMeters.css';
+import './ResidentMeters.scss';
 
 /**
  * Resident Meters Page Component
@@ -34,7 +34,7 @@ const ResidentMeters = () => {
 
   return (
     <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
-      <article className="resident-meters">
+      <article className="resident-meters page-shell">
         <header className="resident-meters__header">
           <div>
             <h1>Medidores</h1>

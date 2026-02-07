@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import './ResidentExpenses.css';
+import './ResidentExpenses.scss';
 
 /**
  * Resident Expenses Page Component
@@ -38,7 +38,7 @@ const ResidentExpenses = () => {
 
   return (
     <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
-      <article className="resident-expenses">
+      <article className="resident-expenses page-shell">
         <header className="resident-expenses__header">
           <div>
             <h1>Egresos</h1>

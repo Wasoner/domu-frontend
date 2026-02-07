@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, LocationPicker, Seo, Spinner } from '../components';
+import { Button, LocationPicker, Seo, Skeleton } from '../components';
 import { Header, MainContent, Footer, AuthLayout } from '../layout';
 import heroLogo from '../assets/LogotipoDOMU.svg';
 import { ROUTES } from '../constants';
 import { useAppContext } from '../context';
 import { api } from '../services';
 import Dashboard from './Dashboard';
-import './Home.css';
+import './Home.scss';
 
 const residentChartData = [
   { month: 'May', amount: '$64.3K', value: 70 },
@@ -38,27 +38,21 @@ const residentQuickActions = [
   },
 ];
 
-const communityFeed = [
-  {
-    date: '17 Nov 2025',
-    title: 'Información de interés para la comunidad',
-    description: 'Recordatorio sobre mantenciones y uso responsable de espacios comunes.',
-  },
-  {
-    date: '02 Oct 2025',
-    title: 'Corte de gas programado',
-    description: 'El servicio se suspenderá el viernes 03-10-2025 desde las 23:00 hrs.',
-  },
-  {
-    date: '29 Sept 2025',
-    title: 'Cotizaciones de trabajos',
-    description: 'Revisa el detalle de los trabajos aprobados para áreas comunes.',
-  },
-];
+
 
 const upcomingEvent = {
   title: 'Próximo evento',
   description: 'Gestión de siniestros: aprende cómo llevar el proceso de manera eficiente.',
+};
+
+const formatRut = (value) => {
+  let clean = value.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length === 0) return '';
+  if (clean.length === 1) return clean;
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+  const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${formatted}-${dv}`;
 };
 
 const COMMUNITY_FORM_STORAGE_KEY = 'communityFormDraft';
@@ -99,6 +93,7 @@ const ResidentHome = ({ user }) => {
   const [charges, setCharges] = useState([]);
   const [chargesError, setChargesError] = useState(null);
   const [loadingCharges, setLoadingCharges] = useState(true);
+  const [communityFeed, setCommunityFeed] = useState([]);
 
   useEffect(() => {
     const fetchCharges = async () => {
@@ -111,7 +106,24 @@ const ResidentHome = ({ user }) => {
         setLoadingCharges(false);
       }
     };
+
+    const fetchFeed = async () => {
+      try {
+        const data = await api.forum.list();
+        if (Array.isArray(data)) {
+          setCommunityFeed(data.slice(0, 3).map((item) => ({
+            date: new Date(item.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
+            title: item.title,
+            description: item.content,
+          })));
+        }
+      } catch (error) {
+        console.error('Error loading community feed', error);
+      }
+    };
+
     fetchCharges();
+    fetchFeed();
   }, []);
 
   const totalPending = useMemo(
@@ -150,7 +162,7 @@ const ResidentHome = ({ user }) => {
 
             <div className="resident-hero__amount">
               <span>Saldo pendiente</span>
-              <strong>{loadingCharges ? 'Cargando...' : formatCurrency(totalPending)}</strong>
+              <strong>{loadingCharges ? <Skeleton variant="text" width="90px" height="18px" /> : formatCurrency(totalPending)}</strong>
             </div>
 
             <div className="resident-hero__actions">
@@ -170,7 +182,7 @@ const ResidentHome = ({ user }) => {
               )}
             </header>
 
-            {loadingCharges && <Spinner size="sm" inline label="Cargando gastos..." />}
+            {loadingCharges && <Skeleton.List rows={3} />}
             {chargesError && !loadingCharges && (
               <p className="error-text">No pudimos cargar tus gastos: {chargesError}</p>
             )}
@@ -276,10 +288,6 @@ const ResidentHome = ({ user }) => {
   );
 };
 
-/**
- * Home Page Component
- * Main landing page for Domu platform
- */
 const Home = () => {
   const { user, isAuthenticated, isLoading } = useAppContext();
   const [showCommunityModal, setShowCommunityModal] = useState(false);
@@ -331,26 +339,31 @@ const Home = () => {
     }
   }, [communityForm, documentName]);
 
-  if (isLoading) {
-    return (
-      <div className="home-page">
-        <Header />
-        <MainContent>
-          <div className="home-loader" role="status">
-            <Spinner label="Preparando tu portal..." />
-          </div>
-        </MainContent>
-        <Footer />
-      </div>
-    );
-  }
-
   if (isAuthenticated) {
     const isAdmin = user?.roleId === 1 || user?.userType === 'admin';
     if (isAdmin) {
       return <Dashboard />;
     }
     return <ResidentHome user={user} />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="home-page">
+        <Header />
+        <MainContent>
+          <div className="home-loader" role="status" style={{ maxWidth: '720px', margin: '3rem auto', padding: '0 1rem' }}>
+            <Skeleton variant="rect" height="200px" borderRadius="var(--radius-md, 12px)" />
+            <div style={{ marginTop: '1.5rem' }}>
+              <Skeleton variant="title" width="40%" />
+              <Skeleton variant="text" count={3} />
+            </div>
+            <Skeleton.Cards count={3} />
+          </div>
+        </MainContent>
+        <Footer />
+      </div>
+    );
   }
 
   const resetCommunityState = () => {
@@ -379,14 +392,10 @@ const Home = () => {
   };
 
   const handleResidentLogin = () => {
-    // Navigate to login page for residents
     window.location.href = ROUTES.LOGIN;
   };
 
   const handleDemoAccess = () => {
-    // TODO: Implement demo access flow
-    console.log('Accessing demo...');
-    // For now, redirect to about page
     window.location.href = ROUTES.ABOUT;
   };
 
@@ -439,7 +448,6 @@ const Home = () => {
         message: '¡Solicitud enviada!',
         status: response?.status || 'PENDING',
       });
-      // Mantenemos el borrador para continuidad; el admin puede seguir editando o enviar otra solicitud
     } catch (error) {
       setCommunityStatus({ ...getDefaultCommunityStatus(), error: error.message });
     }
@@ -451,66 +459,24 @@ const Home = () => {
   };
 
   const features = [
-    {
-      icon: '💳',
-      title: 'Gastos Comunes en línea',
-      description: 'Pagos digitales seguros y seguimiento en tiempo real de tus gastos comunes.'
-    },
-    {
-      icon: '📱',
-      title: 'Portal web responsivo',
-      description: 'Gestiona tu comunidad desde cualquier dispositivo con nuestro portal web optimizado para celulares, tablets y computadores.'
-    },
-    {
-      icon: '📢',
-      title: 'Comunicación directa',
-      description: 'Mantén a tu comunidad informada con anuncios y mensajería instantánea.'
-    },
-    {
-      icon: '🔐',
-      title: 'Control de acceso',
-      description: 'Registra visitas y gestiona el acceso a tu comunidad de forma segura.'
-    },
-    {
-      icon: '📊',
-      title: 'Reportes y estadísticas',
-      description: 'Visualiza el estado financiero y la gestión de tu comunidad en tiempo real.'
-    },
-    {
-      icon: '🏠',
-      title: 'Reserva de espacios',
-      description: 'Gestiona la reserva de espacios comunes como quinchos y salas de eventos.'
-    },
+    { icon: '💳', title: 'Gastos Comunes en línea', description: 'Pagos digitales seguros y seguimiento en tiempo real de tus gastos comunes.' },
+    { icon: '📱', title: 'Portal web responsivo', description: 'Gestiona tu comunidad desde cualquier dispositivo con nuestro portal web optimizado para celulares, tablets y computadores.' },
+    { icon: '📢', title: 'Comunicación directa', description: 'Mantén a tu comunidad informada con anuncios y mensajería instantánea.' },
+    { icon: '🔐', title: 'Control de acceso', description: 'Registra visitas y gestiona el acceso a tu comunidad de forma segura.' },
+    { icon: '📊', title: 'Reportes y estadísticas', description: 'Visualiza el estado financiero y la gestión de tu comunidad en tiempo real.' },
+    { icon: '🏠', title: 'Reserva de espacios', description: 'Gestiona la reserva de espacios comunes como quinchos y salas de eventos.' },
+  ];
+
+  const heroHighlights = [
+    { title: 'Pagos sin fricción', description: 'Cobranza clara, pagos en línea y reportes al instante.' },
+    { title: 'Accesos más seguros', description: 'Registro de visitas con QR y trazabilidad de ingresos.' },
+    { title: 'Comunidad conectada', description: 'Mensajes, avisos y gestión centralizada en un solo lugar.' },
   ];
 
   const benefits = [
-    {
-      title: 'Para Administradores',
-      items: [
-        'Módulo de recaudación completo',
-        'Reportes financieros detallados',
-        'Gestión centralizada de comunidades',
-        'Comunicación eficiente con residentes'
-      ]
-    },
-    {
-      title: 'Para Residentes',
-      items: [
-        'Pagos de gastos comunes online',
-        'Comunicación directa con administración',
-        'Reserva de espacios comunes',
-        'Acceso desde portal web responsivo'
-      ]
-    },
-    {
-      title: 'Para Comités',
-      items: [
-        'Transparencia en las finanzas',
-        'Revisión en tiempo real de gestión',
-        'Comunicación activa con comunidad',
-        'Toma de decisiones informadas'
-      ]
-    },
+    { title: 'Para Administradores', items: ['Módulo de recaudación completo', 'Reportes financieros detallados', 'Gestión centralizada de comunidades', 'Comunicación eficiente con residentes'] },
+    { title: 'Para Residentes', items: ['Pagos de gastos comunes online', 'Comunicación directa con administración', 'Reserva de espacios comunes', 'Acceso desde portal web responsivo'] },
+    { title: 'Para Comités', items: ['Transparencia en las finanzas', 'Revisión en tiempo real de gestión', 'Comunicación activa con comunidad', 'Toma de decisiones informadas'] },
   ];
 
   return (
@@ -523,37 +489,35 @@ const Home = () => {
         structuredData={homeStructuredData}
       />
       <Header />
-
-      {/* Hero Section */}
       <section className="home-hero animated-section">
         <div className="container">
           <div className="home-hero__content">
             <div className="home-hero__text">
-              <h1 className="home-hero__title">
-                Software para la administración de <strong>edificios y condominios</strong>
-              </h1>
-              <p className="home-hero__subtitle">
-                Administra edificios con DOMU: el software y el portal web responsivo para tu comunidad.
-                Gastos Comunes en línea y mucho más.
-              </p>
+              <p className="home-hero__eyebrow">Plataforma DOMU para comunidades</p>
+              <h1 className="home-hero__title">Software para la administración de <strong>edificios y condominios</strong></h1>
+              <p className="home-hero__subtitle">Administra edificios con DOMU: el software y el portal web responsivo para tu comunidad. Gastos Comunes en línea y mucho más.</p>
+              <div className="home-hero__highlights">
+                {heroHighlights.map((item) => (
+                  <div key={item.title} className="home-hero__highlight">
+                    <span>{item.title}</span>
+                    <small>{item.description}</small>
+                  </div>
+                ))}
+              </div>
               <div className="home-hero__actions">
-                <Button onClick={handleCreateCommunity} variant="primary" className="home-hero__cta">
-                  Crear mi comunidad
-                </Button>
-                <Button onClick={handleResidentLogin} variant="ghost" className="home-hero__secondary">
-                  Soy residente
-                </Button>
+                <Button onClick={handleCreateCommunity} variant="primary">Crear mi comunidad</Button>
+                <Button onClick={handleResidentLogin} variant="ghost">Soy residente</Button>
               </div>
             </div>
             <div className="home-hero__visual">
-              <img src={heroLogo} alt="DOMU Logo" className="home-hero__logo" />
+              <div className="home-hero__frame">
+                <img src={heroLogo} alt="DOMU Logo" className="home-hero__logo" />
+              </div>
             </div>
           </div>
         </div>
       </section>
-
       <MainContent>
-        {/* Features Section */}
         <section className="home-features animated-section">
           <div className="container">
             <div className="home-section__header">
@@ -571,8 +535,6 @@ const Home = () => {
             </div>
           </div>
         </section>
-
-        {/* Benefits Section */}
         <section className="home-benefits animated-section">
           <div className="container">
             <div className="home-section__header">
@@ -583,262 +545,231 @@ const Home = () => {
                 <div key={index} className="home-benefit-card">
                   <h3>{benefit.title}</h3>
                   <ul className="home-benefit-list">
-                    {benefit.items.map((item, itemIndex) => (
-                      <li key={itemIndex}>{item}</li>
-                    ))}
+                    {benefit.items.map((item, itemIndex) => <li key={itemIndex}>{item}</li>)}
                   </ul>
                 </div>
               ))}
             </div>
           </div>
         </section>
-
-        {/* CTA Section */}
         <section className="home-cta animated-section">
           <div className="container">
             <div className="home-cta__content">
               <h2>¿Listo para mejorar la gestión de tu comunidad?</h2>
               <p>Crea tu comunidad ahora y comienza a administrar de forma más eficiente</p>
               <div className="home-cta__actions">
-                <Button onClick={handleCreateCommunity} variant="primary" className="home-cta__button">
-                  Crear mi comunidad
-                </Button>
-                <Button onClick={handleDemoAccess} variant="ghost" className="home-cta__button">
-                  Ver demo
-                </Button>
+                <Button onClick={handleCreateCommunity} variant="primary">Crear mi comunidad</Button>
+                <Button onClick={handleDemoAccess} variant="ghost">Ver demo</Button>
               </div>
             </div>
           </div>
         </section>
       </MainContent>
-
       <Footer />
-
       {showCommunityModal && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={handleOverlayClose}>
+        <div className="modal-overlay" onClick={handleOverlayClose}>
           <div className="community-modal" onClick={(e) => e.stopPropagation()}>
             <header className="community-modal__header">
               <div>
                 <p className="eyebrow">{communityStatus.success ? 'Solicitud enviada' : 'Solicitud de comunidad'}</p>
                 <h3>{communityStatus.success ? '¡Listo! Hemos recibido tu solicitud' : 'Crear mi comunidad'}</h3>
-                <small>
-                  {communityStatus.success
-                    ? 'Revisaremos tu documentación y te contactaremos apenas un administrador la valide.'
-                    : 'Adjunta el documento que respalda la propiedad del edificio.'}
-                </small>
+                {!communityStatus.success && (
+                  <div className="stepper">
+                    <span className={step === 1 ? 'step-current' : 'step-done'}>1. Administrador</span>
+                    <span className={step === 2 ? 'step-current' : step > 2 ? 'step-done' : 'step-upcoming'}>2. Comunidad</span>
+                    <span className={step === 3 ? 'step-current' : 'step-upcoming'}>3. Documento</span>
+                  </div>
+                )}
               </div>
-              {!communityStatus.success && (
-                <div className="stepper" aria-label={`Paso ${step} de 2`}>
-                  <span className={step === 1 ? 'step-current' : 'step-done'}>Paso 1</span>
-                  <span className="step-separator">›</span>
-                  <span className={step === 2 ? 'step-current' : 'step-upcoming'}>Paso 2</span>
-                </div>
-              )}
-              <button
-                type="button"
-                className="close-button"
-                aria-label="Cerrar panel"
-                onClick={handleCloseAndReset}
-              >
-                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                  <path
-                    d="M5.28 4.22 10 8.94l4.72-4.72 1.06 1.06L11.06 10l4.72 4.72-1.06 1.06L10 11.06l-4.72 4.72-1.06-1.06L8.94 10 4.22 5.28z"
-                    fill="currentColor"
-                  />
-                </svg>
+              <button type="button" className="close-button" onClick={handleCloseAndReset} aria-label="Cerrar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
               </button>
             </header>
+
             {communityStatus.success ? (
-              <div className="community-success" role="status" aria-live="polite">
-                <div className="community-success__icon" aria-hidden="true">✔</div>
-                <h4>{communityStatus.message || '¡Solicitud enviada!'}</h4>
+              <div className="community-success">
+                <div className="community-success__icon">✓</div>
+                <h4>¡Solicitud enviada!</h4>
                 <p className="community-success__note">
-                  Revisaremos tus documentos y te avisaremos {communityForm.adminEmail ? `al correo ${communityForm.adminEmail}` : 'al correo registrado'} cuando un administrador los apruebe.
+                  Tu solicitud ha sido recibida y será revisada por nuestro equipo.
+                  Te enviaremos un correo con el resultado.
                 </p>
                 <div className="community-success__actions">
-                  <Button type="button" variant="primary" onClick={handleCloseAndReset}>
-                    Volver al inicio
-                  </Button>
-                  <Button type="button" variant="ghost" onClick={handleNewCommunityRequest}>
-                    Enviar otra solicitud
-                  </Button>
+                  <Button type="button" variant="primary" onClick={handleCloseAndReset}>Volver al inicio</Button>
+                  <Button type="button" variant="ghost" onClick={handleNewCommunityRequest}>Nueva solicitud</Button>
                 </div>
               </div>
             ) : (
-              <form className="community-form community-modal__content" onSubmit={handleCommunitySubmit}>
-                {step === 1 && (
-                  <div className="form-notebook">
-                    <div className="form-page">
-                      <p className="eyebrow">Administrador</p>
-                      <label>
-                        Nombre completo
-                        <input
-                          type="text"
-                          value={communityForm.adminName}
-                          onChange={(e) => setCommunityForm({ ...communityForm, adminName: e.target.value })}
-                          required
-                        />
-                      </label>
-                      <label>
-                        Documento (RUT/Pasaporte)
-                        <input
-                          type="text"
-                          value={communityForm.adminDocument}
-                          onChange={(e) => setCommunityForm({ ...communityForm, adminDocument: e.target.value })}
-                          required
-                        />
-                      </label>
-                      <label>
-                        Teléfono admin
-                        <input
-                          type="text"
-                          value={communityForm.adminPhone}
-                          onChange={(e) => setCommunityForm({ ...communityForm, adminPhone: e.target.value })}
-                          required
-                        />
-                      </label>
-                      <label>
-                        Email admin
-                        <input
-                          type="email"
-                          value={communityForm.adminEmail}
-                          onChange={(e) => setCommunityForm({ ...communityForm, adminEmail: e.target.value })}
-                          required
-                        />
-                      </label>
-                    </div>
-                  </div>
-                )}
+              <div className="community-modal__content">
+                <form className="community-form" onSubmit={handleCommunitySubmit}>
+                  {communityStatus.error && (
+                    <p className="error-text">{communityStatus.error}</p>
+                  )}
 
-                {step === 2 && (
-                  <div className="form-notebook">
+                  {step === 1 && (
                     <div className="form-page">
-                      <p className="eyebrow">Edificio / Torre</p>
-                      <label>
-                        Nombre del condominio
-                        <input
-                          type="text"
-                          value={communityForm.name}
-                          onChange={(e) => setCommunityForm({ ...communityForm, name: e.target.value })}
-                          required
-                        />
-                      </label>
-                      <label>
-                        Torre (ej: 1822)
-                        <input
-                          type="text"
-                          value={communityForm.towerLabel}
-                          onChange={(e) => setCommunityForm({ ...communityForm, towerLabel: e.target.value })}
-                        />
-                      </label>
-                      <label>
-                        Dirección (aprox del mapa)
-                        <input
-                          type="text"
-                          value={communityForm.address}
-                          onChange={(e) => setCommunityForm({ ...communityForm, address: e.target.value })}
-                          required
-                        />
-                      </label>
+                      <p className="eyebrow">Datos del administrador</p>
                       <div className="form-grid">
                         <label>
-                          Comuna
+                          Nombre completo *
                           <input
                             type="text"
+                            placeholder="Ej: Juan Pérez"
+                            value={communityForm.adminName}
+                            onChange={(e) => setCommunityForm({ ...communityForm, adminName: e.target.value })}
+                            required
+                          />
+                        </label>
+                        <label>
+                          Correo electrónico
+                          <input
+                            type="email"
+                            placeholder="admin@ejemplo.com"
+                            value={communityForm.adminEmail}
+                            onChange={(e) => setCommunityForm({ ...communityForm, adminEmail: e.target.value })}
+                          />
+                        </label>
+                        <label>
+                          Teléfono
+                          <input
+                            type="tel"
+                            placeholder="+56 9 1234 5678"
+                            value={communityForm.adminPhone}
+                            onChange={(e) => setCommunityForm({ ...communityForm, adminPhone: e.target.value })}
+                          />
+                        </label>
+                        <label>
+                          RUT / Documento
+                          <input
+                            type="text"
+                            placeholder="12.345.678-9"
+                            maxLength={12}
+                            value={communityForm.adminDocument}
+                            onChange={(e) => setCommunityForm({ ...communityForm, adminDocument: formatRut(e.target.value) })}
+                          />
+                        </label>
+                      </div>
+                      <div className="community-modal__actions">
+                        <Button type="button" variant="ghost" onClick={handleOverlayClose}>Cancelar</Button>
+                        <Button type="button" variant="primary" onClick={() => setStep(2)}>Siguiente</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    <div className="form-page">
+                      <p className="eyebrow">Datos de la comunidad</p>
+                      <div className="form-grid">
+                        <label>
+                          Nombre del condominio *
+                          <input
+                            type="text"
+                            placeholder="Ej: Edificio Plaza Central"
+                            value={communityForm.name}
+                            onChange={(e) => setCommunityForm({ ...communityForm, name: e.target.value })}
+                            required
+                          />
+                        </label>
+                        <label>
+                          Dirección *
+                          <input
+                            type="text"
+                            placeholder="Av. Libertad 123"
+                            value={communityForm.address}
+                            onChange={(e) => setCommunityForm({ ...communityForm, address: e.target.value })}
+                            required
+                          />
+                        </label>
+                        <label>
+                          Comuna *
+                          <input
+                            type="text"
+                            placeholder="Santiago"
                             value={communityForm.commune}
                             onChange={(e) => setCommunityForm({ ...communityForm, commune: e.target.value })}
+                            required
                           />
                         </label>
                         <label>
                           Ciudad
                           <input
                             type="text"
+                            placeholder="Región Metropolitana"
                             value={communityForm.city}
                             onChange={(e) => setCommunityForm({ ...communityForm, city: e.target.value })}
                           />
                         </label>
-                      </div>
-                      <div className="form-grid">
                         <label>
-                          Código postal
+                          Torre / Etiqueta
                           <input
                             type="text"
-                            value={communityForm.postalCode}
-                            onChange={(e) => setCommunityForm({ ...communityForm, postalCode: e.target.value })}
+                            placeholder="Torre A"
+                            value={communityForm.towerLabel}
+                            onChange={(e) => setCommunityForm({ ...communityForm, towerLabel: e.target.value })}
                           />
                         </label>
-                        <div />
-                      </div>
-                      <div className="form-grid">
                         <label>
                           Pisos
                           <input
                             type="number"
                             min="1"
+                            max="100"
                             value={communityForm.floors}
                             onChange={(e) => setCommunityForm({ ...communityForm, floors: e.target.value })}
                           />
                         </label>
                         <label>
-                          Deptos totales
+                          Cantidad de unidades
                           <input
                             type="number"
                             min="1"
+                            max="9999"
                             value={communityForm.unitsCount}
                             onChange={(e) => setCommunityForm({ ...communityForm, unitsCount: e.target.value })}
                           />
                         </label>
                       </div>
-                    </div>
-
-                    <div className="form-page">
-                      <p className="eyebrow">Ubicación en mapa</p>
+                      <p className="eyebrow" style={{ marginTop: '0.5rem' }}>Ubicación en el mapa (opcional)</p>
                       <LocationPicker
                         latitude={communityForm.latitude}
                         longitude={communityForm.longitude}
                         onSelect={handleLocationSelect}
                       />
+                      <div className="community-modal__actions">
+                        <Button type="button" variant="ghost" onClick={() => setStep(1)}>Atrás</Button>
+                        <Button type="button" variant="primary" onClick={() => setStep(3)}>Siguiente</Button>
+                      </div>
                     </div>
-                  </div>
-                )}
-
-                <label className="file-input">
-                  Documento (PDF o imagen)
-                  <input type="file" accept=".pdf,image/*" onChange={handleProofFile} />
-                </label>
-                {documentName && (
-                  <p className="info-text">
-                    Archivo seleccionado: {documentName}
-                    {!documentFile && ' (vuelve a adjuntarlo para enviarlo)'}
-                  </p>
-                )}
-
-                {communityStatus.error && <p className="error-text">{communityStatus.error}</p>}
-                {!communityStatus.success && communityStatus.message && (
-                  <p className="success-text">{communityStatus.message}</p>
-                )}
-
-                <div className="community-modal__actions">
-                  <Button type="button" variant="ghost" onClick={handleOverlayClose}>
-                    Cancelar
-                  </Button>
-                  {step === 2 && (
-                    <Button type="button" variant="secondary" onClick={() => setStep(1)}>
-                      Volver
-                    </Button>
                   )}
-                  {step === 1 && (
-                    <Button type="button" variant="primary" onClick={() => setStep(2)}>
-                      Siguiente
-                    </Button>
+
+                  {step === 3 && (
+                    <div className="form-page">
+                      <p className="eyebrow">Documento de acreditación</p>
+                      <label>
+                        Texto de acreditación *
+                        <textarea
+                          rows={3}
+                          placeholder="Ej: Adjunto acta de asamblea de nombramiento como administrador"
+                          value={communityForm.proofText}
+                          onChange={(e) => setCommunityForm({ ...communityForm, proofText: e.target.value })}
+                          required
+                        />
+                      </label>
+                      <label className="file-input">
+                        Documento adjunto (PDF o imagen) *
+                        <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleProofFile} />
+                      </label>
+                      {documentName && <p className="info-text">Archivo seleccionado: {documentName}</p>}
+                      <div className="community-modal__actions">
+                        <Button type="button" variant="ghost" onClick={() => setStep(2)}>Atrás</Button>
+                        <Button type="submit" variant="primary" disabled={communityStatus.loading}>
+                          {communityStatus.loading ? 'Enviando...' : 'Enviar solicitud'}
+                        </Button>
+                      </div>
+                    </div>
                   )}
-                  {step === 2 && (
-                    <Button type="submit" variant="primary" disabled={communityStatus.loading}>
-                      {communityStatus.loading ? 'Enviando...' : 'Enviar solicitud'}
-                    </Button>
-                  )}
-                </div>
-              </form>
+                </form>
+              </div>
             )}
           </div>
         </div>

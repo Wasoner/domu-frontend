@@ -17,6 +17,13 @@ const getAuthToken = () => {
   return localStorage.getItem('authToken');
 };
 
+/**
+ * Get selected building ID from localStorage
+ */
+const getSelectedBuildingId = () => {
+  return localStorage.getItem('selectedBuildingId');
+};
+
 const roleIdToUserType = (roleId) => {
   if (roleId === 1) return 'admin';
   if (roleId === 3) return 'concierge';
@@ -59,26 +66,10 @@ const fetchWrapper = async (url, options = {}) => {
       headers.set('Authorization', `Bearer ${token}`);
     }
 
-    // Log para debugging (solo en desarrollo)
-    if (import.meta.env.DEV) {
-      let bodyForLog = undefined;
-      if (options.body) {
-        if (isFormData) {
-          bodyForLog = '[FormData]';
-        } else if (typeof options.body === 'string') {
-          try {
-            bodyForLog = JSON.parse(options.body);
-          } catch {
-            bodyForLog = options.body;
-          }
-        } else {
-          bodyForLog = options.body;
-        }
-      }
-      console.log(`[API] ${options.method || 'GET'} ${API_BASE_URL}${url}`, {
-        headers: Object.fromEntries(headers.entries()),
-        body: bodyForLog,
-      });
+    // Agregar Building ID seleccionado para filtrar datos por comunidad
+    const selectedBuildingId = getSelectedBuildingId();
+    if (selectedBuildingId) {
+      headers.set('X-Building-Id', selectedBuildingId);
     }
 
     const response = await fetch(`${API_BASE_URL}${url}`, {
@@ -114,11 +105,19 @@ const fetchWrapper = async (url, options = {}) => {
 
     // Si la respuesta está vacía, retornar null
     const contentType = response.headers.get('content-type');
+    const contentLength = response.headers.get('content-length');
+    if (response.status === 204 || contentLength === '0') {
+      return null;
+    }
     if (!contentType || !contentType.includes('application/json')) {
       return null;
     }
 
-    return await response.json();
+    const text = await response.text();
+    if (!text) {
+      return null;
+    }
+    return JSON.parse(text);
   } catch (error) {
     // Mejorar mensajes de error para problemas de red/CORS
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
@@ -127,6 +126,66 @@ const fetchWrapper = async (url, options = {}) => {
     }
 
     console.error('[API Error]', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch helper for binary responses (PDF, boletas).
+ */
+const fetchBlob = async (url, options = {}) => {
+  try {
+    const token = getAuthToken();
+    const headers = new Headers();
+    const isFormData = options.body instanceof FormData;
+
+    if (options.headers) {
+      Object.entries(options.headers).forEach(([key, value]) => {
+        headers.set(key, value);
+      });
+    }
+
+    if (options.body && !headers.has('Content-Type') && !headers.has('content-type') && !isFormData) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const selectedBuildingId = getSelectedBuildingId();
+    if (selectedBuildingId) {
+      headers.set('X-Building-Id', selectedBuildingId);
+    }
+
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      method: options.method || 'GET',
+      headers: headers,
+      body: options.body,
+      ...(options.credentials && { credentials: options.credentials }),
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch {
+        const text = await response.text();
+        if (text) {
+          errorMessage = text;
+        }
+      }
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="([^"]+)"/);
+    const fileName = match?.[1];
+    return { blob, fileName };
+  } catch (error) {
+    console.error('API Error (blob):', error);
     throw error;
   }
 };
@@ -204,6 +263,22 @@ export const api = {
           }
         }
 
+        // Resolver y guardar buildingId válido al iniciar sesión
+        if (responseData.user) {
+          const storedBuildingId = localStorage.getItem('selectedBuildingId');
+          const storedBuildingNum = storedBuildingId ? Number(storedBuildingId) : undefined;
+          const buildingIds = (responseData.user.buildings || []).map((b) => b.id);
+          const hasStoredBuilding = storedBuildingNum !== undefined && buildingIds.includes(storedBuildingNum);
+          const fallbackBuildingId = responseData.user.activeBuildingId ?? responseData.user.selectedBuildingId ?? responseData.user.buildings?.[0]?.id;
+          const resolvedBuildingId = hasStoredBuilding ? storedBuildingNum : fallbackBuildingId;
+
+          if (resolvedBuildingId !== undefined && resolvedBuildingId !== null) {
+            localStorage.setItem('selectedBuildingId', resolvedBuildingId);
+          } else {
+            localStorage.removeItem('selectedBuildingId');
+          }
+        }
+
         return responseData;
       } catch (error) {
         // Limpiar datos de autenticación en caso de error
@@ -221,6 +296,7 @@ export const api = {
       localStorage.removeItem('authToken');
       localStorage.removeItem('userType');
       localStorage.removeItem('userEmail');
+      localStorage.removeItem('selectedBuildingId');
     },
 
     /**
@@ -340,6 +416,60 @@ export const api = {
 
   finance: {
     getMyCharges: async () => fetchWrapper('/finance/my-charges', { method: 'GET' }),
+    listPeriods: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.from) query.set('from', params.from);
+      if (params.to) query.set('to', params.to);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/finance/periods${suffix}`, { method: 'GET' });
+    },
+    createPeriod: async (data) => fetchWrapper('/finance/periods', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    addCharges: async (periodId, data) => fetchWrapper(`/finance/periods/${periodId}/charges`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    listMyPeriods: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.from) query.set('from', params.from);
+      if (params.to) query.set('to', params.to);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/finance/my-periods${suffix}`, { method: 'GET' });
+    },
+    getMyPeriodDetail: async (periodId) => fetchWrapper(`/finance/my-periods/${periodId}`, { method: 'GET' }),
+    downloadMyPeriodPdf: async (periodId) => fetchBlob(`/finance/my-periods/${periodId}/pdf`, { method: 'GET' }),
+    uploadChargeReceipt: async (chargeId, file) => {
+      const formData = new FormData();
+      formData.append('document', file);
+      return fetchWrapper(`/finance/charges/${chargeId}/receipt`, {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    downloadChargeReceipt: async (chargeId) => fetchBlob(`/finance/charges/${chargeId}/receipt`, { method: 'GET' }),
+    generateChargeBoleta: async (chargeId) => fetchBlob(`/finance/charges/${chargeId}/boleta`, { method: 'GET' }),
+    downloadPaymentReceipt: async (paymentId) => fetchBlob(`/finance/payments/${paymentId}/receipt`, { method: 'GET' }),
+    paySimulated: async (chargeId, amount, paymentMethod) => fetchWrapper(`/finance/charges/${chargeId}/pay-simulated`, {
+      method: 'POST',
+      body: JSON.stringify({ amount, paymentMethod }),
+    }),
+  },
+
+  tasks: {
+    list: async () => fetchWrapper('/tasks', { method: 'GET' }),
+    create: async (data) => fetchWrapper('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: async (id, data) => fetchWrapper(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+    delete: async (id) => fetchWrapper(`/tasks/${id}`, {
+      method: 'DELETE',
+    }),
   },
 
   buildings: {
@@ -383,6 +513,10 @@ export const api = {
 
   visits: {
     create: async (data) => fetchWrapper('/visits', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    checkQr: async (data) => fetchWrapper('/visits/qr-check', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -432,6 +566,57 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ status }),
     }),
+    assign: async (incidentId, assignedToUserId) => fetchWrapper(`/incidents/${incidentId}/assign`, {
+      method: 'PATCH',
+      body: JSON.stringify({ assignedToUserId }),
+    }),
+  },
+
+  parcels: {
+    listMine: async (status) => {
+      const query = new URLSearchParams();
+      if (status) query.set('status', status);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/parcels/my${suffix}`, { method: 'GET' });
+    },
+    listAdmin: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.status) query.set('status', params.status);
+      if (params.unitId) query.set('unitId', params.unitId);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/parcels${suffix}`, { method: 'GET' });
+    },
+    create: async (data) => {
+      const payload = {
+        unitId: data.unitId ? Number(data.unitId) : null,
+        sender: String(data.sender || '').trim(),
+        description: String(data.description || '').trim(),
+        receivedAt: data.receivedAt || null,
+      };
+      return fetchWrapper('/parcels', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (parcelId, data) => {
+      const payload = {
+        unitId: data.unitId ? Number(data.unitId) : null,
+        sender: String(data.sender || '').trim(),
+        description: String(data.description || '').trim(),
+        receivedAt: data.receivedAt || null,
+      };
+      return fetchWrapper(`/parcels/${parcelId}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    updateStatus: async (parcelId, status) => fetchWrapper(`/parcels/${parcelId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+    delete: async (parcelId) => fetchWrapper(`/parcels/${parcelId}`, {
+      method: 'DELETE',
+    }),
   },
 
   adminInvites: {
@@ -462,7 +647,7 @@ export const api = {
   adminUsers: {
     create: async (data) => {
       const payload = {
-        unitId: data.unitId ? Number(data.unitId) : null,
+        unitNumber: data.unitNumber ? Number(data.unitNumber) : null,
         roleId: Number(data.roleId),
         firstName: String(data.firstName || '').trim(),
         lastName: String(data.lastName || '').trim(),
@@ -481,15 +666,54 @@ export const api = {
         body: JSON.stringify(payload),
       });
     },
+    getResidents: async () => fetchWrapper('/admin/residents', { method: 'GET' }),
   },
 
-  users: {
-    updateProfile: async (data) => {
+  adminStaff: {
+    list: async () => fetchWrapper('/admin/staff', { method: 'GET' }),
+    listActive: async () => fetchWrapper('/admin/staff/active', { method: 'GET' }),
+    create: async (data) => {
       const payload = {
         firstName: String(data.firstName || '').trim(),
         lastName: String(data.lastName || '').trim(),
-        phone: String(data.phone || '').trim(),
-        documentNumber: String(data.documentNumber || '').trim(),
+        rut: String(data.rut || '').trim(),
+        email: data.email ? String(data.email).trim() : null,
+        phone: data.phone ? String(data.phone).trim() : null,
+        position: String(data.position || '').trim(),
+        active: data.active !== undefined ? Boolean(data.active) : true,
+      };
+      return fetchWrapper('/admin/staff', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (id, data) => {
+      const payload = {
+        firstName: String(data.firstName || '').trim(),
+        lastName: String(data.lastName || '').trim(),
+        rut: String(data.rut || '').trim(),
+        email: data.email ? String(data.email).trim() : null,
+        phone: data.phone ? String(data.phone).trim() : null,
+        position: String(data.position || '').trim(),
+        active: data.active !== undefined ? Boolean(data.active) : true,
+      };
+      return fetchWrapper(`/admin/staff/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (id) => fetchWrapper(`/admin/staff/${id}`, { method: 'DELETE' }),
+  },
+
+  users: {
+    getMyUnit: async () => fetchWrapper('/users/me/unit', { method: 'GET' }),
+    getProfile: async (userId) => fetchWrapper(`/users/${userId}/profile`, { method: 'GET' }),
+    updateProfile: async (data) => {
+      const payload = {
+        firstName: String(userData.firstName || '').trim(),
+        lastName: String(userData.lastName || '').trim(),
+        phone: String(userData.phone || '').trim(),
+        documentNumber: String(userData.documentNumber || '').trim(),
       };
       return fetchWrapper('/users/me/profile', {
         method: 'PUT',
@@ -503,6 +727,22 @@ export const api = {
           currentPassword,
           newPassword,
         }),
+      });
+    },
+    updateAvatar: async (file) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return fetchWrapper('/users/me/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    updatePrivacyAvatar: async (file) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return fetchWrapper('/users/me/privacy-avatar', {
+        method: 'POST',
+        body: formData,
       });
     },
   },
@@ -578,5 +818,159 @@ export const api = {
   reservations: {
     listMine: async () => fetchWrapper('/reservations/my', { method: 'GET' }),
     cancel: async (reservationId) => fetchWrapper(`/reservations/${reservationId}`, { method: 'DELETE' }),
+  },
+
+  polls: {
+    list: async () => fetchWrapper('/polls', { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        title: String(data.title || '').trim(),
+        description: data.description?.trim() || null,
+        closesAt: data.closesAt || null,
+        options: Array.isArray(data.options) ? data.options : [],
+      };
+      return fetchWrapper('/polls', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    vote: async (pollId, optionId) => {
+      return fetchWrapper(`/polls/${pollId}/vote`, {
+        method: 'POST',
+        body: JSON.stringify({ optionId }),
+      });
+    },
+    close: async (pollId) => {
+      return fetchWrapper(`/polls/${pollId}/close`, {
+        method: 'POST',
+      });
+    },
+    exportCsv: async (pollId) => {
+      const { blob } = await fetchBlob(`/polls/${pollId}/export`);
+      return blob.text();
+    },
+  },
+
+  housingUnits: {
+    list: async () => fetchWrapper('/admin/housing-units', { method: 'GET' }),
+    getById: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        number: String(data.number || '').trim(),
+        tower: String(data.tower || '').trim(),
+        floor: String(data.floor || '').trim(),
+        aliquotPercentage: data.aliquotPercentage ? Number(data.aliquotPercentage) : null,
+        squareMeters: data.squareMeters ? Number(data.squareMeters) : null,
+      };
+      return fetchWrapper('/admin/housing-units', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (id, data) => {
+      const payload = {
+        number: String(data.number || '').trim(),
+        tower: String(data.tower || '').trim(),
+        floor: String(data.floor || '').trim(),
+        aliquotPercentage: data.aliquotPercentage ? Number(data.aliquotPercentage) : null,
+        squareMeters: data.squareMeters ? Number(data.squareMeters) : null,
+      };
+      return fetchWrapper(`/admin/housing-units/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (id) => fetchWrapper(`/admin/housing-units/${id}`, { method: 'DELETE' }),
+    linkResident: async (unitId, userId) => {
+      const response = await fetchWrapper(`/admin/housing-units/${unitId}/residents`, {
+        method: 'POST',
+        body: JSON.stringify({ userId: Number(userId) }),
+      });
+      // 204 No Content es una respuesta exitosa
+      return response;
+    },
+    unlinkResident: async (unitId, userId) => {
+      return fetchWrapper(`/admin/housing-units/${unitId}/residents/${userId}`, {
+        method: 'DELETE',
+      });
+    },
+  },
+
+  market: {
+    listItems: async (params = {}) => {
+      const query = new URLSearchParams();
+      if (params.categoryId) query.set('categoryId', params.categoryId);
+      if (params.status) query.set('status', params.status);
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return fetchWrapper(`/market/items${suffix}`, { method: 'GET' });
+    },
+    getItem: async (id) => fetchWrapper(`/market/items/${id}`, { method: 'GET' }),
+    updateItem: async (id, data) => {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'images') {
+          value.forEach(file => formData.append('images', file));
+        } else if (key === 'deletedImageUrls') {
+          formData.append(key, JSON.stringify(value));
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+      return fetchWrapper(`/market/items/${id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+    },
+    deleteItem: async (id) => fetchWrapper(`/market/items/${id}`, { method: 'DELETE' }),
+    createItem: async (data) => {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'images') {
+          value.forEach(file => formData.append('images', file));
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+      return fetchWrapper('/market/items', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+  },
+
+  forum: {
+    list: async () => fetchWrapper('/forum/threads', { method: 'GET' }),
+    create: async (data) => fetchWrapper('/forum/threads', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: async (id, data) => fetchWrapper(`/forum/threads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+    delete: async (id) => fetchWrapper(`/forum/threads/${id}`, { method: 'DELETE' }),
+  },
+
+  chat: {
+    listRooms: async () => fetchWrapper('/chat/rooms', { method: 'GET' }),
+    getMessages: async (roomId) => fetchWrapper(`/chat/rooms/${roomId}/messages`, { method: 'GET' }),
+    getOnlineUsers: async () => fetchWrapper('/chat/online', { method: 'GET' }),
+    listNeighbors: async () => fetchWrapper('/chat/neighbors', { method: 'GET' }),
+    startConversation: async (sellerId, itemId) => {
+      const params = new URLSearchParams();
+      params.set('sellerId', sellerId);
+      if (itemId) params.set('itemId', itemId);
+      return fetchWrapper(`/chat/rooms?${params.toString()}`, { method: 'POST' });
+    },
+    listRequests: async () => fetchWrapper('/chat/requests/me', { method: 'GET' }),
+    sendRequest: async (data) => fetchWrapper('/chat/requests', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    updateRequestStatus: async (requestId, status) => fetchWrapper(`/chat/requests/${requestId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+    hideRoom: async (roomId) => fetchWrapper(`/chat/rooms/${roomId}`, { method: 'DELETE' }),
   },
 };

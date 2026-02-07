@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { api } from '../services';
 import Button from './Button';
-import './VisitPanel.css';
+import Skeleton from './Skeleton';
+import './VisitPanel.scss';
 
 const SUPPORTED_ROLES = ['resident', 'concierge', 'admin'];
 const ROLE_LABELS = {
@@ -25,31 +26,29 @@ const VISIT_TYPES = [
   { value: 'OTHER', label: 'Otro' },
 ];
 
-const initialFormState = {
-  firstName: '',
-  paternalLastName: '',
-  maternalLastName: '',
-  rut: '',
-  visitorType: 'VISIT',
-  entryDate: '',
-  entryTime: '',
-  exitDate: '',
-  exitTime: '',
-  unit: '',
-  notifyAll: false,
-  customExit: false,
+const getInitialFormState = () => {
+  const now = new Date();
+  // Ajuste simple para zona horaria local en inputs tipo date/time
+  const dateStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
+
+  return {
+    firstName: '',
+    paternalLastName: '',
+    maternalLastName: '',
+    rut: '',
+    visitorType: 'VISIT',
+    entryDate: dateStr,
+    entryTime: timeStr,
+    exitDate: '',
+    exitTime: '',
+    unit: '',
+    notifyAll: false,
+    customExit: false,
+  };
 };
 
-const formatDate = (isoString) => {
-  try {
-    return new Intl.DateTimeFormat('es-CL', {
-      dateStyle: 'long',
-      timeStyle: 'short',
-    }).format(new Date(isoString));
-  } catch {
-    return 'Fecha no disponible';
-  }
-};
+
 
 const formatShortDate = (isoString) => {
   try {
@@ -85,10 +84,25 @@ const statusColor = (status) => {
 };
 
 const parseNameParts = (fullName) => {
-  const parts = (fullName || '').split(/\s+/).filter(Boolean);
-  const firstName = parts.shift() || '';
-  const paternalLastName = parts.shift() || '';
-  const maternalLastName = parts.join(' ');
+  const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
+  
+  if (parts.length === 0) return { firstName: '', paternalLastName: '', maternalLastName: '' };
+  
+  if (parts.length === 1) {
+    return { firstName: parts[0], paternalLastName: '', maternalLastName: '' };
+  }
+  
+  if (parts.length === 2) {
+    // Ej: Juan Perez
+    return { firstName: parts[0], paternalLastName: parts[1], maternalLastName: '' };
+  }
+  
+  // Ej: Juan Andres Perez Soto (4) -> First: Juan Andres, Pat: Perez, Mat: Soto
+  // Ej: Juan Perez Soto (3) -> First: Juan, Pat: Perez, Mat: Soto
+  const maternalLastName = parts.pop();
+  const paternalLastName = parts.pop();
+  const firstName = parts.join(' ');
+  
   return { firstName, paternalLastName, maternalLastName };
 };
 
@@ -102,15 +116,17 @@ const toIsoOrUndefined = (value) => {
 const VisitRegistrationPanel = ({ user }) => {
   const resolvedRole = useMemo(() => {
     if (!user) return undefined;
+    console.log('[VisitPanel] Usuario recibido:', user);
     if (user.userType) return user.userType;
     if (user.roleId === 1) return 'admin';
     if (user.roleId === 3) return 'concierge';
     return 'resident';
   }, [user]);
+  console.log('[VisitPanel] Rol resuelto:', resolvedRole);
   const displayRole = ROLE_LABELS[resolvedRole] || 'Usuario';
 
   const [activeTab, setActiveTab] = useState('register');
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState(getInitialFormState);
   const [upcomingVisits, setUpcomingVisits] = useState([]);
   const [pastVisits, setPastVisits] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -120,9 +136,139 @@ const VisitRegistrationPanel = ({ user }) => {
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [saveContact, setSaveContact] = useState(false);
+  const [housingUnits, setHousingUnits] = useState([]);
+  const [loadingUnits, setLoadingUnits] = useState(false);
 
   const canRegister = SUPPORTED_ROLES.includes(resolvedRole);
+  // Fix: Admins/Concierges always have "access" to the form, even if they haven't typed a unit yet.
+  // We only strictly enforce unit presence for Residents (who must have it in their profile).
+  const hasAccessToForm = resolvedRole === 'resident' ? Boolean(user?.unitId) : true;
+  // hasUnit: Para residentes usa unitId del perfil, para admin/concierge usa el campo del formulario
   const hasUnit = resolvedRole === 'resident' ? Boolean(user?.unitId) : Boolean(formData.unit);
+
+  const [qrInput, setQrInput] = useState('');
+
+  // Debounce para procesar el QR solo cuando se haya terminado de "escribir"
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      // Condición relajada: basta con que tenga "RUN" (el = puede venir como ) u otro char)
+      if (qrInput && qrInput.includes('RUN')) {
+        console.log('[QR Debug] Detectado patrón RUN en input, procesando...');
+        handleQrScan(qrInput);
+      }
+    }, 500); // Esperar 500ms de inactividad
+
+    return () => clearTimeout(timeoutId);
+  }, [qrInput]);
+
+  const handleQrScan = async (rawText) => {
+    try {
+      console.log('[QR Debug] Texto crudo recibido:', rawText);
+      
+      // 1. Normalización de caracteres "basura" de la pistola
+      // ) -> =
+      // ^ -> &
+      // _ -> ?
+      // > -> / (en https>)
+      const cleanText = rawText
+        .replace(/\)/g, '=')
+        .replace(/\^/g, '&')
+        .replace(/_/g, '?')
+        .replace(/>/g, '/');
+
+      console.log('[QR Debug] Texto normalizado:', cleanText);
+      
+      // 2. Extracción usando Regex sobre el texto limpio
+      const extract = (key) => {
+        // Busca key=valor hasta el siguiente & o fin de linea
+        const regex = new RegExp(`[?&]${key}=([^&]+)`, 'i');
+        const match = cleanText.match(regex);
+        return match ? decodeURIComponent(match[1]) : null;
+      };
+
+      // Extracción de campos
+      let run = extract('RUN');
+      if (run) {
+        // Corregir formato RUN: 21950346/6 -> 21950346-6
+        run = run.replace('/', '-');
+      }
+
+      const qrData = {
+        run: run,
+        type: extract('type'),
+        serial: extract('serial'),
+        mrz: extract('mrz'),
+        name: extract('name') // Capturamos el nombre si viene en el QR
+      };
+
+      console.log('[QR Debug] Datos extraídos:', qrData);
+
+      if (!qrData.run) {
+        console.warn('[QR Debug] No se encontró RUN válido.');
+        // Solo mostrar error visual si no se pudo rescatar nada útil
+        if (rawText.length > 20) {
+            setFeedback({ type: 'error', message: 'QR ilegible. Intenta nuevamente o ingresa manual.' });
+        }
+        return;
+      }
+
+      setLoadingVisits(true); 
+      // Enviamos solo datos técnicos al backend para buscar
+      const response = await api.visits.checkQr({
+          run: qrData.run,
+          type: qrData.type,
+          serial: qrData.serial,
+          mrz: qrData.mrz
+      });
+      
+      console.log('[QR Debug] Respuesta API:', response);
+      
+      if (response) {
+        // Determinar qué nombre usar:
+        // 1. El de la base de datos (response.fullName) si existe.
+        // 2. El del QR (qrData.name) si no existe en BD.
+        const sourceName = response.exists ? response.fullName : qrData.name;
+        
+        // Parsear el nombre elegido
+        const parsedName = sourceName ? parseNameParts(sourceName) : {};
+        
+        const now = new Date();
+        
+        setFormData(prev => {
+            const newData = {
+              ...prev,
+              rut: response.documentNumber || qrData.run, // Prioridad a lo normalizado por backend
+              firstName: parsedName.firstName || prev.firstName,
+              paternalLastName: parsedName.paternalLastName || prev.paternalLastName,
+              maternalLastName: parsedName.maternalLastName || prev.maternalLastName,
+              entryDate: now.toLocaleDateString('en-CA'),
+              entryTime: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+            };
+            console.log('[QR Debug] Formulario actualizado:', newData);
+            return newData;
+        });
+
+        const successMessage = response.exists 
+            ? 'Visitante registrado encontrado.' 
+            : (qrData.name ? 'Datos cargados desde Cédula.' : 'Visitante nuevo. Completa el nombre.');
+
+        setFeedback({ 
+          type: 'success', 
+          message: `${successMessage} Verifica unidad y da ingreso.` 
+        });
+        setQrInput(''); // Limpiar input
+      }
+    } catch (error) {
+      console.error('[QR Debug] Error fatal:', error);
+      setFeedback({ type: 'error', message: 'Error al procesar lectura.' });
+    } finally {
+      setLoadingVisits(false);
+    }
+  };
+
+  const handleQrInputChange = (e) => {
+    setQrInput(e.target.value);
+  };
 
   const fetchVisits = useCallback(async () => {
     if (!user) return;
@@ -159,12 +305,38 @@ const VisitRegistrationPanel = ({ user }) => {
     }
   }, [user]);
 
+  const fetchHousingUnits = useCallback(async () => {
+    // Solo cargar unidades para admin/concierge (residentes usan su unitId del perfil)
+    if (!user || resolvedRole === 'resident') return;
+    console.log('[VisitPanel] Cargando unidades para rol:', resolvedRole);
+    setLoadingUnits(true);
+    try {
+      const response = await api.housingUnits.list();
+      console.log('[VisitPanel] Unidades recibidas:', response);
+      // La respuesta es un array de objetos { unit: {...}, residents: [...] }
+      // Extraemos solo el objeto 'unit' de cada elemento
+      let units = [];
+      if (Array.isArray(response)) {
+        units = response.map(item => item.unit || item).filter(Boolean);
+      }
+      console.log('[VisitPanel] Unidades procesadas:', units);
+      setHousingUnits(units);
+    } catch (error) {
+      console.error('[VisitPanel] Error cargando unidades:', error);
+      // No mostrar error al usuario, simplemente no habrá opciones
+      setHousingUnits([]);
+    } finally {
+      setLoadingUnits(false);
+    }
+  }, [user, resolvedRole]);
+
   useEffect(() => {
     if (user) {
       fetchVisits();
       fetchContacts();
+      fetchHousingUnits();
     }
-  }, [user, fetchVisits, fetchContacts]);
+  }, [user, fetchVisits, fetchContacts, fetchHousingUnits]);
 
   useEffect(() => {
     if (!feedback) return undefined;
@@ -181,7 +353,7 @@ const VisitRegistrationPanel = ({ user }) => {
   };
 
   const resetForm = () => {
-    setFormData(initialFormState);
+    setFormData(getInitialFormState());
   };
 
   const handleSaveContactToggle = (event) => {
@@ -263,13 +435,16 @@ const VisitRegistrationPanel = ({ user }) => {
         ? toIsoOrUndefined(`${formData.entryDate}T${formData.entryTime}`)
         : undefined;
       
+      // Para residentes, usar unitId del perfil; para admin/concierge, usar el del formulario
+      const unitId = resolvedRole === 'resident' ? user?.unitId : Number(formData.unit);
+      
       const payload = {
         visitorName: buildVisitorName(formData),
         visitorDocument: normalizeRut(formData.rut),
         visitorType: formData.visitorType || 'VISIT',
         validForMinutes: calculateValidMinutes(),
         ...(validFrom ? { validFrom } : {}),
-        ...(resolvedRole !== 'resident' ? { unitId: Number(formData.unit) } : {}),
+        ...(unitId ? { unitId: Number(unitId) } : {}),
       };
       await api.visits.create(payload);
       if (saveContact) {
@@ -357,7 +532,7 @@ const VisitRegistrationPanel = ({ user }) => {
     );
   }
 
-  if (!canRegister || !hasUnit) {
+  if (!canRegister || !hasAccessToForm) {
     return (
       <section className="visit-panel visit-panel--compact">
         <header className="visit-panel__header">
@@ -433,6 +608,24 @@ const VisitRegistrationPanel = ({ user }) => {
         {/* Tab: Registrar nueva visita */}
         {activeTab === 'register' && (
           <div className="visit-panel__view">
+            {/* QR Scanner for Admin/Concierge */}
+            {resolvedRole !== 'resident' && (
+              <div className="visit-form__qr-section">
+                <label className="visit-form__field">
+                  <span>📷 Escanear Cédula (QR)</span>
+                  <input
+                    type="text"
+                    value={qrInput}
+                    onChange={handleQrInputChange}
+                    placeholder="Haz clic aquí y escanea el QR..."
+                    className="visit-form__qr-input"
+                    autoComplete="off"
+                  />
+                  <p className="visit-form__hint">El formulario se completará automáticamente.</p>
+                </label>
+              </div>
+            )}
+
             {/* Unit info */}
             {resolvedRole === 'resident' && user?.unitId && (
               <div className="visit-form__unit-badge">
@@ -538,14 +731,22 @@ const VisitRegistrationPanel = ({ user }) => {
                   {resolvedRole !== 'resident' && (
                     <label className="visit-form__field">
                       <span>Unidad / Depto <span className="required">*</span></span>
-                      <input
-                        type="text"
+                      <select
                         name="unit"
                         value={formData.unit}
                         onChange={handleChange}
-                        placeholder="Ej: 1502"
                         required
-                      />
+                        disabled={loadingUnits}
+                      >
+                        <option value="">
+                          {loadingUnits ? 'Cargando...' : 'Selecciona una unidad'}
+                        </option>
+                        {housingUnits.map((unit) => (
+                          <option key={unit.id} value={unit.id}>
+                            {unit.tower ? `${unit.tower} - ` : ''}{unit.number}{unit.floor ? ` (Piso ${unit.floor})` : ''}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                   )}
                 </div>
@@ -669,7 +870,7 @@ const VisitRegistrationPanel = ({ user }) => {
             </div>
 
             {loadingVisits ? (
-              <div className="visit-panel__loading">Cargando visitas...</div>
+              <Skeleton.List rows={3} />
             ) : upcomingVisits.length === 0 ? (
               <div className="visit-panel__empty">
                 <span className="visit-panel__empty-icon">📅</span>
@@ -722,7 +923,7 @@ const VisitRegistrationPanel = ({ user }) => {
             </div>
 
             {loadingVisits ? (
-              <div className="visit-panel__loading">Cargando historial...</div>
+              <Skeleton.List rows={3} />
             ) : pastVisits.length === 0 ? (
               <div className="visit-panel__empty">
                 <span className="visit-panel__empty-icon">📋</span>
