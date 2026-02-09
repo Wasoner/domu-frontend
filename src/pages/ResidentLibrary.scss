@@ -21,6 +21,13 @@
   font-size: 0.9375rem;
 }
 
+.resident-library__actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .resident-library__search {
   display: flex;
   align-items: center;
@@ -30,6 +37,81 @@
   border-radius: var(--radius-sm);
   padding: 0.65rem 1rem;
   min-width: 280px;
+}
+
+.resident-library__upload-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .resident-library__form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-gray-darker);
+    }
+
+    input[type="text"],
+    select,
+    input[type="file"] {
+      padding: 0.625rem;
+      border: 1px solid var(--color-border-medium);
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      outline: none;
+      transition: border-color 0.2s;
+
+      &:focus {
+        border-color: var(--color-turquoise);
+      }
+    }
+    
+    input[type="file"] {
+      padding: 0.5rem;
+    }
+  }
+
+  .error-message {
+    color: var(--color-red);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .resident-library__form-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.resident-library__loading,
+.resident-library__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  gap: 1rem;
 }
 
 .resident-library__search svg {
@@ -143,6 +225,12 @@
   color: var(--color-gray);
 }
 
+.resident-library__item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .resident-library__download-btn {
   display: flex;
   align-items: center;
@@ -154,6 +242,7 @@
   border-radius: var(--radius-sm);
   font-weight: 500;
   font-size: 0.875rem;
+  text-decoration: none;
   cursor: pointer;
   transition: all var(--transition-normal);
   flex-shrink: 0;
@@ -162,6 +251,30 @@
 .resident-library__download-btn:hover {
   background: var(--color-turquoise);
   color: var(--color-white);
+}
+
+.resident-library__delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--color-border-medium);
+  color: var(--color-gray-dark);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+
+  &:hover {
+    background: #fff5f5;
+    border-color: #feb2b2;
+    color: var(--color-red);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .resident-library__download-btn svg {

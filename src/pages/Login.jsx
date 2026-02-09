@@ -159,14 +159,10 @@ const Login = () => {
                                 <Button
                                     type="submit"
                                     variant="primary"
-                                    disabled={loading}
-                                    className={loading ? 'btn-loading' : ''}
+                                    loading={loading}
+                                    fullWidth
                                 >
-                                    {loading ? (
-                                        <Skeleton.Inline width="80px" label="Iniciando sesión..." />
-                                    ) : (
-                                        'Iniciar Sesión'
-                                    )}
+                                    Iniciar Sesión
                                 </Button>
                             </form>
 
