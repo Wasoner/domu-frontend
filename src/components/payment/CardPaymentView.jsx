@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from '../';
+import { Icon, Spinner } from '../';
 import CreditCardSVG from './CreditCardSVG';
 import './CardPaymentView.scss';
 
@@ -199,10 +199,7 @@ const CardPaymentView = ({ amount, onComplete, onCancel }) => {
           disabled={loading}
         >
           {loading ? (
-            <>
-              <span className="card-payment__spinner" />
-              Procesando pago...
-            </>
+            <Spinner variant="white" size="sm" label="Procesando pago..." inline />
           ) : (
             <>
               <Icon name="lock" size={18} />

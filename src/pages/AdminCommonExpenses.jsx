@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import { Skeleton } from '../components';
+import { Skeleton, Button } from '../components';
 import { api } from '../services';
 import './AdminCommonExpenses.scss';
 
@@ -17,6 +17,7 @@ const AdminCommonExpenses = () => {
   const [periods, setPeriods] = useState([]);
   const [loadingPeriods, setLoadingPeriods] = useState(false);
   const [periodsLoaded, setPeriodsLoaded] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({
     period: '',
@@ -152,6 +153,7 @@ const AdminCommonExpenses = () => {
     }
 
     try {
+      setActionLoading(true);
       await api.finance.createPeriod({
         year,
         month,
@@ -165,6 +167,8 @@ const AdminCommonExpenses = () => {
       await refreshPeriods();
     } catch (err) {
       setError(err.message || 'No pudimos crear el período.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -184,6 +188,7 @@ const AdminCommonExpenses = () => {
     }
 
     try {
+      setActionLoading(true);
       await api.finance.addCharges(appendTarget, {
         charges: payloadCharges,
         note: appendNote,
@@ -194,6 +199,8 @@ const AdminCommonExpenses = () => {
       await refreshPeriods();
     } catch (err) {
       setError(err.message || 'No pudimos agregar los cargos.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -208,12 +215,15 @@ const AdminCommonExpenses = () => {
     }
 
     try {
+      setActionLoading(true);
       await api.finance.uploadChargeReceipt(receiptChargeId, receiptFile);
       setFeedback('Boleta subida correctamente.');
       setReceiptChargeId('');
       setReceiptFile(null);
     } catch (err) {
       setError(err.message || 'No pudimos subir la boleta.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -377,7 +387,7 @@ const AdminCommonExpenses = () => {
                   ))}
                 </div>
 
-                <button type="submit" className="admin-ggcc__primary">Crear período</button>
+                <Button type="submit" variant="primary" loading={actionLoading}>Crear período</Button>
               </form>
             </article>
           </div>
@@ -477,7 +487,7 @@ const AdminCommonExpenses = () => {
                     </div>
                   ))}
                 </div>
-                <button type="submit" className="admin-ggcc__primary">Agregar cargos</button>
+                <Button type="submit" variant="primary" loading={actionLoading}>Agregar cargos</Button>
               </form>
             </article>
           </div>
@@ -515,7 +525,7 @@ const AdminCommonExpenses = () => {
                     required
                   />
                 </label>
-                <button type="submit" className="admin-ggcc__primary">Subir boleta</button>
+                <Button type="submit" variant="primary" loading={actionLoading}>Subir boleta</Button>
               </form>
             </article>
           </div>

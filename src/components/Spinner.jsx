@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import './Spinner.scss';
 
-function Spinner({ label, size = 'md', inline = false, overlay = false }) {
+function Spinner({ label, size = 'md', inline = false, overlay = false, variant = 'primary' }) {
   return (
     <div
-      className={`spinner ${inline ? 'spinner--inline' : ''} spinner--${size} ${overlay ? 'spinner--overlay' : ''}`}
+      className={`spinner ${inline ? 'spinner--inline' : ''} spinner--${size} ${overlay ? 'spinner--overlay' : ''} spinner--${variant}`}
       role="status"
       aria-live="polite"
     >
@@ -19,6 +19,7 @@ Spinner.propTypes = {
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
   inline: PropTypes.bool,
   overlay: PropTypes.bool,
+  variant: PropTypes.oneOf(['primary', 'white']),
 };
 
 export default Spinner;

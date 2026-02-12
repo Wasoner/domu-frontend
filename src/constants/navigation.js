@@ -26,6 +26,7 @@ export const NAV_SECTIONS = [
         ],
       },
       { label: 'Visitas', icon: 'door', to: ROUTES.RESIDENT_EVENTS, roles: ['resident', 'concierge', 'admin'], exact: true },
+      { label: 'Biblioteca', icon: 'folder', to: ROUTES.RESIDENT_LIBRARY, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
       { label: 'Votaciones', icon: 'checkBadge', to: ROUTES.VOTINGS, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
       { label: 'Áreas comunes', icon: 'sparkles', to: ROUTES.RESIDENT_AMENITIES, roles: ['resident', 'admin', 'concierge'], exact: true },
     ],
