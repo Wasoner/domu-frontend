@@ -747,6 +747,21 @@ export const api = {
     },
   },
 
+  library: {
+    list: async () => fetchWrapper('/library', { method: 'GET' }),
+    upload: async (data) => {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('category', data.category);
+      formData.append('file', data.file);
+      return fetchWrapper('/library', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    delete: async (id) => fetchWrapper(`/library/${id}`, { method: 'DELETE' }),
+  },
+
   amenities: {
     list: async () => fetchWrapper('/amenities', { method: 'GET' }),
     listAll: async () => fetchWrapper('/amenities/all', { method: 'GET' }),

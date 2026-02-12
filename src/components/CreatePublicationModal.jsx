@@ -12,7 +12,7 @@ const CATEGORIES = [
   { value: 'event', label: 'Evento', icon: '📅' },
 ];
 
-const CreatePublicationModal = ({ isOpen, onClose, onSubmit, initialData, isAdmin }) => {
+const CreatePublicationModal = ({ isOpen, onClose, onSubmit, initialData, isAdmin, loading = false }) => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -107,8 +107,8 @@ const CreatePublicationModal = ({ isOpen, onClose, onSubmit, initialData, isAdmi
           )}
 
           <div className="modal-actions">
-            <Button variant="ghost" onClick={onClose} type="button">Cancelar</Button>
-            <Button variant="primary" type="submit">
+            <Button variant="ghost" onClick={onClose} type="button" disabled={loading}>Cancelar</Button>
+            <Button variant="primary" type="submit" loading={loading}>
               {initialData ? 'Guardar Cambios' : 'Publicar'}
             </Button>
           </div>
