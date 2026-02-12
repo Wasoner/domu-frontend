@@ -1,36 +1,36 @@
 import { Header, MainContent, Footer } from '../layout';
-import { Button, Seo } from '../components';
+import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
 import './UserTypeLanding.scss';
 
 const features = [
   {
-    icon: '💰',
+    iconName: 'banknotes',
     title: 'Gestión de gastos comunes',
     description: 'Genera y administra cobros mensuales con cálculo automático de prorrateos y multas.',
   },
   {
-    icon: '📨',
+    iconName: 'bellAlert',
     title: 'Cobranza automatizada',
     description: 'Envía recordatorios de pago automáticos y gestiona la cartera de morosos eficientemente.',
   },
   {
-    icon: '📊',
+    iconName: 'chartBar',
     title: 'Reportes financieros',
     description: 'Visualiza el estado financiero de la comunidad con reportes detallados y exportables.',
   },
   {
-    icon: '📢',
+    iconName: 'speakerWave',
     title: 'Comunicados masivos',
     description: 'Envía avisos a toda la comunidad por email, notificaciones push o publicaciones en el muro.',
   },
   {
-    icon: '⚠️',
+    iconName: 'exclamationTriangle',
     title: 'Control de morosidad',
     description: 'Monitorea deudores, aplica intereses y gestiona convenios de pago desde un solo lugar.',
   },
   {
-    icon: '🔧',
+    iconName: 'clipboardCheck',
     title: 'Gestión de proveedores',
     description: 'Administra contratos, pagos y evaluación de proveedores de servicios del edificio.',
   },
@@ -47,11 +47,18 @@ const benefits = [
 
 const UserTypeAdministrador = () => {
   const handleCreateCommunity = () => {
-    window.location.href = ROUTES.HOME;
+    window.location.href = `${ROUTES.HOME}?openCommunityModal=1`;
   };
 
   const handleDemo = () => {
     window.location.href = ROUTES.ABOUT;
+  };
+
+  const handleViewFeatures = () => {
+    const target = document.getElementById('soluciones-funcionalidades');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -68,7 +75,9 @@ const UserTypeAdministrador = () => {
       <section className="usertype-hero animated-section">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__icon">📊</span>
+            <span className="usertype-hero__icon" aria-hidden="true">
+              <Icon name="chartBar" className="usertype-hero__icon-svg" strokeWidth={1.8} />
+            </span>
             <span className="usertype-hero__eyebrow">Solución para Administradores</span>
             <h1 className="usertype-hero__title">
               Administración <strong>profesional</strong> de condominios
@@ -78,8 +87,8 @@ const UserTypeAdministrador = () => {
               Optimiza tu tiempo y mejora la satisfacción de tus comunidades.
             </p>
             <div className="usertype-hero__actions">
-              <Button onClick={handleCreateCommunity} variant="primary">
-                Crear mi comunidad
+              <Button onClick={handleViewFeatures} variant="primary">
+                Ver funcionalidades
               </Button>
               <Button onClick={handleDemo} variant="ghost">
                 Ver demo
@@ -87,14 +96,16 @@ const UserTypeAdministrador = () => {
             </div>
           </div>
           <div className="usertype-hero__visual">
-            <span className="usertype-hero__illustration" aria-hidden="true">📊</span>
+            <span className="usertype-hero__illustration" aria-hidden="true">
+              <Icon name="chartBar" className="usertype-hero__illustration-icon" strokeWidth={1.5} />
+            </span>
           </div>
         </div>
       </section>
 
       <MainContent>
         {/* Features Section */}
-        <section className="usertype-features animated-section">
+        <section id="soluciones-funcionalidades" className="usertype-features animated-section">
           <div className="container">
             <div className="usertype-section__header">
               <h2>Funcionalidades para Administradores</h2>
@@ -103,7 +114,9 @@ const UserTypeAdministrador = () => {
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
                 <div key={index} className="usertype-feature-card">
-                  <div className="usertype-feature-card__icon">{feature.icon}</div>
+                  <div className="usertype-feature-card__icon" aria-hidden="true">
+                    <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
+                  </div>
                   <h3>{feature.title}</h3>
                   <p>{feature.description}</p>
                 </div>
@@ -126,7 +139,9 @@ const UserTypeAdministrador = () => {
               </div>
               <div className="usertype-benefits__visual">
                 <div className="usertype-benefits__card">
-                  <span className="usertype-benefits__card-icon">💼</span>
+                  <span className="usertype-benefits__card-icon" aria-hidden="true">
+                    <Icon name="buildingOffice" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
+                  </span>
                   <h3>Dashboard administrativo</h3>
                   <p>Control total de tus comunidades con métricas clave, alertas y tareas pendientes en un solo vistazo.</p>
                   <div className="usertype-benefits__card-stats">

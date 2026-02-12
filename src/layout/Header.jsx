@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/LogotipoDOMU.svg';
-import { Button } from '../components';
+import { Button, Icon } from '../components';
 import { ROUTES } from '../constants';
 import './Header.scss';
 
 const solucionesItems = [
-  { label: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, icon: '🏢' },
-  { label: 'Administrador', route: ROUTES.SOLUCIONES_ADMINISTRADOR, icon: '📊' },
-  { label: 'Comité', route: ROUTES.SOLUCIONES_COMITE, icon: '🗳️' },
-  { label: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, icon: '🏠' },
-  { label: 'Funcionarios', route: ROUTES.SOLUCIONES_FUNCIONARIOS, icon: '🏛️' },
+  { label: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, iconName: 'buildingOffice' },
+  { label: 'Administrador', route: ROUTES.SOLUCIONES_ADMINISTRADOR, iconName: 'chartBar' },
+  { label: 'Comité', route: ROUTES.SOLUCIONES_COMITE, iconName: 'scale' },
+  { label: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, iconName: 'home' },
+  { label: 'Funcionarios', route: ROUTES.SOLUCIONES_FUNCIONARIOS, iconName: 'buildingLibrary' },
 ];
 
 const Header = () => {
@@ -69,9 +68,6 @@ const Header = () => {
       <div className="header-inner container">
         <div className="brand-wrap">
           <Link to="/" className="brand-link" aria-label="DOMU - Ir al inicio">
-            <span className="brand-logo" aria-hidden>
-              <img src={logo} alt="DOMU - Software para administración de edificios" className="brand-img" />
-            </span>
             <span className="brand-name">DOMU</span>
           </Link>
         </div>
@@ -121,7 +117,9 @@ const Header = () => {
                     role="menuitem"
                     onClick={closeDropdown}
                   >
-                    <span className="dropdown-item-icon" aria-hidden="true">{item.icon}</span>
+                    <span className="dropdown-item-icon" aria-hidden="true">
+                      <Icon name={item.iconName} size={18} strokeWidth={1.9} />
+                    </span>
                     <span className="dropdown-item-label">{item.label}</span>
                   </Link>
                 </li>

@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Button, LocationPicker, Seo, Skeleton } from '../components';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Button, Icon, LocationPicker, Seo, Skeleton } from '../components';
 import { Header, MainContent, Footer, AuthLayout } from '../layout';
 import heroLogo from '../assets/LogotipoDOMU.svg';
 import { ROUTES } from '../constants';
 import { useAppContext } from '../context';
-import { api } from '../services';
+import { api, communityMaps } from '../services';
 import Dashboard from './Dashboard';
 import './Home.scss';
 
@@ -57,6 +58,7 @@ const formatRut = (value) => {
 
 const COMMUNITY_FORM_STORAGE_KEY = 'communityFormDraft';
 const COMMUNITY_DOC_NAME_KEY = 'communityDocName';
+const OPEN_COMMUNITY_MODAL_PARAM = 'openCommunityModal';
 
 const communityFormDefaults = {
   name: '',
@@ -87,6 +89,10 @@ const getDefaultCommunityStatus = () => ({
 const formatCurrency = (value) => {
   const safe = Number.isFinite(value) ? value : 0;
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(safe);
+};
+
+const formatNumber = (value) => {
+  return new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 }).format(Number(value) || 0);
 };
 
 const ResidentHome = ({ user }) => {
@@ -289,6 +295,7 @@ const ResidentHome = ({ user }) => {
 };
 
 const Home = () => {
+  const location = useLocation();
   const { user, isAuthenticated, isLoading } = useAppContext();
   const [showCommunityModal, setShowCommunityModal] = useState(false);
   const [step, setStep] = useState(1);
@@ -306,6 +313,9 @@ const Home = () => {
   const [documentFile, setDocumentFile] = useState(null);
   const [documentName, setDocumentName] = useState(() => localStorage.getItem(COMMUNITY_DOC_NAME_KEY) || '');
   const [communityStatus, setCommunityStatus] = useState(getDefaultCommunityStatus);
+  const [mappedCommunities, setMappedCommunities] = useState([]);
+  const [communityUsageStats, setCommunityUsageStats] = useState(() => communityMaps.getStats());
+  const [selectedMappedCommunityId, setSelectedMappedCommunityId] = useState('');
   const currentOrigin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://domu.app';
   const homeStructuredData = {
     '@context': 'https://schema.org',
@@ -338,6 +348,32 @@ const Home = () => {
       localStorage.removeItem(COMMUNITY_DOC_NAME_KEY);
     }
   }, [communityForm, documentName]);
+
+  const syncCommunityRegistry = useCallback(() => {
+    setMappedCommunities(communityMaps.list());
+    setCommunityUsageStats(communityMaps.getStats());
+  }, []);
+
+  useEffect(() => {
+    syncCommunityRegistry();
+  }, [syncCommunityRegistry]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const shouldOpenCommunityModal = params.get(OPEN_COMMUNITY_MODAL_PARAM) === '1';
+
+    if (!shouldOpenCommunityModal) return;
+
+    setCommunityStatus(getDefaultCommunityStatus());
+    setStep(1);
+    syncCommunityRegistry();
+    setShowCommunityModal(true);
+
+    params.delete(OPEN_COMMUNITY_MODAL_PARAM);
+    const nextSearch = params.toString();
+    const nextUrl = `${location.pathname}${nextSearch ? `?${nextSearch}` : ''}${location.hash || ''}`;
+    window.history.replaceState(window.history.state, '', nextUrl);
+  }, [location.hash, location.pathname, location.search, syncCommunityRegistry]);
 
   if (isAuthenticated) {
     const isAdmin = user?.roleId === 1 || user?.userType === 'admin';
@@ -372,6 +408,7 @@ const Home = () => {
     setCommunityStatus(getDefaultCommunityStatus());
     setDocumentFile(null);
     setDocumentName('');
+    setSelectedMappedCommunityId('');
     localStorage.removeItem(COMMUNITY_FORM_STORAGE_KEY);
     localStorage.removeItem(COMMUNITY_DOC_NAME_KEY);
   };
@@ -379,6 +416,7 @@ const Home = () => {
   const handleCreateCommunity = () => {
     setCommunityStatus(getDefaultCommunityStatus());
     setStep(1);
+    syncCommunityRegistry();
     setShowCommunityModal(true);
   };
 
@@ -402,6 +440,36 @@ const Home = () => {
   const handleProofFile = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const maxSizeBytes = 50 * 1024 * 1024;
+    const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+    const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+    const isAllowedType = allowedMimeTypes.includes(file.type) || allowedExtensions.includes(fileExtension);
+
+    if (!isAllowedType) {
+      setDocumentFile(null);
+      setDocumentName('');
+      setCommunityStatus({
+        ...getDefaultCommunityStatus(),
+        error: 'Formato inválido. Solo se permite PDF, JPG, JPEG o PNG.',
+      });
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > maxSizeBytes) {
+      setDocumentFile(null);
+      setDocumentName('');
+      setCommunityStatus({
+        ...getDefaultCommunityStatus(),
+        error: 'El archivo excede el tamaño máximo permitido de 50MB.',
+      });
+      event.target.value = '';
+      return;
+    }
+
+    setCommunityStatus((prev) => ({ ...prev, error: '' }));
     setDocumentFile(file);
     setDocumentName(file.name);
     setCommunityForm((prev) => ({
@@ -410,7 +478,56 @@ const Home = () => {
     }));
   };
 
-  const handleLocationSelect = ({ lat, lng, address, postcode, city, state }) => {
+  const applyMappedCommunityToForm = (mappedCommunity, options = {}) => {
+    if (!mappedCommunity) return;
+    const { recordSelection = false } = options;
+    const latitude = Number(mappedCommunity.latitude);
+    const longitude = Number(mappedCommunity.longitude);
+
+    setCommunityForm((prev) => ({
+      ...prev,
+      name: mappedCommunity.name || prev.name,
+      address: mappedCommunity.address || prev.address,
+      commune: mappedCommunity.commune || prev.commune,
+      city: mappedCommunity.city || prev.city,
+      postalCode: mappedCommunity.postalCode || prev.postalCode,
+      towerLabel: mappedCommunity.towerLabel || prev.towerLabel,
+      unitsCount: mappedCommunity.unitsCount || prev.unitsCount,
+      floors: mappedCommunity.floors || prev.floors,
+      latitude: Number.isFinite(latitude) ? latitude.toFixed(6) : prev.latitude,
+      longitude: Number.isFinite(longitude) ? longitude.toFixed(6) : prev.longitude,
+    }));
+
+    if (mappedCommunity.id) {
+      setSelectedMappedCommunityId(String(mappedCommunity.id));
+      if (recordSelection) {
+        communityMaps.registerSelection(mappedCommunity.id);
+        syncCommunityRegistry();
+      }
+    }
+  };
+
+  const handleMappedCommunityChange = (event) => {
+    const nextId = event.target.value;
+    setSelectedMappedCommunityId(nextId);
+
+    if (!nextId) {
+      return;
+    }
+
+    const mappedCommunity = mappedCommunities.find((item) => String(item.id) === nextId);
+    if (mappedCommunity) {
+      applyMappedCommunityToForm(mappedCommunity, { recordSelection: true });
+    }
+  };
+
+  const handleSavedLocationSelect = (mappedCommunity) => {
+    if (mappedCommunity?.id) {
+      setSelectedMappedCommunityId(String(mappedCommunity.id));
+    }
+  };
+
+  const handleLocationSelect = ({ lat, lng, address, postcode, city, state, communityId }) => {
     if (typeof lat === 'number' && typeof lng === 'number') {
       setCommunityForm((prev) => ({
         ...prev,
@@ -421,6 +538,14 @@ const Home = () => {
         commune: state || prev.commune,
         postalCode: postcode || prev.postalCode,
       }));
+    }
+
+    if (communityId) {
+      setSelectedMappedCommunityId(String(communityId));
+      communityMaps.registerSelection(communityId);
+      syncCommunityRegistry();
+    } else {
+      setSelectedMappedCommunityId('');
     }
   };
 
@@ -442,6 +567,17 @@ const Home = () => {
         proofText: communityForm.proofText?.trim() || `Documento adjunto: ${documentFile.name}`,
       };
       const response = await api.buildings.createRequest(payload);
+      communityMaps.registerCommunity({
+        ...communityForm,
+        id: selectedMappedCommunityId || undefined,
+        latitude: payload.latitude,
+        longitude: payload.longitude,
+        floors: payload.floors,
+        unitsCount: payload.unitsCount,
+        source: 'community-request',
+        status: response?.status || 'PENDING',
+      });
+      syncCommunityRegistry();
       setCommunityStatus({
         ...getDefaultCommunityStatus(),
         success: true,
@@ -459,12 +595,12 @@ const Home = () => {
   };
 
   const features = [
-    { icon: '💳', title: 'Gastos Comunes en línea', description: 'Pagos digitales seguros y seguimiento en tiempo real de tus gastos comunes.' },
-    { icon: '📱', title: 'Portal web responsivo', description: 'Gestiona tu comunidad desde cualquier dispositivo con nuestro portal web optimizado para celulares, tablets y computadores.' },
-    { icon: '📢', title: 'Comunicación directa', description: 'Mantén a tu comunidad informada con anuncios y mensajería instantánea.' },
-    { icon: '🔐', title: 'Control de acceso', description: 'Registra visitas y gestiona el acceso a tu comunidad de forma segura.' },
-    { icon: '📊', title: 'Reportes y estadísticas', description: 'Visualiza el estado financiero y la gestión de tu comunidad en tiempo real.' },
-    { icon: '🏠', title: 'Reserva de espacios', description: 'Gestiona la reserva de espacios comunes como quinchos y salas de eventos.' },
+    { iconName: 'creditCard', title: 'Gastos Comunes en línea', description: 'Pagos digitales seguros y seguimiento en tiempo real de tus gastos comunes.' },
+    { iconName: 'arrowTopRightOnSquare', title: 'Portal web responsivo', description: 'Gestiona tu comunidad desde cualquier dispositivo con nuestro portal web optimizado para celulares, tablets y computadores.' },
+    { iconName: 'chatBubbleLeftRight', title: 'Comunicación directa', description: 'Mantén a tu comunidad informada con anuncios y mensajería instantánea.' },
+    { iconName: 'shieldCheck', title: 'Control de acceso', description: 'Registra visitas y gestiona el acceso a tu comunidad de forma segura.' },
+    { iconName: 'chartBar', title: 'Reportes y estadísticas', description: 'Visualiza el estado financiero y la gestión de tu comunidad en tiempo real.' },
+    { iconName: 'calendar', title: 'Reserva de espacios', description: 'Gestiona la reserva de espacios comunes como quinchos y salas de eventos.' },
   ];
 
   const heroHighlights = [
@@ -493,7 +629,6 @@ const Home = () => {
         <div className="container">
           <div className="home-hero__content">
             <div className="home-hero__text">
-              <p className="home-hero__eyebrow">Plataforma DOMU para comunidades</p>
               <h1 className="home-hero__title">Software para la administración de <strong>edificios y condominios</strong></h1>
               <p className="home-hero__subtitle">Administra edificios con DOMU: el software y el portal web responsivo para tu comunidad. Gastos Comunes en línea y mucho más.</p>
               <div className="home-hero__highlights">
@@ -527,7 +662,12 @@ const Home = () => {
             <div className="home-features__grid">
               {features.map((feature, index) => (
                 <div key={index} className="home-feature-card">
-                  <div className="home-feature-card__icon">{feature.icon}</div>
+                  <div className="home-feature-card__media" aria-hidden="true">
+                    <span className="home-feature-card__accent" />
+                    <div className="home-feature-card__icon">
+                      <Icon name={feature.iconName} size={26} strokeWidth={2} />
+                    </div>
+                  </div>
                   <h3>{feature.title}</h3>
                   <p>{feature.description}</p>
                 </div>
@@ -729,11 +869,44 @@ const Home = () => {
                           />
                         </label>
                       </div>
+                      <div className="community-map-summary">
+                        <p className="community-map-summary__title">Mapa comunitario DOMU</p>
+                        <div className="community-map-summary__stats" role="status" aria-live="polite">
+                          <div className="community-map-summary__stat">
+                            <span>Condominios mapeados</span>
+                            <strong>{formatNumber(communityUsageStats.mappedCommunities)}</strong>
+                          </div>
+                          <div className="community-map-summary__stat">
+                            <span>Unidades estimadas</span>
+                            <strong>{formatNumber(communityUsageStats.estimatedUsers)}</strong>
+                          </div>
+                          <div className="community-map-summary__stat">
+                            <span>Veces seleccionado</span>
+                            <strong>{formatNumber(communityUsageStats.totalSelections)}</strong>
+                          </div>
+                        </div>
+                        {mappedCommunities.length > 0 && (
+                          <label className="community-map-summary__select">
+                            Elegir condominio guardado
+                            <select value={selectedMappedCommunityId} onChange={handleMappedCommunityChange}>
+                              <option value="">Seleccionar del historial</option>
+                              {mappedCommunities.map((mappedCommunity) => (
+                                <option key={mappedCommunity.id} value={mappedCommunity.id}>
+                                  {mappedCommunity.name || 'Condominio sin nombre'}
+                                  {mappedCommunity.commune ? ` - ${mappedCommunity.commune}` : ''}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
+                      </div>
                       <p className="eyebrow" style={{ marginTop: '0.5rem' }}>Ubicación en el mapa (opcional)</p>
                       <LocationPicker
                         latitude={communityForm.latitude}
                         longitude={communityForm.longitude}
                         onSelect={handleLocationSelect}
+                        savedLocations={mappedCommunities}
+                        onSavedLocationSelect={handleSavedLocationSelect}
                       />
                       <div className="community-modal__actions">
                         <Button type="button" variant="ghost" onClick={() => setStep(1)}>Atrás</Button>
@@ -757,7 +930,7 @@ const Home = () => {
                       </label>
                       <label className="file-input">
                         Documento adjunto (PDF o imagen) *
-                        <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleProofFile} />
+                        <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleProofFile} />
                       </label>
                       {documentName && <p className="info-text">Archivo seleccionado: {documentName}</p>}
                       <div className="community-modal__actions">

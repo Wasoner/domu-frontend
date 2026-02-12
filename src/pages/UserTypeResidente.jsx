@@ -1,36 +1,36 @@
 import { Header, MainContent, Footer } from '../layout';
-import { Button, Seo } from '../components';
+import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
 import './UserTypeLanding.scss';
 
 const features = [
   {
-    icon: '💳',
+    iconName: 'creditCard',
     title: 'Pago de gastos comunes',
     description: 'Paga tus gastos comunes en línea de forma segura con múltiples medios de pago.',
   },
   {
-    icon: '🗓️',
+    iconName: 'calendar',
     title: 'Reserva de espacios',
     description: 'Reserva quinchos, salas de eventos y otros espacios comunes en segundos.',
   },
   {
-    icon: '👥',
+    iconName: 'users',
     title: 'Registro de visitas',
     description: 'Anuncia visitas y proveedores con anticipación para agilizar su ingreso.',
   },
   {
-    icon: '🔔',
+    iconName: 'exclamationTriangle',
     title: 'Reportar incidencias',
     description: 'Informa problemas de mantenimiento o seguridad directamente a la administración.',
   },
   {
-    icon: '📣',
+    iconName: 'speakerWave',
     title: 'Ver comunicados',
     description: 'Mantente informado con los avisos oficiales y noticias de tu comunidad.',
   },
   {
-    icon: '📋',
+    iconName: 'clockHistory',
     title: 'Historial de pagos',
     description: 'Consulta tu historial de pagos, saldos pendientes y descarga comprobantes.',
   },
@@ -68,7 +68,9 @@ const UserTypeResidente = () => {
       <section className="usertype-hero animated-section">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__icon">🏠</span>
+            <span className="usertype-hero__icon" aria-hidden="true">
+              <Icon name="home" className="usertype-hero__icon-svg" strokeWidth={1.8} />
+            </span>
             <span className="usertype-hero__eyebrow">Solución para Residentes</span>
             <h1 className="usertype-hero__title">
               Tu comunidad en la <strong>palma de tu mano</strong>
@@ -87,7 +89,9 @@ const UserTypeResidente = () => {
             </div>
           </div>
           <div className="usertype-hero__visual">
-            <span className="usertype-hero__illustration" aria-hidden="true">🏠</span>
+            <span className="usertype-hero__illustration" aria-hidden="true">
+              <Icon name="home" className="usertype-hero__illustration-icon" strokeWidth={1.5} />
+            </span>
           </div>
         </div>
       </section>
@@ -103,7 +107,9 @@ const UserTypeResidente = () => {
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
                 <div key={index} className="usertype-feature-card">
-                  <div className="usertype-feature-card__icon">{feature.icon}</div>
+                  <div className="usertype-feature-card__icon" aria-hidden="true">
+                    <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
+                  </div>
                   <h3>{feature.title}</h3>
                   <p>{feature.description}</p>
                 </div>
@@ -126,7 +132,9 @@ const UserTypeResidente = () => {
               </div>
               <div className="usertype-benefits__visual">
                 <div className="usertype-benefits__card">
-                  <span className="usertype-benefits__card-icon">📱</span>
+                  <span className="usertype-benefits__card-icon" aria-hidden="true">
+                    <Icon name="cpuChip" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
+                  </span>
                   <h3>Portal del residente</h3>
                   <p>Accede a todos los servicios de tu comunidad desde cualquier dispositivo, cuando lo necesites.</p>
                   <div className="usertype-benefits__card-stats">

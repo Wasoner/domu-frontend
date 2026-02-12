@@ -1,36 +1,36 @@
 import { Header, MainContent, Footer } from '../layout';
-import { Button, Seo } from '../components';
+import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
 import './UserTypeLanding.scss';
 
 const features = [
   {
-    icon: '🚪',
+    iconName: 'door',
     title: 'Control de accesos',
     description: 'Gestiona el ingreso de residentes, visitas y proveedores con registro digital en tiempo real.',
   },
   {
-    icon: '📝',
+    iconName: 'clipboard',
     title: 'Registro de visitas',
     description: 'Registra y autoriza visitas de forma rápida con notificación automática al residente.',
   },
   {
-    icon: '📦',
+    iconName: 'archiveBox',
     title: 'Recepción de encomiendas',
     description: 'Administra la llegada de paquetes y notifica al destinatario para su retiro oportuno.',
   },
   {
-    icon: '💬',
+    iconName: 'chatBubbleLeftRight',
     title: 'Comunicación con residentes',
     description: 'Canal directo para avisos urgentes, consultas y coordinación con la comunidad.',
   },
   {
-    icon: '🚨',
+    iconName: 'exclamationTriangle',
     title: 'Reportes de incidencias',
     description: 'Documenta y reporta incidentes de seguridad o mantenimiento al instante.',
   },
   {
-    icon: '📖',
+    iconName: 'document',
     title: 'Bitácora digital',
     description: 'Registro cronológico de todas las actividades y eventos del edificio.',
   },
@@ -47,11 +47,18 @@ const benefits = [
 
 const UserTypeConserjeria = () => {
   const handleCreateCommunity = () => {
-    window.location.href = ROUTES.HOME;
+    window.location.href = `${ROUTES.HOME}?openCommunityModal=1`;
   };
 
   const handleDemo = () => {
     window.location.href = ROUTES.ABOUT;
+  };
+
+  const handleViewFeatures = () => {
+    const target = document.getElementById('soluciones-funcionalidades');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -68,7 +75,9 @@ const UserTypeConserjeria = () => {
       <section className="usertype-hero animated-section">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__icon">🏢</span>
+            <span className="usertype-hero__icon" aria-hidden="true">
+              <Icon name="buildingOffice" className="usertype-hero__icon-svg" strokeWidth={1.8} />
+            </span>
             <span className="usertype-hero__eyebrow">Solución para Conserjería</span>
             <h1 className="usertype-hero__title">
               Gestión digital para <strong>conserjería</strong>
@@ -78,8 +87,8 @@ const UserTypeConserjeria = () => {
               Todo desde una plataforma intuitiva diseñada para el día a día de la conserjería.
             </p>
             <div className="usertype-hero__actions">
-              <Button onClick={handleCreateCommunity} variant="primary">
-                Crear mi comunidad
+              <Button onClick={handleViewFeatures} variant="primary">
+                Ver funcionalidades
               </Button>
               <Button onClick={handleDemo} variant="ghost">
                 Ver demo
@@ -87,14 +96,16 @@ const UserTypeConserjeria = () => {
             </div>
           </div>
           <div className="usertype-hero__visual">
-            <span className="usertype-hero__illustration" aria-hidden="true">🏢</span>
+            <span className="usertype-hero__illustration" aria-hidden="true">
+              <Icon name="buildingOffice" className="usertype-hero__illustration-icon" strokeWidth={1.5} />
+            </span>
           </div>
         </div>
       </section>
 
       <MainContent>
         {/* Features Section */}
-        <section className="usertype-features animated-section">
+        <section id="soluciones-funcionalidades" className="usertype-features animated-section">
           <div className="container">
             <div className="usertype-section__header">
               <h2>Funcionalidades para Conserjería</h2>
@@ -103,7 +114,9 @@ const UserTypeConserjeria = () => {
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
                 <div key={index} className="usertype-feature-card">
-                  <div className="usertype-feature-card__icon">{feature.icon}</div>
+                  <div className="usertype-feature-card__icon" aria-hidden="true">
+                    <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
+                  </div>
                   <h3>{feature.title}</h3>
                   <p>{feature.description}</p>
                 </div>
@@ -126,7 +139,9 @@ const UserTypeConserjeria = () => {
               </div>
               <div className="usertype-benefits__visual">
                 <div className="usertype-benefits__card">
-                  <span className="usertype-benefits__card-icon">📊</span>
+                  <span className="usertype-benefits__card-icon" aria-hidden="true">
+                    <Icon name="chartBar" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
+                  </span>
                   <h3>Panel de conserjería</h3>
                   <p>Vista centralizada con todas las tareas pendientes, visitas del día y notificaciones importantes.</p>
                   <div className="usertype-benefits__card-stats">

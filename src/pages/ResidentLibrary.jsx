@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services/api';
 import { useAppContext } from '../context/useAppContext';
-import { Button, Spinner } from '../components';
+import { Button, Icon, Spinner } from '../components';
 import './ResidentLibrary.scss';
 
 /**
@@ -16,6 +16,7 @@ const ResidentLibrary = () => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [previewDocument, setPreviewDocument] = useState(null);
   
   // Upload state
   const [showUploadForm, setShowUploadForm] = useState(false);
@@ -30,12 +31,12 @@ const ResidentLibrary = () => {
   const isAdmin = user?.roleId === 1;
 
   const categories = [
-    { id: 'all', label: 'Todos', icon: '📁' },
-    { id: 'legal', label: 'Reglamentos', icon: '📜' },
-    { id: 'actas', label: 'Actas Asamblea', icon: '📋' },
-    { id: 'emergencia', label: 'Emergencia', icon: '🚨' },
-    { id: 'seguros', label: 'Seguros', icon: '🛡️' },
-    { id: 'otros', label: 'Otros', icon: '📄' },
+    { id: 'all', label: 'Todos', iconName: 'folder' },
+    { id: 'legal', label: 'Reglamentos', iconName: 'scale' },
+    { id: 'actas', label: 'Actas Asamblea', iconName: 'clipboard' },
+    { id: 'emergencia', label: 'Emergencia', iconName: 'exclamationTriangle' },
+    { id: 'seguros', label: 'Seguros', iconName: 'shield' },
+    { id: 'otros', label: 'Otros', iconName: 'document' },
   ];
 
   const fetchDocuments = async () => {
@@ -55,6 +56,22 @@ const ResidentLibrary = () => {
   useEffect(() => {
     fetchDocuments();
   }, []);
+
+  useEffect(() => {
+    if (!previewDocument) return undefined;
+
+    const handleEscToClosePreview = (event) => {
+      if (event.key === 'Escape') {
+        setPreviewDocument(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscToClosePreview);
+
+    return () => {
+      window.removeEventListener('keydown', handleEscToClosePreview);
+    };
+  }, [previewDocument]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -104,8 +121,17 @@ const ResidentLibrary = () => {
     }
   };
 
-  const getCategoryIcon = (catId) => {
-    return categories.find(c => c.id === catId)?.icon || '📄';
+  const handleOpenPreview = (doc) => {
+    if (!doc?.fileUrl) return;
+    setPreviewDocument(doc);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewDocument(null);
+  };
+
+  const getCategoryIconName = (catId) => {
+    return categories.find(c => c.id === catId)?.iconName || 'document';
   };
 
   const formatSize = (bytes) => {
@@ -114,6 +140,15 @@ const ResidentLibrary = () => {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatDate = (value) => {
+    if (!value) return 'Fecha no disponible';
+
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) return 'Fecha no disponible';
+
+    return parsedDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const filteredDocuments = documents
@@ -130,10 +165,7 @@ const ResidentLibrary = () => {
           </div>
           <div className="resident-library__actions">
             <div className="resident-library__search">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" />
-                <path d="m15 15-3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
+              <Icon name="magnifyingGlass" size={20} />
               <input
                 type="text"
                 placeholder="Buscar documento..."
@@ -205,7 +237,7 @@ const ResidentLibrary = () => {
               className={`resident-library__category-btn ${filter === cat.id ? 'is-active' : ''}`}
               onClick={() => setFilter(cat.id)}
             >
-              <span>{cat.icon}</span>
+              <Icon name={cat.iconName} size={16} className="resident-library__category-icon" />
               {cat.label}
             </button>
           ))}
@@ -223,46 +255,101 @@ const ResidentLibrary = () => {
           </div>
         ) : filteredDocuments.length === 0 ? (
           <div className="resident-library__empty">
-            <span className="resident-library__empty-icon">📂</span>
+            <Icon name="folder" size={64} className="resident-library__empty-icon" />
             <p>No se encontraron documentos</p>
           </div>
         ) : (
           <div className="resident-library__list">
             {filteredDocuments.map((doc) => (
               <div key={doc.id} className="resident-library__item">
-                <span className="resident-library__item-icon">{getCategoryIcon(doc.category)}</span>
+                <span className="resident-library__item-icon">
+                  <Icon name={getCategoryIconName(doc.category)} size={22} />
+                </span>
                 <div className="resident-library__item-info">
                   <strong className="resident-library__item-name">{doc.name}</strong>
                   <span className="resident-library__item-meta">
-                    {formatSize(doc.size)} • {new Date(doc.uploadDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {formatSize(doc.size)} • {formatDate(doc.uploadDate)}
                   </span>
                 </div>
                 <div className="resident-library__item-actions">
+                  <button
+                    type="button"
+                    className="resident-library__preview-btn"
+                    onClick={() => handleOpenPreview(doc)}
+                  >
+                    <Icon name="eye" size={18} strokeWidth={1.8} />
+                    Visualizar
+                  </button>
                   <a 
                     href={doc.fileUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="resident-library__download-btn"
                   >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M10 3v10m0 0l-3-3m3 3l3-3M3 17h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <Icon name="download" size={18} />
                     Descargar
                   </a>
                   {isAdmin && (
                     <button 
+                      type="button"
                       className="resident-library__delete-btn"
                       onClick={() => handleDelete(doc.id)}
                       title="Eliminar documento"
+                      aria-label="Eliminar documento"
                     >
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M4 6h12M8 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2m2 0v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                      <Icon name="trash" size={18} strokeWidth={1.8} />
                     </button>
                   )}
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {previewDocument && (
+          <div className="resident-library__preview-overlay" onClick={handleClosePreview}>
+            <section
+              className="resident-library__preview-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="resident-library-preview-title"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <header className="resident-library__preview-header">
+                <div>
+                  <h3 id="resident-library-preview-title">{previewDocument.name}</h3>
+                  <p>
+                    {formatSize(previewDocument.size)} • {formatDate(previewDocument.uploadDate)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="resident-library__preview-close"
+                  onClick={handleClosePreview}
+                  aria-label="Cerrar visor de documento"
+                >
+                  <Icon name="close" size={18} />
+                </button>
+              </header>
+              <div className="resident-library__preview-content">
+                <iframe
+                  title={`Vista previa de ${previewDocument.name}`}
+                  src={previewDocument.fileUrl}
+                  className="resident-library__preview-frame"
+                />
+              </div>
+              <footer className="resident-library__preview-footer">
+                <a
+                  href={previewDocument.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="resident-library__download-btn"
+                >
+                  <Icon name="download" size={18} />
+                  Descargar PDF
+                </a>
+              </footer>
+            </section>
           </div>
         )}
       </article>

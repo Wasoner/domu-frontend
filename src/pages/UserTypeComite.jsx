@@ -1,36 +1,36 @@
 import { Header, MainContent, Footer } from '../layout';
-import { Button, Seo } from '../components';
+import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
 import './UserTypeLanding.scss';
 
 const features = [
   {
-    icon: '👁️',
+    iconName: 'chartBar',
     title: 'Supervisión financiera',
     description: 'Revisa en tiempo real los ingresos, egresos y estado de cuentas de tu comunidad.',
   },
   {
-    icon: '🗳️',
+    iconName: 'handRaised',
     title: 'Sistema de votaciones',
     description: 'Organiza votaciones digitales para decisiones importantes con resultados transparentes.',
   },
   {
-    icon: '✅',
+    iconName: 'checkBadge',
     title: 'Aprobación de proyectos',
     description: 'Revisa y aprueba cotizaciones, presupuestos y proyectos de mejora del edificio.',
   },
   {
-    icon: '📈',
+    iconName: 'chartBar',
     title: 'Dashboard de transparencia',
     description: 'Panel visual con indicadores clave de gestión y cumplimiento administrativo.',
   },
   {
-    icon: '📄',
+    iconName: 'document',
     title: 'Actas digitales',
     description: 'Registra y almacena actas de reuniones con firmas digitales y acceso histórico.',
   },
   {
-    icon: '💬',
+    iconName: 'chatBubbleLeftRight',
     title: 'Comunicación con la comunidad',
     description: 'Canal directo para informar decisiones y recibir feedback de los residentes.',
   },
@@ -47,11 +47,18 @@ const benefits = [
 
 const UserTypeComite = () => {
   const handleCreateCommunity = () => {
-    window.location.href = ROUTES.HOME;
+    window.location.href = `${ROUTES.HOME}?openCommunityModal=1`;
   };
 
   const handleDemo = () => {
     window.location.href = ROUTES.ABOUT;
+  };
+
+  const handleViewFeatures = () => {
+    const target = document.getElementById('soluciones-funcionalidades');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -68,7 +75,9 @@ const UserTypeComite = () => {
       <section className="usertype-hero animated-section">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__icon">🗳️</span>
+            <span className="usertype-hero__icon" aria-hidden="true">
+              <Icon name="scale" className="usertype-hero__icon-svg" strokeWidth={1.8} />
+            </span>
             <span className="usertype-hero__eyebrow">Solución para Comité</span>
             <h1 className="usertype-hero__title">
               Supervisión y <strong>transparencia</strong> para tu comunidad
@@ -78,8 +87,8 @@ const UserTypeComite = () => {
               informadas con acceso total a la información de tu edificio.
             </p>
             <div className="usertype-hero__actions">
-              <Button onClick={handleCreateCommunity} variant="primary">
-                Crear mi comunidad
+              <Button onClick={handleViewFeatures} variant="primary">
+                Ver funcionalidades
               </Button>
               <Button onClick={handleDemo} variant="ghost">
                 Ver demo
@@ -87,14 +96,16 @@ const UserTypeComite = () => {
             </div>
           </div>
           <div className="usertype-hero__visual">
-            <span className="usertype-hero__illustration" aria-hidden="true">🗳️</span>
+            <span className="usertype-hero__illustration" aria-hidden="true">
+              <Icon name="scale" className="usertype-hero__illustration-icon" strokeWidth={1.5} />
+            </span>
           </div>
         </div>
       </section>
 
       <MainContent>
         {/* Features Section */}
-        <section className="usertype-features animated-section">
+        <section id="soluciones-funcionalidades" className="usertype-features animated-section">
           <div className="container">
             <div className="usertype-section__header">
               <h2>Funcionalidades para el Comité</h2>
@@ -103,7 +114,9 @@ const UserTypeComite = () => {
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
                 <div key={index} className="usertype-feature-card">
-                  <div className="usertype-feature-card__icon">{feature.icon}</div>
+                  <div className="usertype-feature-card__icon" aria-hidden="true">
+                    <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
+                  </div>
                   <h3>{feature.title}</h3>
                   <p>{feature.description}</p>
                 </div>
@@ -126,7 +139,9 @@ const UserTypeComite = () => {
               </div>
               <div className="usertype-benefits__visual">
                 <div className="usertype-benefits__card">
-                  <span className="usertype-benefits__card-icon">🔍</span>
+                  <span className="usertype-benefits__card-icon" aria-hidden="true">
+                    <Icon name="magnifyingGlass" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
+                  </span>
                   <h3>Panel de fiscalización</h3>
                   <p>Acceso completo a movimientos financieros, contratos y documentación de la comunidad.</p>
                   <div className="usertype-benefits__card-stats">
