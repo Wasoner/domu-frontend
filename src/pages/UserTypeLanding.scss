@@ -31,9 +31,16 @@
 }
 
 .usertype-hero__icon {
-  font-size: 4rem;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-turquoise);
   margin-bottom: 0.5rem;
+}
+
+.usertype-hero__icon-svg {
+  width: 4rem;
+  height: 4rem;
 }
 
 .usertype-hero__eyebrow {
@@ -79,9 +86,16 @@
 }
 
 .usertype-hero__illustration {
-  font-size: 12rem;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-turquoise);
   animation: floatSoft 4s ease-in-out infinite;
+}
+
+.usertype-hero__illustration-icon {
+  width: 12rem;
+  height: 12rem;
 }
 
 @keyframes floatSoft {
@@ -166,9 +180,11 @@
 }
 
 .usertype-feature-card__icon {
-  font-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-turquoise);
   margin-bottom: 1.25rem;
-  line-height: 1;
 }
 
 .usertype-feature-card h3 {
@@ -263,9 +279,16 @@
 }
 
 .usertype-benefits__card-icon {
-  font-size: 3.5rem;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-turquoise);
   margin-bottom: 1.25rem;
+}
+
+.usertype-benefits__card-icon-svg {
+  width: 3.5rem;
+  height: 3.5rem;
 }
 
 .usertype-benefits__card h3 {
@@ -366,8 +389,9 @@
     justify-content: center;
   }
 
-  .usertype-hero__illustration {
-    font-size: 9rem;
+  .usertype-hero__illustration-icon {
+    width: 9rem;
+    height: 9rem;
   }
 
   .usertype-benefits__content {
@@ -398,8 +422,9 @@
     padding: 0 1.5rem;
   }
 
-  .usertype-hero__illustration {
-    font-size: 7rem;
+  .usertype-hero__illustration-icon {
+    width: 7rem;
+    height: 7rem;
   }
 
   .usertype-features,
@@ -433,12 +458,14 @@
 }
 
 @media (max-width: 480px) {
-  .usertype-hero__icon {
-    font-size: 3rem;
+  .usertype-hero__icon-svg {
+    width: 3rem;
+    height: 3rem;
   }
 
-  .usertype-hero__illustration {
-    font-size: 5.5rem;
+  .usertype-hero__illustration-icon {
+    width: 5.5rem;
+    height: 5.5rem;
   }
 
   .usertype-benefits__card-stats {

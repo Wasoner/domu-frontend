@@ -43,6 +43,9 @@ Create a `.env` file in the root directory based on `.env.example`:
 # Backend API URL (default for local dev)
 VITE_API_BASE_URL=/api
 
+# Map provider (MapTiler Free)
+VITE_MAPTILER_KEY=your_maptiler_key_here
+
 # App Environment (development/production)
 VITE_APP_ENV=development
 

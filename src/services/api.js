@@ -8,7 +8,7 @@
 // En desarrollo, usar el proxy de Vite para evitar CORS
 // En producción, usar la URL completa del backend
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? '/api' : 'http://localhost:7000/api');
+  (import.meta.env.DEV ? '/api' : 'http://localhost:8080/api');
 
 /**
  * Get authentication token from localStorage

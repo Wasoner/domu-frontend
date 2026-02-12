@@ -9,7 +9,7 @@ export default defineConfig({
     proxy: {
       // Proxy para evitar problemas de CORS en desarrollo
       '/api': {
-        target: 'http://localhost:7000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         // Reescribir la ruta para que /api vaya directamente al backend
