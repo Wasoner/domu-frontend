@@ -87,7 +87,7 @@ const ChatHub = () => {
         if (!token) return;
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = import.meta.env.DEV ? 'localhost:7000' : window.location.host;
+        const host = import.meta.env.DEV ? 'localhost:8080' : window.location.host;
 
         const connectWs = () => {
             const socket = new WebSocket(`${protocol}//${host}/ws/chat?token=${token}`);

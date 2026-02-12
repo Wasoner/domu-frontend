@@ -1,21 +1,418 @@
 .about-page {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
   min-height: 100vh;
+  background:
+    radial-gradient(circle at 82% 2%, rgba(83, 164, 151, 0.2), transparent 36%),
+    radial-gradient(circle at 12% 12%, rgba(241, 107, 50, 0.12), transparent 34%),
+    var(--color-bg-secondary);
 }
 
-.about-page h1 {
-  color: var(--color-turquoise);
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 1.2;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 1rem;
+.about-page .app-main {
+  padding: 0 0 2.5rem;
 }
 
-.about-page p {
+.about-hero {
+  padding: 2.5rem 0 1.5rem;
+}
+
+.about-hero__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: 1.5rem;
+}
+
+.about-hero__text,
+.about-hero__panel {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+}
+
+.about-hero__text {
+  position: relative;
+  overflow: hidden;
+}
+
+.about-hero__text::before {
+  content: '';
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  background: radial-gradient(circle, rgba(83, 164, 151, 0.26), transparent 70%);
+  top: -55px;
+  right: -45px;
+  pointer-events: none;
+}
+
+.about-hero__eyebrow {
+  display: inline-block;
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-gray);
+  margin-bottom: 0.65rem;
+}
+
+.about-hero__text h1 {
+  color: var(--color-black);
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  line-height: 1.08;
+}
+
+.about-hero__text p {
+  margin: 0 0 1.4rem;
+  max-width: 58ch;
+  line-height: 1.72;
   color: var(--color-gray-dark);
-  font-size: 1rem;
+}
+
+.about-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.about-hero__panel {
+  background: linear-gradient(180deg, rgba(83, 164, 151, 0.1), rgba(255, 255, 255, 0.98));
+}
+
+.about-hero__panel h2 {
+  font-size: 1.3rem;
+  margin: 0 0 0.9rem;
+}
+
+.about-hero__panel ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0;
+}
+
+.about-hero__panel li {
+  color: var(--color-gray-dark);
   line-height: 1.6;
-  margin-bottom: 1rem;
+  padding-left: 1.15rem;
+  position: relative;
+}
+
+.about-hero__panel li::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-turquoise);
+  position: absolute;
+  top: 0.52rem;
+  left: 0;
+}
+
+.about-section {
+  padding: 1.5rem 0;
+}
+
+.about-section__header {
+  text-align: center;
+  margin: 0 auto 1.35rem;
+  max-width: 720px;
+}
+
+.about-section__header--left {
+  text-align: left;
+  margin: 0 0 1.1rem;
+}
+
+.about-section__header h2 {
+  margin: 0 0 0.55rem;
+  color: var(--color-black);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.about-section__header p {
+  margin: 0;
+  color: var(--color-gray-dark);
+  line-height: 1.6;
+}
+
+.about-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.95rem;
+}
+
+.about-metric-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1.15rem 1.2rem;
+}
+
+.about-metric-card strong {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--color-turquoise);
+  font-size: 1.65rem;
+}
+
+.about-metric-card p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  color: var(--color-gray-dark);
+}
+
+.about-section--accent {
+  margin: 0.5rem 0;
+  background: linear-gradient(135deg, rgba(83, 164, 151, 0.08), rgba(241, 107, 50, 0.08));
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.about-pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.about-pillar-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1.3rem 1.15rem;
+}
+
+.about-pillar-card__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-pill);
+  background: rgba(83, 164, 151, 0.12);
+  color: var(--color-turquoise);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-pillar-card h3 {
+  margin: 0.55rem 0 0.4rem;
+  color: var(--color-black);
+  font-size: 1.02rem;
+}
+
+.about-pillar-card p {
+  margin: 0;
+  color: var(--color-gray-dark);
+  font-size: 0.92rem;
+  line-height: 1.58;
+}
+
+.about-modules-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.about-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 0.9rem;
+}
+
+.about-module-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-left: 3px solid var(--color-turquoise);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem 1rem 0.9rem;
+}
+
+.about-module-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: var(--color-black);
+}
+
+.about-module-card p {
+  margin: 0;
+  color: var(--color-gray-dark);
+  font-size: 0.9rem;
+  line-height: 1.52;
+}
+
+.about-side-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1.3rem 1.2rem;
+}
+
+.about-side-card h3,
+.about-side-card h4 {
+  color: var(--color-black);
+  margin: 0 0 0.7rem;
+}
+
+.about-side-card h3 {
+  font-size: clamp(1.15rem, 2.4vw, 1.65rem);
+  line-height: 1.2;
+}
+
+.about-side-card h4 {
+  margin-top: 1rem;
+  font-size: 0.92rem;
+  color: var(--color-gray-dark);
+}
+
+.about-side-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.about-side-card li {
+  line-height: 1.5;
+  color: var(--color-gray-dark);
+  font-size: 0.88rem;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.about-side-card li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--color-turquoise);
+}
+
+@media (max-width: 1200px) {
+  .about-hero__content {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 1rem;
+  }
+
+  .about-hero__text,
+  .about-hero__panel {
+    padding: 1.6rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .about-hero__content,
+  .about-modules-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .about-hero {
+    padding-top: 2rem;
+  }
+
+  .about-hero__panel,
+  .about-side-card {
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .about-page .container {
+    padding: 0 1rem;
+  }
+
+  .about-hero {
+    padding: 1.5rem 0 1rem;
+  }
+
+  .about-hero__text,
+  .about-hero__panel,
+  .about-side-card {
+    padding: 1.35rem;
+  }
+
+  .about-hero__text h1 {
+    font-size: clamp(1.55rem, 8.4vw, 2.05rem);
+    line-height: 1.12;
+  }
+
+  .about-hero__text p {
+    font-size: 0.98rem;
+    line-height: 1.62;
+  }
+
+  .about-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+  }
+
+  .about-hero__actions .btn {
+    width: 100%;
+  }
+
+  .about-section {
+    padding: 1.15rem 0;
+  }
+
+  .about-section__header {
+    margin-bottom: 1rem;
+  }
+
+  .about-section__header h2 {
+    font-size: clamp(1.25rem, 7.2vw, 1.65rem);
+  }
+
+  .about-metrics,
+  .about-pillars,
+  .about-modules-grid {
+    grid-template-columns: 1fr;
+    gap: 0.72rem;
+  }
+
+  .about-side-card h3 {
+    font-size: 1.12rem;
+  }
+
+  .about-side-card li {
+    font-size: 0.93rem;
+  }
+
+  .about-page .app-main {
+    padding-bottom: 2rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .about-page .container {
+    padding: 0 0.8rem;
+  }
+
+  .about-hero__text,
+  .about-hero__panel,
+  .about-side-card,
+  .about-metric-card,
+  .about-pillar-card,
+  .about-module-card {
+    padding: 1rem;
+  }
+
+  .about-hero__eyebrow {
+    font-size: 0.68rem;
+  }
+
+  .about-hero__text p,
+  .about-module-card p,
+  .about-pillar-card p,
+  .about-side-card li {
+    font-size: 0.9rem;
+  }
 }
