@@ -705,6 +705,10 @@ export const api = {
     delete: async (id) => fetchWrapper(`/admin/staff/${id}`, { method: 'DELETE' }),
   },
 
+  staff: {
+    getMine: async () => fetchWrapper('/staff/me', { method: 'GET' }),
+  },
+
   users: {
     getMyUnit: async () => fetchWrapper('/users/me/unit', { method: 'GET' }),
     getProfile: async (userId) => fetchWrapper(`/users/${userId}/profile`, { method: 'GET' }),

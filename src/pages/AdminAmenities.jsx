@@ -292,6 +292,7 @@ const AdminAmenities = () => {
                 type="url"
                 value={form.imageUrl}
                 onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                maxLength={5000}
                 placeholder="https://ejemplo.com/imagen.jpg"
                 className="form-field__input"
               />

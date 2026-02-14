@@ -116,7 +116,7 @@ const Votaciones = () => {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(defaultForm);
   const canCreate = user?.userType === 'admin' || user?.userType === 'concierge';
-  const canVote = ['resident', 'admin', 'concierge', 'staff'].includes(user?.userType);
+  const canVote = ['resident', 'admin', 'concierge'].includes(user?.userType);
 
   const openPolls = useMemo(() => polls.open || [], [polls]);
   const closedPolls = useMemo(() => polls.closed || [], [polls]);

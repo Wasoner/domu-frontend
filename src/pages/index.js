@@ -21,7 +21,8 @@ export { default as AdminTasks } from './AdminTasks';
 export { default as AdminStaff } from './AdminStaff';
 
 // Resident pages
-export { default as ResidentPortal } from './ResidentPortal';
+export { default as StaffPortal } from './StaffPortal';
+export { default as StaffTasks } from './StaffTasks';
 export { default as ResidentVisits } from './ResidentVisits';
 export { default as ResidentProfile } from './ResidentProfile';
 export { default as ResidentIncidents } from './ResidentIncidents';
