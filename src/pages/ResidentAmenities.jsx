@@ -6,6 +6,7 @@ import './ResidentAmenities.scss';
 
 const ResidentAmenities = () => {
   const { user } = useAppContext();
+  const isStaff = user?.roleId === 4 || user?.userType === 'staff';
   const [activeTab, setActiveTab] = useState('amenities'); // 'amenities' | 'my-reservations'
   const [amenities, setAmenities] = useState([]);
   const [myReservations, setMyReservations] = useState([]);
@@ -49,14 +50,15 @@ const ResidentAmenities = () => {
   }, [user]);
 
   useEffect(() => {
-    if (activeTab === 'amenities') {
+    if (activeTab === 'amenities' || isStaff) {
       fetchAmenities();
     } else {
       fetchMyReservations();
     }
-  }, [activeTab, fetchAmenities, fetchMyReservations]);
+  }, [activeTab, fetchAmenities, fetchMyReservations, isStaff]);
 
   const handleOpenReserve = (amenity) => {
+    if (isStaff) return;
     setSelectedAmenity(amenity);
     setSelectedDate(getTodayString());
     setAvailability(null);
@@ -160,7 +162,7 @@ const ResidentAmenities = () => {
             <p className="resident-amenities__eyebrow">Comunidad</p>
             <h1>Áreas Comunes</h1>
             <p className="resident-amenities__subtitle">
-              Reserva espacios comunes de tu comunidad.
+              {isStaff ? 'Consulta disponibilidad y reglas de uso de los espacios comunes.' : 'Reserva espacios comunes de tu comunidad.'}
             </p>
           </div>
         </header>
@@ -177,15 +179,17 @@ const ResidentAmenities = () => {
           >
             Espacios disponibles
           </button>
-          <button
-            type="button"
-            className={`tab ${activeTab === 'my-reservations' ? 'tab--active' : ''}`}
-            onClick={() => setActiveTab('my-reservations')}
-            role="tab"
-            aria-selected={activeTab === 'my-reservations'}
-          >
-            Mis reservas ({upcomingReservations.length})
-          </button>
+          {!isStaff && (
+            <button
+              type="button"
+              className={`tab ${activeTab === 'my-reservations' ? 'tab--active' : ''}`}
+              onClick={() => setActiveTab('my-reservations')}
+              role="tab"
+              aria-selected={activeTab === 'my-reservations'}
+            >
+              Mis reservas ({upcomingReservations.length})
+            </button>
+          )}
         </div>
 
         {activeTab === 'amenities' && (
@@ -243,20 +247,22 @@ const ResidentAmenities = () => {
                       <p>{amenity.rules}</p>
                     </details>
                   )}
-                  <button
-                    type="button"
-                    className="amenity-preview__reserve"
-                    onClick={() => handleOpenReserve(amenity)}
-                  >
-                    Reservar
-                  </button>
+                  {!isStaff && (
+                    <button
+                      type="button"
+                      className="amenity-preview__reserve"
+                      onClick={() => handleOpenReserve(amenity)}
+                    >
+                      Reservar
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
           </section>
         )}
 
-        {activeTab === 'my-reservations' && (
+        {!isStaff && activeTab === 'my-reservations' && (
           <section className="my-reservations">
             {loading && myReservations.length === 0 && (
               <div className="my-reservations__skeleton" aria-hidden="true">
@@ -336,7 +342,7 @@ const ResidentAmenities = () => {
         )}
 
         {/* Modal: Reservar */}
-        {showReserveModal && selectedAmenity && (
+        {!isStaff && showReserveModal && selectedAmenity && (
           <div className="modal" role="dialog" aria-modal="true">
             <div className="modal__card">
               <header className="modal__header">

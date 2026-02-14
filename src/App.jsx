@@ -11,12 +11,14 @@ import {
   AdminIncidentStats,
   AdminResidents,
   AdminHousingUnits,
+  AdminAmenities,
   AdminCommonExpenses,
   AdminParcels,
   AdminTasks,
   AdminStaff,
   UserConfirmation,
-  ResidentPortal,
+  StaffPortal,
+  StaffTasks,
   ResidentVisits,
   ResidentProfile,
   ResidentIncidents,
@@ -70,13 +72,15 @@ function App() {
           <Route path={ROUTES.ADMIN_INCIDENT_STATS} element={<AdminIncidentStats />} />
           <Route path={ROUTES.ADMIN_RESIDENTS} element={<AdminResidents />} />
           <Route path={ROUTES.ADMIN_HOUSING_UNITS} element={<AdminHousingUnits />} />
+          <Route path={ROUTES.ADMIN_AMENITIES} element={<AdminAmenities />} />
           <Route path={ROUTES.COMMON_CHARGES} element={<AdminCommonExpenses />} />
           <Route path={ROUTES.ADMIN_PARCELS} element={<AdminParcels />} />
           <Route path={ROUTES.ADMIN_TASKS} element={<AdminTasks />} />
           <Route path={ROUTES.ADMIN_STAFF} element={<AdminStaff />} />
 
           {/* Protected Routes - Resident */}
-          <Route path={ROUTES.RESIDENT_PORTAL} element={<ResidentPortal />} />
+          <Route path={ROUTES.RESIDENT_PORTAL} element={<StaffPortal />} />
+          <Route path={ROUTES.STAFF_TASKS} element={<StaffTasks />} />
           <Route path={ROUTES.RESIDENT_EVENTS} element={<ResidentVisits />} />
           <Route path={ROUTES.RESIDENT_PROFILE} element={<ResidentProfile />} />
           <Route path={ROUTES.RESIDENT_INCIDENTS} element={<ResidentIncidents />} />

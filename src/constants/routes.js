@@ -39,12 +39,14 @@ export const ROUTES = {
   ADMIN_INCIDENTS: '/dashboard/incidents',
   ADMIN_INCIDENT_STATS: '/dashboard/incidents/stats',
   ADMIN_PARCELS: '/dashboard/encomiendas',
+  ADMIN_AMENITIES: '/dashboard/amenities',
   ADMIN_TASKS: '/dashboard/tasks',
   ADMIN_STAFF: '/dashboard/staff',
   SETTINGS: '/dashboard/settings',
 
   // Protected routes - Resident
   RESIDENT_PORTAL: '/resident',
+  STAFF_TASKS: '/staff/tasks',
   RESIDENT_CHARGES: '/resident/charges',
   RESIDENT_CHARGES_DETAIL: '/resident/charges/:id',
   RESIDENT_PAYMENTS: '/resident/payments',
@@ -112,6 +114,7 @@ export const ROUTE_CATEGORIES = {
   ],
   RESIDENT: [
     ROUTES.RESIDENT_PORTAL,
+    ROUTES.STAFF_TASKS,
     ROUTES.RESIDENT_CHARGES,
     ROUTES.RESIDENT_PAYMENTS,
     ROUTES.RESIDENT_HISTORY,

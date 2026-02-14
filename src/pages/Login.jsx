@@ -40,7 +40,9 @@ const Login = () => {
                 ? 'admin'
                 : userRoleId === 3
                     ? 'concierge'
-                    : 'resident';
+                    : userRoleId === 4
+                        ? 'staff'
+                        : 'resident';
 
             // Guardar información del usuario en el contexto
             setUser({

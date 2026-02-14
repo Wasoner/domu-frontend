@@ -6,6 +6,7 @@ export const NAV_SECTIONS = [
     roles: ['resident', 'staff'],
     items: [
       { label: 'Panel principal', icon: 'home', to: ROUTES.RESIDENT_PORTAL, roles: ['resident', 'staff'], exact: true },
+      { label: 'Mis tareas', icon: 'clipboardCheck', to: ROUTES.STAFF_TASKS, roles: ['staff'], exact: true },
     ],
   },
   {
@@ -13,22 +14,22 @@ export const NAV_SECTIONS = [
     roles: ['resident', 'admin', 'concierge', 'staff'],
     items: [
       { label: 'Publicaciones', icon: 'newspaper', to: ROUTES.RESIDENT_PUBLICATIONS, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
-      { label: 'Tienda comunidad', icon: 'shoppingBag', to: ROUTES.RESIDENT_MARKETPLACE, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
-      { label: 'Mensajes / Chat', icon: 'chatBubbleLeftRight', to: ROUTES.RESIDENT_CHAT, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
+      { label: 'Tienda comunidad', icon: 'shoppingBag', to: ROUTES.RESIDENT_MARKETPLACE, roles: ['resident', 'admin', 'concierge'], exact: true },
+      { label: 'Mensajes / Chat', icon: 'chatBubbleLeftRight', to: ROUTES.RESIDENT_CHAT, roles: ['resident', 'admin', 'concierge'], exact: true },
       {
         label: 'Incidentes',
         icon: 'ticket',
-        roles: ['admin', 'concierge', 'resident', 'staff'],
+        roles: ['admin', 'concierge', 'resident'],
         subItems: [
           { label: 'Tablero Jira', to: ROUTES.ADMIN_INCIDENTS, roles: ['admin', 'concierge'], exact: true },
-          { label: 'Reportar incidente', to: ROUTES.RESIDENT_INCIDENTS, roles: ['admin', 'concierge', 'resident', 'staff'], exact: true },
+          { label: 'Reportar incidente', to: ROUTES.RESIDENT_INCIDENTS, roles: ['admin', 'concierge', 'resident'], exact: true },
           { label: 'Estadísticas', to: ROUTES.ADMIN_INCIDENT_STATS, roles: ['admin'], exact: true },
         ],
       },
       { label: 'Visitas', icon: 'door', to: ROUTES.RESIDENT_EVENTS, roles: ['resident', 'concierge', 'admin'], exact: true },
-      { label: 'Biblioteca', icon: 'folder', to: ROUTES.RESIDENT_LIBRARY, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
+      { label: 'Biblioteca', icon: 'folder', to: ROUTES.RESIDENT_LIBRARY, roles: ['resident', 'admin', 'concierge'], exact: true },
       { label: 'Votaciones', icon: 'checkBadge', to: ROUTES.VOTINGS, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
-      { label: 'Áreas comunes', icon: 'sparkles', to: ROUTES.RESIDENT_AMENITIES, roles: ['resident', 'admin', 'concierge'], exact: true },
+      { label: 'Áreas comunes', icon: 'sparkles', to: ROUTES.RESIDENT_AMENITIES, roles: ['resident', 'admin', 'concierge', 'staff'], exact: true },
     ],
   },
   {
@@ -48,6 +49,7 @@ export const NAV_SECTIONS = [
       { label: 'Residentes', icon: 'users', to: ROUTES.ADMIN_RESIDENTS, roles: ['admin', 'concierge'], exact: true },
       { label: 'Encomiendas', icon: 'cube', to: ROUTES.ADMIN_PARCELS, roles: ['admin', 'concierge'], exact: true },
       { label: 'Unidades', icon: 'homeModern', to: ROUTES.ADMIN_HOUSING_UNITS, roles: ['admin'], exact: true },
+      { label: 'Espacios comunes', icon: 'sparkles', to: ROUTES.ADMIN_AMENITIES, roles: ['admin', 'concierge'], exact: true },
       { label: 'Personal', icon: 'userGroup', to: ROUTES.ADMIN_STAFF, roles: ['admin'], exact: true },
       { label: 'Tareas Staff', icon: 'listBullet', to: ROUTES.ADMIN_TASKS, roles: ['admin'], exact: true },
       { label: 'Cargar gastos', icon: 'banknotes', to: ROUTES.COMMON_CHARGES, roles: ['admin'], exact: true },

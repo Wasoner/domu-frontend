@@ -120,10 +120,11 @@ const ResidentPublications = () => {
 
   const isAdmin = user?.roleId === 1;
   const isConcierge = user?.roleId === 3;
-  const canCreate = true; // Allow all residents to post for now
+  const isStaff = user?.roleId === 4 || user?.userType === 'staff';
+  const canCreate = !isStaff;
 
   return (
-    <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge']}>
+    <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge', 'staff']}>
       <article className="resident-publications page-shell">
         <header className="resident-publications__header">
           <div>
@@ -174,7 +175,7 @@ const ResidentPublications = () => {
         ) : (
           <div className="resident-publications__list">
             {filteredPublications.map((pub) => {
-              const canEdit = isAdmin || (user?.id && pub.authorId === user.id);
+              const canEdit = !isStaff && (isAdmin || (user?.id && pub.authorId === user.id));
 
               return (
                 <article
