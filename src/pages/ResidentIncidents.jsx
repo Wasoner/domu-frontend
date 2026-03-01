@@ -3,7 +3,14 @@ import PropTypes from 'prop-types';
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services';
+import { Icon } from '../components';
 import './ResidentIncidents.scss';
+
+const PANEL_CONFIG = [
+  { key: 'reported', title: 'Reportados', icon: 'clipboard', description: 'Pendientes de revisión', color: '#f59e0b' },
+  { key: 'inProgress', title: 'En progreso', icon: 'screwdriver', description: 'Siendo atendidos', color: '#0ea5e9' },
+  { key: 'closed', title: 'Cerrados', icon: 'check', description: 'Incidentes resueltos', color: '#22c55e' },
+];
 
 /**
  * Configuración de categorías de incidentes
@@ -142,45 +149,6 @@ IncidentItem.propTypes = {
     date: PropTypes.string,
   }).isRequired,
 };
-
-/**
- * Ilustraciones SVG para los paneles vacíos
- */
-const ReportedIllustration = () => (
-  <svg className="resident-incidents__illustration" viewBox="0 0 120 100" fill="none">
-    <path d="M60 85c22.091 0 40-8.954 40-20S82.091 45 60 45 20 53.954 20 65s17.909 20 40 20z" fill="#E8F4F8" />
-    <path d="M35 35h50v40c0 5.523-4.477 10-10 10H45c-5.523 0-10-4.477-10-10V35z" fill="#fff" stroke="#B8D4E3" strokeWidth="2" />
-    <path d="M35 35c0-11.046 8.954-20 20-20h10c11.046 0 20 8.954 20 20" stroke="#B8D4E3" strokeWidth="2" />
-    <circle cx="75" cy="30" r="8" fill="#4ECDC4" />
-    <path d="M72 30l2 2 4-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="50" cy="55" r="3" fill="#B8D4E3" />
-    <circle cx="60" cy="55" r="3" fill="#B8D4E3" />
-    <circle cx="70" cy="55" r="3" fill="#B8D4E3" />
-    <path d="M45 65h30" stroke="#B8D4E3" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-
-const InProgressIllustration = () => (
-  <svg className="resident-incidents__illustration" viewBox="0 0 120 100" fill="none">
-    <path d="M60 85c22.091 0 40-8.954 40-20S82.091 45 60 45 20 53.954 20 65s17.909 20 40 20z" fill="#E8F4F8" />
-    <circle cx="60" cy="50" r="25" fill="#fff" stroke="#B8D4E3" strokeWidth="2" />
-    <path d="M60 50l-12 12" stroke="#6BB9F0" strokeWidth="3" strokeLinecap="round" />
-    <path d="M60 50l8-8" stroke="#6BB9F0" strokeWidth="3" strokeLinecap="round" />
-    <circle cx="60" cy="50" r="4" fill="#4ECDC4" />
-    <circle cx="75" cy="25" r="8" fill="#4ECDC4" />
-    <path d="M72 25h6M75 22v6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-
-const ClosedIllustration = () => (
-  <svg className="resident-incidents__illustration" viewBox="0 0 120 100" fill="none">
-    <path d="M60 85c22.091 0 40-8.954 40-20S82.091 45 60 45 20 53.954 20 65s17.909 20 40 20z" fill="#E8F4F8" />
-    <path d="M40 40h40v35c0 5.523-4.477 10-10 10H50c-5.523 0-10-4.477-10-10V40z" fill="#fff" stroke="#B8D4E3" strokeWidth="2" />
-    <path d="M50 55l5 5 15-15" stroke="#4ECDC4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="75" cy="30" r="8" fill="#4ECDC4" />
-    <path d="M72 30l2 2 4-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 const ResidentIncidentsSkeleton = () => (
   <div className="resident-incidents__panel-list">
@@ -371,7 +339,8 @@ const ResidentIncidents = () => {
 
             <div className="resident-incidents__actions">
               <button
-                className="resident-incidents__report-btn"
+                type="button"
+                className="btn btn-primary"
                 onClick={() => setShowReportModal(true)}
               >
                 Reportar incidente
@@ -383,92 +352,54 @@ const ResidentIncidents = () => {
         {error && <p className="resident-incidents__error">{error}</p>}
 
         <div className="resident-incidents__panels">
-          {/* Panel Reportados */}
-          <section className="resident-incidents__panel resident-incidents__panel--reported">
-            <div className="resident-incidents__panel-header">
-              <div className="resident-incidents__panel-title">
-                <h2>Reportados</h2>
-                <span className="resident-incidents__panel-count">{panelCounts.reported}</span>
-              </div>
-            </div>
-            <div className="resident-incidents__panel-body">
-              {loading ? (
-                <ResidentIncidentsSkeleton />
-              ) : filteredIncidents.reported.length > 0 ? (
-                <div className="resident-incidents__panel-list">
-                  {filteredIncidents.reported.map((incident) => (
-                    <IncidentItem key={incident.id} incident={incident} />
-                  ))}
-                </div>
-              ) : (
-                <div className="resident-incidents__empty-state">
-                  <ReportedIllustration />
-                  <h3>¿Algo no funciona como debe?</h3>
-                  <p>Aquí verás los incidentes nuevos de tu comunidad</p>
-                </div>
-              )}
-            </div>
-          </section>
+          {PANEL_CONFIG.map((config) => {
+            const incidents = filteredIncidents[config.key];
+            const count = panelCounts[config.key];
+            const emptyContent = {
+              reported: { title: '¿Algo no funciona como debe?', text: 'Aquí verás los incidentes nuevos de tu comunidad' },
+              inProgress: { title: 'Trabajos en desarrollo', text: 'Conoce aquí los incidentes que están en proceso de ser solucionados' },
+              closed: { title: 'Trabajos concluidos', text: 'Los incidentes que tu administración considere listos los visualizarás acá' },
+            };
+            const empty = emptyContent[config.key];
 
-          {/* Panel En progreso */}
-          <section className="resident-incidents__panel resident-incidents__panel--in-progress">
-            <div className="resident-incidents__panel-header">
-              <div className="resident-incidents__panel-title">
-                <h2>En progreso</h2>
-                <span className="resident-incidents__panel-count">{panelCounts.inProgress}</span>
-              </div>
-              <span className="resident-incidents__info-icon" title="Incidentes siendo atendidos">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M8 5v3M8 10v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </span>
-            </div>
-            <div className="resident-incidents__panel-body">
-              {loading ? (
-                <ResidentIncidentsSkeleton />
-              ) : filteredIncidents.inProgress.length > 0 ? (
-                <div className="resident-incidents__panel-list">
-                  {filteredIncidents.inProgress.map((incident) => (
-                    <IncidentItem key={incident.id} incident={incident} />
-                  ))}
+            return (
+              <section
+                key={config.key}
+                className={`resident-incidents__panel resident-incidents__panel--${config.key}`}
+                style={{ '--panel-color': config.color }}
+              >
+                <div className="resident-incidents__panel-header">
+                  <div className="resident-incidents__panel-title-row">
+                    <span className="resident-incidents__panel-icon" aria-hidden="true">
+                      <Icon name={config.icon} size={18} />
+                    </span>
+                    <h2>{config.title}</h2>
+                    <span className="resident-incidents__panel-count">{count}</span>
+                  </div>
+                  <p className="resident-incidents__panel-description">{config.description}</p>
                 </div>
-              ) : (
-                <div className="resident-incidents__empty-state">
-                  <InProgressIllustration />
-                  <h3>Trabajos en desarrollo</h3>
-                  <p>Conoce aquí los incidentes que están en proceso de ser solucionados</p>
+                <div className="resident-incidents__panel-body">
+                  {loading ? (
+                    <ResidentIncidentsSkeleton />
+                  ) : incidents.length > 0 ? (
+                    <div className="resident-incidents__panel-list">
+                      {incidents.map((incident) => (
+                        <IncidentItem key={incident.id} incident={incident} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="resident-incidents__empty-state">
+                      <span className="resident-incidents__empty-icon" aria-hidden="true">
+                        <Icon name={config.icon} size={28} />
+                      </span>
+                      <h3>{empty.title}</h3>
+                      <p>{empty.text}</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </section>
-
-          {/* Panel Cerrados */}
-          <section className="resident-incidents__panel resident-incidents__panel--closed">
-            <div className="resident-incidents__panel-header">
-              <div className="resident-incidents__panel-title">
-                <h2>Cerrados</h2>
-                <span className="resident-incidents__panel-count">{panelCounts.closed}</span>
-              </div>
-            </div>
-            <div className="resident-incidents__panel-body">
-              {loading ? (
-                <ResidentIncidentsSkeleton />
-              ) : filteredIncidents.closed.length > 0 ? (
-                <div className="resident-incidents__panel-list">
-                  {filteredIncidents.closed.map((incident) => (
-                    <IncidentItem key={incident.id} incident={incident} />
-                  ))}
-                </div>
-              ) : (
-                <div className="resident-incidents__empty-state">
-                  <ClosedIllustration />
-                  <h3>Trabajos concluidos</h3>
-                  <p>Los incidentes que tu administración considere listos los visualizarás acá</p>
-                </div>
-              )}
-            </div>
-          </section>
+              </section>
+            );
+          })}
         </div>
 
         {/* Modal para reportar incidente */}

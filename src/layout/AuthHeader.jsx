@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import logo from '../assets/LogotipoDOMU.svg';
 import { Icon } from '../components';
@@ -9,16 +9,20 @@ import { getNotificationVisual } from '../constants/notifications';
 import { useNotifications } from '../hooks/useNotifications';
 import './AuthHeader.scss';
 
-const AuthHeader = ({ user }) => {
+const AuthHeader = ({ user, navSections = [] }) => {
   const navigate = useNavigate();
-  const { selectBuilding } = useAppContext();
+  const { selectBuilding, logout } = useAppContext();
   const [showBuildingDropdown, setShowBuildingDropdown] = useState(false);
   const [showHelpDropdown, setShowHelpDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [showMobileMenuDropdown, setShowMobileMenuDropdown] = useState(false);
+  const [showMobileProfileDropdown, setShowMobileProfileDropdown] = useState(false);
 
   const buildingRef = useRef(null);
   const helpRef = useRef(null);
   const notificationsRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+  const mobileProfileRef = useRef(null);
 
   const buildingOptions = user?.buildings || [];
   const activeBuildingId = user?.selectedBuildingId || user?.activeBuildingId;
@@ -109,6 +113,24 @@ const AuthHeader = ({ user }) => {
     }
   };
 
+  const displayName = user?.firstName
+    ? `${user.firstName} ${user?.lastName || ''}`.trim()
+    : user?.email || 'Mi perfil';
+  const initials = (() => {
+    const first = user?.firstName?.trim()?.[0];
+    const last = user?.lastName?.trim()?.[0];
+    if (first || last) return `${first || ''}${last || ''}`.toUpperCase();
+    if (user?.email) return user.email.trim()[0].toUpperCase();
+    return 'D';
+  })();
+  const avatarUrl = user?.avatarBoxId || '';
+
+  const handleLogout = () => {
+    setShowMobileProfileDropdown(false);
+    logout();
+    navigate(ROUTES.LOGIN);
+  };
+
   // Cerrar dropdowns al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -120,6 +142,12 @@ const AuthHeader = ({ user }) => {
       }
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
         setShowNotificationsDropdown(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setShowMobileMenuDropdown(false);
+      }
+      if (mobileProfileRef.current && !mobileProfileRef.current.contains(event.target)) {
+        setShowMobileProfileDropdown(false);
       }
     };
 
@@ -135,7 +163,7 @@ const AuthHeader = ({ user }) => {
         <img
           src={logo}
           alt="Logo DOMU"
-          className="auth-header__logo auth-header__logo--clickable"
+          className="auth-header__logo auth-header__logo--clickable auth-header__logo--desktop"
           onClick={handleLogoClick}
           role="button"
           tabIndex={0}
@@ -187,8 +215,8 @@ const AuthHeader = ({ user }) => {
             )}
             {showBuildingDropdown && buildingOptions.length > 0 && (
               <div className="auth-header__dropdown auth-header__dropdown--buildings" role="listbox">
-                <div className="auth-header__dropdown-header">
-                  <span>Seleccionar comunidad</span>
+                <div className="auth-header__dropdown-header auth-header__dropdown-header--communities">
+                  <span>Comunidad</span>
                   <span className="auth-header__dropdown-count">{buildingOptions.length}</span>
                 </div>
                 {buildingOptions.map((b) => (
@@ -203,7 +231,7 @@ const AuthHeader = ({ user }) => {
                     role="option"
                     aria-selected={b.id === selectedBuilding?.id}
                   >
-                    <div className="auth-header__building-option-icon">
+                    <div className="auth-header__building-option-icon auth-header__building-option-icon--desktop">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                         <path d="M3 21V8L12 3L21 8V21H15V14H9V21H3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
@@ -211,7 +239,7 @@ const AuthHeader = ({ user }) => {
                     <div className="auth-header__building-option-info">
                       <span className="auth-header__building-option-name">{b.name}</span>
                       {b.address && (
-                        <span className="auth-header__building-option-address">
+                        <span className="auth-header__building-option-address auth-header__building-option-address--desktop">
                           {(() => {
                             const pts = b.address.split(',').map((p) => p.trim());
                             const st = pts.slice(0, 2).join(', ');
@@ -222,7 +250,7 @@ const AuthHeader = ({ user }) => {
                       )}
                     </div>
                     {b.id === selectedBuilding?.id && (
-                      <span className="auth-header__building-option-check">
+                      <span className="auth-header__building-option-check auth-header__building-option-check--desktop">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                           <path d="M5 12L10 17L20 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
@@ -237,8 +265,119 @@ const AuthHeader = ({ user }) => {
       </div>
 
       <div className="auth-header__right">
+        {/* Menú móvil - navegación (visible solo en pantallas pequeñas) */}
         <div
-          className="auth-header__icon-button"
+          className="auth-header__icon-button auth-header__mobile-menu"
+          ref={mobileMenuRef}
+          onClick={() => {
+            setShowMobileMenuDropdown(!showMobileMenuDropdown);
+            setShowMobileProfileDropdown(false);
+          }}
+          aria-label="Menú de navegación"
+          aria-expanded={showMobileMenuDropdown}
+        >
+          <Icon name="menu" size={20} />
+          {showMobileMenuDropdown && (
+            <div className="auth-header__dropdown auth-header__dropdown--right auth-header__dropdown--mobile-nav">
+              <div className="auth-header__dropdown-header">Menú</div>
+              {navSections.map((section) => (
+                <div key={section.title} className="auth-header__mobile-nav-section">
+                  <span className="auth-header__mobile-nav-title">{section.title}</span>
+                  {section.items.map((item) => {
+                    if (item.to) {
+                      return (
+                        <NavLink
+                          key={item.label}
+                          to={item.to}
+                          end={item.exact !== undefined ? item.exact : true}
+                          className={({ isActive }) =>
+                            `auth-header__dropdown-item auth-header__mobile-nav-link ${isActive ? 'auth-header__dropdown-item--active' : ''}`
+                          }
+                          onClick={() => setShowMobileMenuDropdown(false)}
+                        >
+                          {item.icon && <Icon name={item.icon} size={18} />}
+                          <span>{item.label}</span>
+                        </NavLink>
+                      );
+                    }
+                    if (item.subItems?.length) {
+                      return item.subItems.map((sub) => (
+                        <NavLink
+                          key={`${item.label}-${sub.label}`}
+                          to={sub.to}
+                          end={sub.exact !== undefined ? sub.exact : true}
+                          className={({ isActive }) =>
+                            `auth-header__dropdown-item auth-header__mobile-nav-link auth-header__mobile-nav-sublink ${isActive ? 'auth-header__dropdown-item--active' : ''}`
+                          }
+                          onClick={() => setShowMobileMenuDropdown(false)}
+                        >
+                          {item.icon && <Icon name={item.icon} size={16} />}
+                          <span>{sub.label}</span>
+                        </NavLink>
+                      ));
+                    }
+                    return null;
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Perfil móvil (visible solo en pantallas pequeñas) */}
+        <div
+          className="auth-header__icon-button auth-header__mobile-profile"
+          ref={mobileProfileRef}
+          onClick={() => {
+            setShowMobileProfileDropdown(!showMobileProfileDropdown);
+            setShowMobileMenuDropdown(false);
+          }}
+          aria-label="Menú de perfil"
+          aria-expanded={showMobileProfileDropdown}
+        >
+          <div className="auth-header__profile-avatar-btn">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" />
+            ) : (
+              <span>{initials}</span>
+            )}
+          </div>
+          {showMobileProfileDropdown && (
+            <div className="auth-header__dropdown auth-header__dropdown--right auth-header__dropdown--profile">
+              <div className="auth-header__dropdown-header auth-header__profile-info">
+                <div className="auth-header__profile-avatar-btn auth-header__profile-avatar-btn--lg">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" />
+                  ) : (
+                    <span>{initials}</span>
+                  )}
+                </div>
+                <div>
+                  <span className="auth-header__profile-name">{displayName}</span>
+                  <span className="auth-header__profile-email">{user?.email}</span>
+                </div>
+              </div>
+              <Link
+                to={ROUTES.RESIDENT_PROFILE}
+                className="auth-header__dropdown-item"
+                onClick={() => setShowMobileProfileDropdown(false)}
+              >
+                Mi perfil
+              </Link>
+              <button
+                type="button"
+                className="auth-header__dropdown-item auth-header__dropdown-item--danger"
+                onClick={handleLogout}
+              >
+                <Icon name="door" size={16} />
+                Cerrar sesión
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div
+          className="auth-header__icon-button auth-header__help"
           ref={helpRef}
           onClick={() => setShowHelpDropdown(!showHelpDropdown)}
           aria-label="Ayuda"
@@ -251,7 +390,9 @@ const AuthHeader = ({ user }) => {
           {showHelpDropdown && (
             <div className="auth-header__dropdown auth-header__dropdown--right">
               <div className="auth-header__dropdown-item">Centro de ayuda</div>
-              <div className="auth-header__dropdown-item">Contactar soporte</div>
+              <Link to={ROUTES.CONTACT} className="auth-header__dropdown-item" onClick={() => setShowHelpDropdown(false)}>
+                Contactar soporte
+              </Link>
               <div className="auth-header__dropdown-item">Preguntas frecuentes</div>
             </div>
           )}
@@ -354,11 +495,33 @@ AuthHeader.propTypes = {
     email: PropTypes.string,
     userType: PropTypes.string,
     unitId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    avatarBoxId: PropTypes.string,
   }),
+  navSections: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      items: PropTypes.arrayOf(
+        PropTypes.shape({
+          label: PropTypes.string.isRequired,
+          icon: PropTypes.string,
+          to: PropTypes.string,
+          exact: PropTypes.bool,
+          subItems: PropTypes.arrayOf(
+            PropTypes.shape({
+              label: PropTypes.string.isRequired,
+              to: PropTypes.string.isRequired,
+              exact: PropTypes.bool,
+            })
+          ),
+        })
+      ),
+    })
+  ),
 };
 
 AuthHeader.defaultProps = {
   user: null,
+  navSections: [],
 };
 
 export default AuthHeader;

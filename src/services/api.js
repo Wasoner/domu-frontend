@@ -290,6 +290,26 @@ export const api = {
     },
 
     /**
+     * Forgot password - Solicitar recuperación de contraseña
+     */
+    forgotPassword: async (email) => {
+      return fetchWrapper('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+    },
+
+    /**
+     * Reset password - Restablecer contraseña con token
+     */
+    resetPassword: async (token, newPassword) => {
+      return fetchWrapper('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, newPassword }),
+      });
+    },
+
+    /**
      * Logout - Cerrar sesión
      */
     logout: () => {

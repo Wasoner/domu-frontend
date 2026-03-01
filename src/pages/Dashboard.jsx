@@ -8,76 +8,6 @@ import { ROUTES } from '../constants';
 import './Dashboard.scss';
 
 /**
- * Módulos de acceso rápido - Enlaces funcionales a páginas principales
- */
-const quickAccessModules = [
-    {
-        id: 'charges',
-        title: 'Gastos Comunes',
-        description: 'Gestiona periodos y cargos',
-        icon: 'banknotes',
-        to: ROUTES.COMMON_CHARGES,
-        accentColor: 'var(--color-turquoise)',
-    },
-    {
-        id: 'incidents',
-        title: 'Incidentes',
-        description: 'Gestiona tickets y reportes',
-        icon: 'ticket',
-        to: ROUTES.ADMIN_INCIDENTS,
-        accentColor: 'var(--color-warning-light)',
-    },
-    {
-        id: 'amenities',
-        title: 'Áreas Comunes',
-        description: 'Reservas y espacios',
-        icon: 'calendar',
-        to: ROUTES.RESIDENT_AMENITIES,
-        accentColor: 'var(--color-info-light)',
-    },
-    {
-        id: 'residents',
-        title: 'Residentes',
-        description: 'Administrar comunidad',
-        icon: 'home',
-        to: ROUTES.ADMIN_RESIDENTS,
-        accentColor: 'var(--color-success)',
-    },
-    {
-        id: 'parcels',
-        title: 'Encomiendas',
-        description: 'Gestión de paquetes',
-        icon: 'archiveBox',
-        to: ROUTES.ADMIN_PARCELS,
-        accentColor: 'var(--color-info)',
-    },
-    {
-        id: 'tasks',
-        title: 'Tareas Staff',
-        description: 'Asignar y monitorear',
-        icon: 'clipboardCheck',
-        to: ROUTES.ADMIN_TASKS,
-        accentColor: 'var(--color-primary)',
-    },
-    {
-        id: 'users',
-        title: 'Usuarios',
-        description: 'Crear y administrar cuentas',
-        icon: 'users',
-        to: ROUTES.ADMIN_CREATE_USER,
-        accentColor: 'var(--color-gray-dark)',
-    },
-    {
-        id: 'profile',
-        title: 'Configuración',
-        description: 'Ajustes de la cuenta',
-        icon: 'lock',
-        to: ROUTES.RESIDENT_PROFILE,
-        accentColor: 'var(--color-gray)',
-    },
-];
-
-/**
  * Dashboard Administrativo
  * Panel principal con métricas en tiempo real y accesos rápidos
  */
@@ -294,6 +224,27 @@ const Dashboard = () => {
 
                 {/* Contenido principal en dos columnas */}
                 <div className="dashboard__grid">
+                    {/* Estado de la comunidad - arriba */}
+                    <aside className="dashboard__side">
+                        {isInitialLoading ? (
+                            <section className="dashboard__status-card dashboard__status-card--skeleton" aria-hidden="true">
+                                <div>
+                                    <span className="dashboard__skeleton-block dashboard__skeleton-block--sm" />
+                                    <span className="dashboard__skeleton-block dashboard__skeleton-block--lg" />
+                                    <span className="dashboard__skeleton-block dashboard__skeleton-block--xl" />
+                                </div>
+                            </section>
+                        ) : (
+                            <section className={`dashboard__status-card dashboard__status-card--${statusTone}`}>
+                                <div>
+                                    <p className="dashboard__status-eyebrow">Estado de la comunidad</p>
+                                    <h3>{statusMessage}</h3>
+                                    <p>{statusDetail}</p>
+                                </div>
+                            </section>
+                        )}
+                    </aside>
+
                     <section className="dashboard__primary">
                         {/* Feed de incidentes recientes */}
                         <section className="dashboard__feed" aria-label="Incidentes recientes">
@@ -303,7 +254,7 @@ const Dashboard = () => {
                                     <p>Últimos incidentes reportados</p>
                                 </div>
                                 <div className="dashboard__feed-actions">
-                                    <Link to={ROUTES.ADMIN_INCIDENTS} className="dashboard__view-all">
+                                    <Link to={ROUTES.ADMIN_INCIDENTS} className="btn btn-primary">
                                         Ver todo
                                     </Link>
                                 </div>
@@ -364,7 +315,7 @@ const Dashboard = () => {
                                     <p>Últimos productos publicados</p>
                                 </div>
                                 <div className="dashboard__feed-actions">
-                                    <Link to={ROUTES.RESIDENT_MARKETPLACE} className="dashboard__view-all">
+                                    <Link to={ROUTES.RESIDENT_MARKETPLACE} className="btn btn-primary">
                                         Ver tienda
                                     </Link>
                                 </div>
@@ -399,71 +350,6 @@ const Dashboard = () => {
                             </div>
                         </section>
                     </section>
-
-                    <aside className="dashboard__side">
-                        {isInitialLoading ? (
-                            <section className="dashboard__status-card dashboard__status-card--skeleton" aria-hidden="true">
-                                <div>
-                                    <span className="dashboard__skeleton-block dashboard__skeleton-block--sm" />
-                                    <span className="dashboard__skeleton-block dashboard__skeleton-block--lg" />
-                                    <span className="dashboard__skeleton-block dashboard__skeleton-block--xl" />
-                                </div>
-                                <span className="dashboard__skeleton-block dashboard__skeleton-block--md" />
-                            </section>
-                        ) : (
-                            <section className={`dashboard__status-card dashboard__status-card--${statusTone}`}>
-                                <div>
-                                    <p className="dashboard__status-eyebrow">Estado de la comunidad</p>
-                                    <h3>{statusMessage}</h3>
-                                    <p>{statusDetail}</p>
-                                </div>
-                                <Link to={ROUTES.ADMIN_INCIDENTS} className="dashboard__status-link">
-                                    Gestionar casos
-                                </Link>
-                            </section>
-                        )}
-
-                        {/* Accesos rápidos */}
-                        <section className="dashboard__quick-access" aria-label="Accesos rápidos">
-                            <div className="dashboard__quick-header">
-                                <h2>Gestión directa</h2>
-                                <span>Atajos a herramientas clave</span>
-                            </div>
-                            <div className="dashboard__modules">
-                                {isInitialLoading ? (
-                                    Array.from({ length: 6 }, (_, index) => (
-                                        <div key={index} className="module-card module-card--skeleton" aria-hidden="true">
-                                            <span className="module-card__icon" />
-                                            <div className="module-card__content">
-                                                <span className="dashboard__skeleton-block dashboard__skeleton-block--md" />
-                                                <span className="dashboard__skeleton-block dashboard__skeleton-block--lg" />
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    quickAccessModules.map((module) => (
-                                        <Link
-                                            key={module.id}
-                                            to={module.to}
-                                            className="module-card"
-                                            style={{ '--module-accent': module.accentColor }}
-                                        >
-                                            <span className="module-card__icon" aria-hidden="true">
-                                                <Icon name={module.icon} size={20} />
-                                            </span>
-                                            <div className="module-card__content">
-                                                <h3>{module.title}</h3>
-                                                <p>{module.description}</p>
-                                            </div>
-                                            <span className="module-card__arrow" aria-hidden="true">
-                                                <Icon name="chevronRight" size={16} />
-                                            </span>
-                                        </Link>
-                                    ))
-                                )}
-                            </div>
-                        </section>
-                    </aside>
                 </div>
             </article>
         </ProtectedLayout>

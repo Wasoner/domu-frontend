@@ -8,6 +8,7 @@ export const ROUTES = {
   HOME: '/',
   ABOUT: '/about',
   LOGIN: '/login',
+  FORGOT_PASSWORD: '/recuperar-contrasena',
   REGISTER: '/register',
   CONFIRM_USER: '/confirmar',
   ADMIN_INVITE: '/registrar-admin',
