@@ -241,7 +241,7 @@ const Votaciones = () => {
             <p className="polls-page__subtitle">Crea votaciones rápidas y permite que la comunidad decida.</p>
           </div>
           {canCreate && (
-            <button type="button" className="polls-page__primary" onClick={() => setShowForm(true)}>
+            <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
               + Nueva votación
             </button>
           )}

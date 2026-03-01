@@ -250,7 +250,7 @@ const ResidentAmenities = () => {
                   {!isStaff && (
                     <button
                       type="button"
-                      className="amenity-preview__reserve"
+                      className="btn btn-primary"
                       onClick={() => handleOpenReserve(amenity)}
                     >
                       Reservar

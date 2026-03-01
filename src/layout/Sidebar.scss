@@ -10,7 +10,8 @@
   height: calc(100vh - 140px);
   align-self: flex-start;
   transition: width 0.25s ease;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: visible;
   display: flex;
   flex-direction: column;
 }
@@ -21,40 +22,37 @@
 }
 
 .app-sidebar__toggle {
-  position: absolute;
-  top: 1.5rem;
-  right: -12px;
-  z-index: 10;
+  flex-shrink: 0;
+  align-self: flex-end;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--color-border-light);
-  background: var(--color-bg-primary, #fff);
+  background: transparent;
   color: var(--color-gray);
   cursor: pointer;
   padding: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .app-sidebar__toggle:hover {
   background: var(--color-bg-accent);
   color: var(--color-turquoise);
   border-color: var(--color-turquoise);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .app-sidebar__toggle-icon {
-  font-size: 1rem;
-  line-height: 1;
-  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -1px;
+}
+
+.app-sidebar.is-collapsed .app-sidebar__toggle {
+  align-self: center;
 }
 
 
@@ -64,15 +62,51 @@
   flex-direction: column;
   gap: 1.25rem;
   flex: 1;
+  overflow-x: hidden;
   overflow-y: auto;
   min-height: 0;
+  min-width: 0;
   transition: padding 0.25s ease;
+
+  /* Scrollbar: fondo igual a auth-layout__body (var(--color-bg-secondary)), solo visible barra y flechas */
+  scrollbar-color: var(--color-border-medium) var(--color-bg-secondary);
+  scrollbar-width: thin;
+}
+
+.app-sidebar__inner::-webkit-scrollbar {
+  width: 10px;
+}
+
+.app-sidebar__inner::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+.app-sidebar__inner::-webkit-scrollbar-thumb {
+  background: var(--color-border-medium);
+  border-radius: 5px;
+}
+
+.app-sidebar__inner::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray);
+}
+
+.app-sidebar__inner::-webkit-scrollbar-button {
+  background: var(--color-bg-secondary);
+  color: var(--color-gray);
+  display: block;
+  height: 10px;
+}
+
+.app-sidebar__inner::-webkit-scrollbar-button:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-turquoise);
 }
 
 .app-sidebar__section {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  min-width: 0;
 }
 
 .app-sidebar__section-title {
@@ -98,10 +132,12 @@
 
 .app-sidebar__item {
   width: 100%;
+  min-width: 0;
 }
 
 .app-sidebar__link {
   width: 100%;
+  min-width: 0;
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -116,6 +152,7 @@
   transition: background var(--transition-normal), color var(--transition-normal);
   text-decoration: none;
   text-align: left;
+  overflow: hidden;
 }
 
 .app-sidebar__icon {
@@ -136,6 +173,7 @@
 
 .app-sidebar__link-label {
   flex: 1;
+  min-width: 0;
   opacity: 1;
   max-width: 220px;
   overflow: hidden;
@@ -167,7 +205,9 @@
 
 .app-sidebar__sublink {
   display: block;
-  padding: 0.45rem 0.5rem;
+  padding: 0.45rem 0.85rem;
+  margin-left: -2.75rem;
+  padding-left: 2.75rem;
   color: var(--color-gray-dark);
   text-decoration: none;
   font-size: 0.9rem;
@@ -181,11 +221,20 @@
 }
 
 .app-sidebar__sublink.is-active {
+  background: var(--color-bg-accent);
   color: var(--color-turquoise);
   font-weight: 600;
 }
 
-.app-sidebar__link:hover {
+.app-sidebar__link:hover,
+.app-sidebar__link:focus-visible {
+  background: var(--color-bg-accent);
+  color: var(--color-turquoise);
+}
+
+/* Botón colapsible: mismo hover que los enlaces */
+.app-sidebar__link--collapsible:hover,
+.app-sidebar__link--collapsible:focus-visible {
   background: var(--color-bg-accent);
   color: var(--color-turquoise);
 }
@@ -197,6 +246,7 @@
 }
 
 .app-sidebar__link.is-child-active {
+  background: var(--color-bg-accent);
   color: var(--color-turquoise);
   font-weight: 600;
 }
@@ -349,10 +399,6 @@
 
 @media (max-width: 768px) {
   .app-sidebar {
-    display: none;
-  }
-
-  .app-sidebar__toggle {
     display: none;
   }
 }

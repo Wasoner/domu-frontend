@@ -18,7 +18,7 @@ export const NAV_SECTIONS = [
       { label: 'Mensajes / Chat', icon: 'chatBubbleLeftRight', to: ROUTES.RESIDENT_CHAT, roles: ['resident', 'admin', 'concierge'], exact: true },
       {
         label: 'Incidentes',
-        icon: 'ticket',
+        icon: 'exclamationTriangle',
         roles: ['admin', 'concierge', 'resident'],
         subItems: [
           { label: 'Tablero Jira', to: ROUTES.ADMIN_INCIDENTS, roles: ['admin', 'concierge'], exact: true },

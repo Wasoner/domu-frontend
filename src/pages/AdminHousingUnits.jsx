@@ -316,7 +316,7 @@ const AdminHousingUnits = () => {
         <div className="admin-housing-units__error">
           <h2>Error al cargar unidades</h2>
           <p>{error}</p>
-          <button onClick={fetchUnits} className="button button--primary">
+          <button onClick={fetchUnits} className="btn btn-primary">
             Reintentar
           </button>
         </div>
@@ -337,7 +337,7 @@ const AdminHousingUnits = () => {
             <button onClick={fetchUnits} className="button button--secondary" disabled={loading}>
               {loading ? 'Actualizando…' : 'Actualizar'}
             </button>
-            <button onClick={handleOpenCreate} className="button button--primary">
+            <button onClick={handleOpenCreate} className="btn btn-primary">
               + Crear Unidad
             </button>
           </div>
@@ -405,7 +405,7 @@ const AdminHousingUnits = () => {
               </p>
             </div>
             {!searchTerm && (
-              <button onClick={handleOpenCreate} className="button button--primary">
+              <button onClick={handleOpenCreate} className="btn btn-primary">
                 + Crear primera unidad
               </button>
             )}
@@ -588,7 +588,7 @@ const AdminHousingUnits = () => {
                   </button>
                   <button
                     type="submit"
-                    className="button button--primary"
+                    className="btn btn-primary"
                     disabled={submitting}
                   >
                     {submitting ? 'Guardando...' : (selectedUnit ? 'Actualizar' : 'Crear')}
@@ -657,7 +657,7 @@ const AdminHousingUnits = () => {
                       <p>No hay residentes vinculados a esta unidad</p>
                       <button
                         onClick={() => setShowAssignModal(true)}
-                        className="button button--primary"
+                        className="btn btn-primary"
                       >
                         Asignar Primer Residente
                       </button>
@@ -744,7 +744,7 @@ const AdminHousingUnits = () => {
                   {availableResidents.length > 0 && (
                     <button
                       onClick={handleLinkResident}
-                      className="button button--primary"
+                      className="btn btn-primary"
                       disabled={!selectedResidentId}
                     >
                       Asignar

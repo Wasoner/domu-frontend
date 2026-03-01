@@ -125,10 +125,18 @@
   gap: 1.5rem;
 }
 
-/* Menú y perfil móviles - ocultos en desktop */
+/* Menú y perfil móviles - solo visibles cuando el sidebar está oculto (móvil) */
 .auth-header__mobile-menu,
 .auth-header__mobile-profile {
   display: none;
+}
+
+/* Ocultar explícitamente en desktop cuando el sidebar es visible */
+@media (min-width: 769px) {
+  .auth-header__mobile-menu,
+  .auth-header__mobile-profile {
+    display: none !important;
+  }
 }
 
 .auth-header__icon-button {

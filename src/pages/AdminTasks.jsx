@@ -151,7 +151,7 @@ const AdminTasks = () => {
               Tareas del Staff
             </h1>
           </div>
-          <button className="admin-tasks__add" onClick={() => setShowModal(true)}>
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
             <Icon name="plus" size={18} />
             Nueva Tarea
           </button>

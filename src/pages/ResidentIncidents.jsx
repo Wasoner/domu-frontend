@@ -339,7 +339,8 @@ const ResidentIncidents = () => {
 
             <div className="resident-incidents__actions">
               <button
-                className="resident-incidents__report-btn"
+                type="button"
+                className="btn btn-primary"
                 onClick={() => setShowReportModal(true)}
               >
                 Reportar incidente

@@ -197,26 +197,13 @@
 
 .resident-incidents__panel {
   background: var(--color-bg-primary);
-  border: none;
-  border-top: 4px solid var(--color-border-light);
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg, 12px);
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   min-height: 400px;
   overflow: hidden;
-}
-
-.resident-incidents__panel--reported {
-  border-top: 4px solid var(--panel-color, #f59e0b);
-}
-
-.resident-incidents__panel--in-progress {
-  border-top: 4px solid var(--panel-color, #0ea5e9);
-}
-
-.resident-incidents__panel--closed {
-  border-top: 4px solid var(--panel-color, #22c55e);
 }
 
 /* Header estandarizado - fondo sólido con tinte de categoría, borde superior identifica */

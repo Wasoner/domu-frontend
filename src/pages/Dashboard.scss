@@ -10,17 +10,19 @@
   width: 100%;
 
   &__market {
-    margin-top: 32px;
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: var(--shadow-sm);
-
     &-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
+      gap: 1rem;
+      padding: 1.5rem;
+      min-height: 220px;
+      flex: 1;
+      align-content: start;
+
+      .dashboard__feed-empty {
+        grid-column: 1 / -1;
+        place-self: center;
+      }
     }
   }
 }
@@ -212,24 +214,12 @@
 }
 
 /* Variantes de color */
-.metric-card--warning {
-  border-top: 4px solid var(--color-warning);
-}
-
 .metric-card--warning .metric-card__value {
   color: var(--color-warning);
 }
 
-.metric-card--info {
-  border-top: 4px solid var(--color-info);
-}
-
 .metric-card--info .metric-card__value {
   color: var(--color-info);
-}
-
-.metric-card--success {
-  border-top: 4px solid var(--color-success);
 }
 
 .metric-card--success .metric-card__value {
@@ -241,8 +231,9 @@
    ---------------------------------------- */
 .dashboard__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 2rem;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 1.5rem;
   align-items: start;
 }
 
@@ -279,12 +270,16 @@
 /* ----------------------------------------
    Feed de incidentes
    ---------------------------------------- */
-.dashboard__feed {
+.dashboard__feed,
+.dashboard__market {
   background: var(--color-bg-primary);
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   overflow: hidden;
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
 }
 
 .dashboard__feed-header {
@@ -313,6 +308,11 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+
+  .btn {
+    min-width: 140px;
+    justify-content: center;
+  }
 }
 
 .dashboard__view-all {
@@ -333,6 +333,8 @@
 .dashboard__feed-list {
   display: flex;
   flex-direction: column;
+  min-height: 220px;
+  flex: 1;
 }
 
 .dashboard__feed-empty {
@@ -506,18 +508,6 @@
   padding: 0.4rem 0.65rem;
   border-radius: 10px;
   background: rgba(83, 164, 151, 0.1);
-}
-
-.dashboard__status-card--ok {
-  border-top: 4px solid var(--color-success);
-}
-
-.dashboard__status-card--warn {
-  border-top: 4px solid var(--color-warning);
-}
-
-.dashboard__status-card--alert {
-  border-top: 4px solid var(--color-error);
 }
 
 .dashboard__status-card--skeleton {
