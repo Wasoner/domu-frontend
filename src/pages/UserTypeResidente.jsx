@@ -68,9 +68,6 @@ const UserTypeResidente = () => {
       <section className="usertype-hero animated-section">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__icon" aria-hidden="true">
-              <Icon name="home" className="usertype-hero__icon-svg" strokeWidth={1.8} />
-            </span>
             <span className="usertype-hero__eyebrow">Solución para Residentes</span>
             <h1 className="usertype-hero__title">
               Tu comunidad en la <strong>palma de tu mano</strong>

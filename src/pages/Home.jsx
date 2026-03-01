@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Button, Icon, LocationPicker, Seo, Skeleton } from '../components';
 import { Header, MainContent, Footer, AuthLayout } from '../layout';
 import heroLogo from '../assets/LogotipoDOMU.svg';
@@ -429,10 +429,6 @@ const Home = () => {
     resetCommunityState();
   };
 
-  const handleResidentLogin = () => {
-    window.location.href = ROUTES.LOGIN;
-  };
-
   const handleDemoAccess = () => {
     window.location.href = ROUTES.ABOUT;
   };
@@ -603,17 +599,47 @@ const Home = () => {
     { iconName: 'calendar', title: 'Reserva de espacios', description: 'Gestiona la reserva de espacios comunes como quinchos y salas de eventos.' },
   ];
 
-  const heroHighlights = [
-    { title: 'Pagos sin fricción', description: 'Cobranza clara, pagos en línea y reportes al instante.' },
-    { title: 'Accesos más seguros', description: 'Registro de visitas con QR y trazabilidad de ingresos.' },
-    { title: 'Comunidad conectada', description: 'Mensajes, avisos y gestión centralizada en un solo lugar.' },
+  const solucionesIntegrantes = [
+    { title: 'Administrador', route: ROUTES.SOLUCIONES_ADMINISTRADOR, iconName: 'chartBar' },
+    { title: 'Comité', route: ROUTES.SOLUCIONES_COMITE, iconName: 'scale' },
+    { title: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, iconName: 'buildingOffice' },
+    { title: 'Funcionarios', route: ROUTES.SOLUCIONES_FUNCIONARIOS, iconName: 'buildingLibrary' },
+    { title: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, iconName: 'home' },
   ];
 
-  const benefits = [
-    { title: 'Para Administradores', items: ['Módulo de recaudación completo', 'Reportes financieros detallados', 'Gestión centralizada de comunidades', 'Comunicación eficiente con residentes'] },
-    { title: 'Para Residentes', items: ['Pagos de gastos comunes online', 'Comunicación directa con administración', 'Reserva de espacios comunes', 'Acceso desde portal web responsivo'] },
-    { title: 'Para Comités', items: ['Transparencia en las finanzas', 'Revisión en tiempo real de gestión', 'Comunicación activa con comunidad', 'Toma de decisiones informadas'] },
-  ];
+  const benefitsCarouselRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const updateCarouselButtons = useCallback(() => {
+    const el = benefitsCarouselRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 1);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.offsetWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    const el = benefitsCarouselRef.current;
+    if (el) {
+      updateCarouselButtons();
+      el.addEventListener('scroll', updateCarouselButtons);
+    }
+    window.addEventListener('resize', updateCarouselButtons);
+    return () => {
+      const carouselEl = benefitsCarouselRef.current;
+      if (carouselEl) {
+        carouselEl.removeEventListener('scroll', updateCarouselButtons);
+      }
+      window.removeEventListener('resize', updateCarouselButtons);
+    };
+  }, [updateCarouselButtons]);
+
+  const scrollBenefitsCarousel = (direction) => {
+    const el = benefitsCarouselRef.current;
+    if (!el) return;
+    const amount = el.offsetWidth;
+    el.scrollBy({ left: direction === 'right' ? amount : -amount, behavior: 'smooth' });
+  };
 
   return (
     <div className="home-page fade-in">
@@ -631,17 +657,8 @@ const Home = () => {
             <div className="home-hero__text">
               <h1 className="home-hero__title">Software para la administración de <strong>edificios y condominios</strong></h1>
               <p className="home-hero__subtitle">Administra edificios con DOMU: el software y el portal web responsivo para tu comunidad. Gastos Comunes en línea y mucho más.</p>
-              <div className="home-hero__highlights">
-                {heroHighlights.map((item) => (
-                  <div key={item.title} className="home-hero__highlight">
-                    <span>{item.title}</span>
-                    <small>{item.description}</small>
-                  </div>
-                ))}
-              </div>
               <div className="home-hero__actions">
                 <Button onClick={handleCreateCommunity} variant="primary">Crear mi comunidad</Button>
-                <Button onClick={handleResidentLogin} variant="ghost">Soy residente</Button>
               </div>
             </div>
             <div className="home-hero__visual">
@@ -662,11 +679,8 @@ const Home = () => {
             <div className="home-features__grid">
               {features.map((feature, index) => (
                 <div key={index} className="home-feature-card">
-                  <div className="home-feature-card__media" aria-hidden="true">
-                    <span className="home-feature-card__accent" />
-                    <div className="home-feature-card__icon">
-                      <Icon name={feature.iconName} size={26} strokeWidth={2} />
-                    </div>
+                  <div className="home-feature-card__icon" aria-hidden="true">
+                    <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
                   </div>
                   <h3>{feature.title}</h3>
                   <p>{feature.description}</p>
@@ -678,17 +692,43 @@ const Home = () => {
         <section className="home-benefits animated-section">
           <div className="container">
             <div className="home-section__header">
-              <h2>El software DOMU está pensado para cada integrante del condominio</h2>
+              <h2>DOMU está pensado para cada integrante de la comunidad</h2>
             </div>
-            <div className="home-benefits__grid">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="home-benefit-card">
-                  <h3>{benefit.title}</h3>
-                  <ul className="home-benefit-list">
-                    {benefit.items.map((item, itemIndex) => <li key={itemIndex}>{item}</li>)}
-                  </ul>
-                </div>
-              ))}
+            <div className="home-benefits__carousel-wrap">
+              <button
+                type="button"
+                className="home-benefits__nav home-benefits__nav--left"
+                onClick={() => scrollBenefitsCarousel('left')}
+                disabled={!canScrollLeft}
+                aria-label="Anterior"
+              >
+                <Icon name="arrowLeft" size={24} strokeWidth={2} />
+              </button>
+              <div
+                ref={benefitsCarouselRef}
+                className="home-benefits__carousel"
+              >
+                {solucionesIntegrantes.map((item, index) => (
+                  <div key={index} className="home-benefit-card">
+                    <div className="home-benefit-card__icon" aria-hidden="true">
+                      <Icon name={item.iconName} size={42} strokeWidth={1.8} />
+                    </div>
+                    <h3>{item.title}</h3>
+                    <Link to={item.route} className="home-benefit-card__cta">
+                      Más información
+                    </Link>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="home-benefits__nav home-benefits__nav--right"
+                onClick={() => scrollBenefitsCarousel('right')}
+                disabled={!canScrollRight}
+                aria-label="Siguiente"
+              >
+                <Icon name="arrowRight" size={24} strokeWidth={2} />
+              </button>
             </div>
           </div>
         </section>

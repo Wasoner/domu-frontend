@@ -68,9 +68,6 @@ const UserTypeFuncionarios = () => {
       <section className="usertype-hero animated-section">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__icon" aria-hidden="true">
-              <Icon name="buildingLibrary" className="usertype-hero__icon-svg" strokeWidth={1.8} />
-            </span>
             <span className="usertype-hero__eyebrow">Solución para Funcionarios</span>
             <h1 className="usertype-hero__title">
               Fiscalización <strong>inteligente</strong> de comunidades
