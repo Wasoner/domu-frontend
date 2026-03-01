@@ -637,7 +637,11 @@ const Home = () => {
   const scrollBenefitsCarousel = (direction) => {
     const el = benefitsCarouselRef.current;
     if (!el) return;
-    const amount = el.offsetWidth;
+    const firstCard = el.querySelector('.home-benefit-card');
+    if (!firstCard) return;
+    const cardWidth = firstCard.offsetWidth;
+    const gap = parseInt(getComputedStyle(el).gap, 10) || 28;
+    const amount = cardWidth + gap;
     el.scrollBy({ left: direction === 'right' ? amount : -amount, behavior: 'smooth' });
   };
 
