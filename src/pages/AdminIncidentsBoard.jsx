@@ -15,7 +15,7 @@ const COLUMNS = [
     status: 'REPORTED',
     color: '#f59e0b',
     icon: 'clipboard',
-    description: 'Nuevos incidentes pendientes de revisión',
+    description: 'Pendientes de revisión',
   },
   {
     key: 'inProgress',
@@ -23,7 +23,7 @@ const COLUMNS = [
     status: 'IN_PROGRESS',
     color: '#0ea5e9',
     icon: 'screwdriver',
-    description: 'Incidentes siendo atendidos',
+    description: 'Siendo atendidos',
   },
   {
     key: 'closed',
@@ -244,7 +244,7 @@ const KanbanColumn = ({
         {isEmpty && !isDragOver && (
           <div className="kanban-column__empty">
             <span className="kanban-column__empty-icon" aria-hidden="true">
-              <Icon name={column.icon} size={32} />
+              <Icon name={column.icon} size={28} />
             </span>
             <p>Sin incidentes</p>
           </div>

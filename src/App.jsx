@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import {
   Home,
   About,
+  Contact,
   Login,
+  ForgotPassword,
   Register,
   AdminInviteRegister,
   Dashboard,
@@ -53,7 +55,9 @@ function App() {
           {/* Public Routes */}
           <Route path={ROUTES.HOME} element={<Home />} />
           <Route path={ROUTES.ABOUT} element={<About />} />
+          <Route path={ROUTES.CONTACT} element={<Contact />} />
           <Route path={ROUTES.LOGIN} element={<Login />} />
+          <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
           <Route path={ROUTES.REGISTER} element={<Register />} />
           <Route path={ROUTES.CONFIRM_USER} element={<UserConfirmation />} />
           <Route path={ROUTES.ADMIN_INVITE} element={<AdminInviteRegister />} />

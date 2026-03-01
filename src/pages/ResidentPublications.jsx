@@ -12,10 +12,13 @@ import './ResidentPublications.scss';
 const ResidentPublications = () => {
   const { user } = useAppContext();
   const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPublication, setEditingPublication] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const fetchPublications = async () => {
     try {
@@ -56,9 +59,17 @@ const ResidentPublications = () => {
     return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  const filteredPublications = filter === 'all'
-    ? publications
-    : publications.filter((p) => p.type === filter);
+  const filteredPublications = publications
+    .filter((p) => filter === 'all' || p.type === filter)
+    .filter((p) => {
+      if (!searchTerm.trim()) return true;
+      const q = searchTerm.toLowerCase().trim();
+      return (
+        (p.title || '').toLowerCase().includes(q) ||
+        (p.content || '').toLowerCase().includes(q) ||
+        (p.author || '').toLowerCase().includes(q)
+      );
+    });
 
   const getTypeLabel = (type) => {
     const labels = {
@@ -70,23 +81,27 @@ const ResidentPublications = () => {
     return labels[type] || type;
   };
 
-  const getTypeIcon = (type) => {
+  const getTypeIconName = (type) => {
     const icons = {
-      announcement: '📢',
-      alert: '⚠️',
-      news: '📰',
-      event: '📅',
+      announcement: 'speakerWave',
+      alert: 'exclamationTriangle',
+      news: 'newspaper',
+      event: 'calendar',
     };
-    return icons[type] || '📋';
+    return icons[type] || 'document';
   };
 
   const handleCreate = () => {
     setEditingPublication(null);
+    setErrorMessage(null);
+    setSuccessMessage(null);
     setIsModalOpen(true);
   };
 
   const handleEdit = (pub) => {
     setEditingPublication(pub);
+    setErrorMessage(null);
+    setSuccessMessage(null);
     setIsModalOpen(true);
   };
 
@@ -102,19 +117,22 @@ const ResidentPublications = () => {
   };
 
   const handleSubmit = async (data) => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
     try {
       if (editingPublication) {
         await api.forum.update(editingPublication.id, data);
-        alert('Publicación actualizada correctamente.');
+        setSuccessMessage('Publicación actualizada correctamente.');
       } else {
         await api.forum.create(data);
-        alert('Publicación creada correctamente.');
+        setSuccessMessage('Publicación creada correctamente.');
       }
       setIsModalOpen(false);
       fetchPublications();
+      setTimeout(() => setSuccessMessage(null), 4000);
     } catch (error) {
       console.error('Error saving publication:', error);
-      alert('Error al guardar la publicación. Intenta nuevamente.');
+      setErrorMessage('Error al guardar la publicación. Intenta nuevamente.');
     }
   };
 
@@ -138,39 +156,69 @@ const ResidentPublications = () => {
           )}
         </header>
 
+        {successMessage && (
+          <div className="resident-publications__message resident-publications__message--success" role="status">
+            {successMessage}
+          </div>
+        )}
+        {errorMessage && (
+          <div className="resident-publications__message resident-publications__message--error" role="alert">
+            {errorMessage}
+          </div>
+        )}
+
         <div className="resident-publications__filters">
-          <button
-            className={`resident-publications__filter-btn ${filter === 'all' ? 'is-active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            Todas
-          </button>
-          <button
-            className={`resident-publications__filter-btn ${filter === 'announcement' ? 'is-active' : ''}`}
-            onClick={() => setFilter('announcement')}
-          >
-            📢 Anuncios
-          </button>
-          <button
-            className={`resident-publications__filter-btn ${filter === 'alert' ? 'is-active' : ''}`}
-            onClick={() => setFilter('alert')}
-          >
-            ⚠️ Alertas
-          </button>
-          <button
-            className={`resident-publications__filter-btn ${filter === 'event' ? 'is-active' : ''}`}
-            onClick={() => setFilter('event')}
-          >
-            📅 Eventos
-          </button>
+          <div className="resident-publications__search">
+            <Icon name="magnifyingGlass" size={20} />
+            <input
+              type="text"
+              placeholder="Buscar avisos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="resident-publications__categories">
+            <button
+              className={`category-pill ${filter === 'all' ? 'is-active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              Todas
+            </button>
+            <button
+              className={`category-pill ${filter === 'announcement' ? 'is-active' : ''}`}
+              onClick={() => setFilter('announcement')}
+            >
+              <Icon name="speakerWave" size={16} /> Anuncios
+            </button>
+            <button
+              className={`category-pill ${filter === 'alert' ? 'is-active' : ''}`}
+              onClick={() => setFilter('alert')}
+            >
+              <Icon name="exclamationTriangle" size={16} /> Alertas
+            </button>
+            <button
+              className={`category-pill ${filter === 'news' ? 'is-active' : ''}`}
+              onClick={() => setFilter('news')}
+            >
+              <Icon name="newspaper" size={16} /> Noticias
+            </button>
+            <button
+              className={`category-pill ${filter === 'event' ? 'is-active' : ''}`}
+              onClick={() => setFilter('event')}
+            >
+              <Icon name="calendar" size={16} /> Eventos
+            </button>
+          </div>
         </div>
 
         {loading ? (
           <Skeleton.Cards count={4} />
         ) : filteredPublications.length === 0 ? (
           <div className="resident-publications__empty">
-            <span className="resident-publications__empty-icon">📭</span>
-            <p>No hay publicaciones en esta categoría</p>
+            <span className="resident-publications__empty-icon" aria-hidden="true">
+              <Icon name="newspaper" size={48} />
+            </span>
+            <p>{searchTerm.trim() ? 'No se encontraron avisos con ese criterio' : 'No hay publicaciones en esta categoría'}</p>
           </div>
         ) : (
           <div className="resident-publications__list">
@@ -182,15 +230,19 @@ const ResidentPublications = () => {
                   key={pub.id}
                   className={`resident-publications__card ${pub.pinned ? 'is-pinned' : ''}`}
                 >
-                  {pub.pinned && <span className="resident-publications__pin">📌 Fijado</span>}
                   <div className="resident-publications__card-header">
                     <span className="resident-publications__type-badge" data-type={pub.type}>
-                      {getTypeIcon(pub.type)} {getTypeLabel(pub.type)}
+                      <Icon name={getTypeIconName(pub.type)} size={12} /> {getTypeLabel(pub.type)}
                     </span>
                     <div className="resident-publications__meta">
                       <span className="resident-publications__date">
                         {getRelativeTime(pub.date)}
                       </span>
+                      {pub.pinned && (
+                        <span className="resident-publications__pin">
+                          <Icon name="pin" size={12} /> Fijado
+                        </span>
+                      )}
                       {canEdit && (
                         <div className="resident-publications__actions">
                           <button

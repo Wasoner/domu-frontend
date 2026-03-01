@@ -58,9 +58,16 @@ const Login = () => {
             } else {
                 navigate(ROUTES.RESIDENT_PORTAL);
             }
-        } catch (error) {
-            console.error('Error en login:', error);
-            setError(error.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+        } catch (err) {
+            console.error('Error en login:', err);
+            const msg = (err.message || '').toLowerCase();
+            if (msg.includes('invalid credentials') || msg.includes('credenciales') || msg.includes('unauthorized')) {
+                setError('Correo o contraseña incorrectos');
+            } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('conectar')) {
+                setError('No se pudo conectar con el servidor');
+            } else {
+                setError(err.message || 'Error al iniciar sesión. Intenta de nuevo más tarde.');
+            }
         } finally {
             setLoading(false);
         }
@@ -124,7 +131,12 @@ const Login = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="password">Contraseña</label>
+                                    <div className="form-group__label-row">
+                                        <label htmlFor="password">Contraseña</label>
+                                        <Link to={ROUTES.FORGOT_PASSWORD} className="link-forgot">
+                                            ¿Olvidaste tu contraseña?
+                                        </Link>
+                                    </div>
                                     <div className="password-input-wrapper">
                                         <input
                                             id="password"
