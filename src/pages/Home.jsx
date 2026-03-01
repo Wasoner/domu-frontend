@@ -634,33 +634,6 @@ const Home = () => {
     { title: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, iconName: 'home' },
   ];
 
-  const benefitsCarouselRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const updateCarouselButtons = useCallback(() => {
-    const el = benefitsCarouselRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 1);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.offsetWidth - 1);
-  }, []);
-
-  useEffect(() => {
-    const el = benefitsCarouselRef.current;
-    if (el) {
-      updateCarouselButtons();
-      el.addEventListener('scroll', updateCarouselButtons);
-    }
-    window.addEventListener('resize', updateCarouselButtons);
-    return () => {
-      const carouselEl = benefitsCarouselRef.current;
-      if (carouselEl) {
-        carouselEl.removeEventListener('scroll', updateCarouselButtons);
-      }
-      window.removeEventListener('resize', updateCarouselButtons);
-    };
-  }, [updateCarouselButtons]);
-
   const scrollBenefitsCarousel = (direction) => {
     const el = benefitsCarouselRef.current;
     if (!el) return;
