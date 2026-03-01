@@ -3,12 +3,17 @@
   flex-direction: column;
   padding: 2rem 0;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -17,13 +22,13 @@
   }
 
   .container {
-    padding: 0 1.5rem;
+    padding: 0 1.25rem;
   }
 }
 
 @media (max-width: 480px) {
   .app-main {
-    padding: 1.25rem 0;
+    padding: 1rem 0;
   }
 
   .container {
@@ -32,6 +37,10 @@
 }
 
 @media (max-width: 380px) {
+  .app-main {
+    padding: 0.75rem 0;
+  }
+
   .container {
     padding: 0 0.75rem;
   }
