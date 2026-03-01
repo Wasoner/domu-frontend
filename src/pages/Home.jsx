@@ -375,6 +375,33 @@ const Home = () => {
     window.history.replaceState(window.history.state, '', nextUrl);
   }, [location.hash, location.pathname, location.search, syncCommunityRegistry]);
 
+  const benefitsCarouselRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const updateCarouselButtons = useCallback(() => {
+    const el = benefitsCarouselRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 1);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.offsetWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    const el = benefitsCarouselRef.current;
+    if (el) {
+      updateCarouselButtons();
+      el.addEventListener('scroll', updateCarouselButtons);
+    }
+    window.addEventListener('resize', updateCarouselButtons);
+    return () => {
+      const carouselEl = benefitsCarouselRef.current;
+      if (carouselEl) {
+        carouselEl.removeEventListener('scroll', updateCarouselButtons);
+      }
+      window.removeEventListener('resize', updateCarouselButtons);
+    };
+  }, [updateCarouselButtons]);
+
   if (isAuthenticated) {
     const isAdmin = user?.roleId === 1 || user?.userType === 'admin';
     if (isAdmin) {
