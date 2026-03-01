@@ -5,11 +5,11 @@ import { ROUTES } from '../constants';
 import './Header.scss';
 
 const solucionesItems = [
-  { label: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, iconName: 'buildingOffice' },
   { label: 'Administrador', route: ROUTES.SOLUCIONES_ADMINISTRADOR, iconName: 'chartBar' },
   { label: 'Comité', route: ROUTES.SOLUCIONES_COMITE, iconName: 'scale' },
-  { label: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, iconName: 'home' },
+  { label: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, iconName: 'buildingOffice' },
   { label: 'Funcionarios', route: ROUTES.SOLUCIONES_FUNCIONARIOS, iconName: 'buildingLibrary' },
+  { label: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, iconName: 'home' },
 ];
 
 const Header = () => {
@@ -74,7 +74,6 @@ const Header = () => {
 
         <nav className="main-nav" aria-label="Navegación principal">
           <Link to={ROUTES.HOME} className="nav-item">Inicio</Link>
-          <Link to={ROUTES.ABOUT} className="nav-item">Acerca de</Link>
           
           {/* Dropdown Soluciones */}
           <div className="nav-dropdown" ref={dropdownRef}>
@@ -130,7 +129,7 @@ const Header = () => {
 
         <div className="header-actions">
           <Button onClick={handleResidentClick} variant="ghost" className="header-btn">
-            Soy residente
+            Iniciar sesión
           </Button>
         </div>
       </div>

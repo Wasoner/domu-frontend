@@ -75,9 +75,6 @@ const UserTypeConserjeria = () => {
       <section className="usertype-hero animated-section">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__icon" aria-hidden="true">
-              <Icon name="buildingOffice" className="usertype-hero__icon-svg" strokeWidth={1.8} />
-            </span>
             <span className="usertype-hero__eyebrow">Solución para Conserjería</span>
             <h1 className="usertype-hero__title">
               Gestión digital para <strong>conserjería</strong>

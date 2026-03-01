@@ -11,8 +11,28 @@
   padding: 0 2rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
+  .app-main {
+    padding: 1.5rem 0;
+  }
+
   .container {
     padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main {
+    padding: 1.25rem 0;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .container {
+    padding: 0 0.75rem;
   }
 }

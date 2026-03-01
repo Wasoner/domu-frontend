@@ -157,26 +157,13 @@
 }
 
 .usertype-feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--color-turquoise);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.35s ease;
+  content: none;
 }
 
 .usertype-feature-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--color-turquoise);
-}
-
-.usertype-feature-card:hover::before {
-  transform: scaleX(1);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.09);
+  border-color: rgba(83, 164, 151, 0.35);
 }
 
 .usertype-feature-card__icon {
