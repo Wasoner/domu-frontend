@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Header, MainContent, Footer } from '../layout';
 import { Button, Seo, Skeleton } from '../components';
@@ -16,6 +16,7 @@ const AdminInviteRegister = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [communityName, setCommunityName] = useState('');
+  const [existingAdminAccount, setExistingAdminAccount] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -39,6 +40,7 @@ const AdminInviteRegister = () => {
         setError('');
         const invite = await api.adminInvites.getInfo(inviteCode);
         setCommunityName(invite.communityName || '');
+        setExistingAdminAccount(Boolean(invite.existingAdminAccount));
         setFormData((prev) => ({
           ...prev,
           firstName: invite.firstName || '',
@@ -77,6 +79,27 @@ const AdminInviteRegister = () => {
       return;
     }
 
+    if (existingAdminAccount) {
+      try {
+        setSubmitting(true);
+        await api.adminInvites.register(inviteCode, {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          documentNumber: formData.documentNumber,
+          password: '',
+        });
+        setSuccess('Comunidad vinculada. Inicia sesión para administrarla.');
+        setTimeout(() => navigate(ROUTES.LOGIN), 1400);
+      } catch (submitError) {
+        console.error('Error vinculando admin existente desde invitación:', submitError);
+        setError(submitError.message || 'No pudimos vincular la comunidad a tu cuenta.');
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     if (!formData.password || formData.password.length < MIN_PASSWORD_LENGTH) {
       setError(`La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`);
       return;
@@ -96,7 +119,7 @@ const AdminInviteRegister = () => {
         documentNumber: formData.documentNumber,
         password: formData.password,
       });
-      setSuccess('¡Cuenta creada! Ya puedes iniciar sesión con tu correo.');
+      setSuccess('Cuenta creada. Ya puedes iniciar sesión con tu correo.');
       setTimeout(() => navigate(ROUTES.LOGIN), 1600);
     } catch (submitError) {
       console.error('Error registrando admin desde invitación:', submitError);
@@ -117,7 +140,7 @@ const AdminInviteRegister = () => {
       <Header />
       <MainContent>
         <div className="admin-invite-card fade-in">
-          <h1>Crear usuario administrador</h1>
+          <h1>{existingAdminAccount ? 'Cuenta de administrador detectada' : 'Crear usuario administrador'}</h1>
           {communityName && (
             <p className="admin-invite-subtitle">
               Comunidad: <strong>{communityName}</strong>
@@ -138,6 +161,24 @@ const AdminInviteRegister = () => {
 
           {loadingInvite ? (
             <Skeleton.Form fields={5} />
+          ) : existingAdminAccount ? (
+            <div className="admin-invite-existing">
+              <p>Este correo ya tiene un usuario administrador en DOMU.</p>
+              <p>No es necesario crear otra cuenta. Vincula esta comunidad y continúa con tu sesión habitual.</p>
+              <Button type="button" variant="primary" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? <Skeleton.Inline width="120px" label="Vinculando..." /> : 'Vincular comunidad'}
+              </Button>
+              <p className="admin-invite-back">
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => navigate(ROUTES.LOGIN)}
+                  disabled={submitting}
+                >
+                  Ir a iniciar sesión
+                </button>
+              </p>
+            </div>
           ) : (
             <form className="admin-invite-form" onSubmit={handleSubmit}>
               <div className="form-row">
@@ -237,7 +278,7 @@ const AdminInviteRegister = () => {
               </div>
 
               <Button type="submit" variant="primary" disabled={submitting}>
-                {submitting ? <Skeleton.Inline width="80px" label="Creando cuenta…" /> : 'Crear cuenta'}
+                {submitting ? <Skeleton.Inline width="80px" label="Creando cuenta..." /> : 'Crear cuenta'}
               </Button>
 
               <p className="admin-invite-back">
