@@ -262,7 +262,7 @@ const AdminResidents = () => {
             >
               {loading ? 'Actualizando…' : 'Actualizar'}
             </button>
-            <Link to={ROUTES.ADMIN_CREATE_USER} className="button button--primary">
+            <Link to={ROUTES.ADMIN_CREATE_USER} className="btn btn-primary">
               <Icon name="userPlus" size={18} />
               Registrar Residente
             </Link>

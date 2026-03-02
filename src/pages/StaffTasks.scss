@@ -1,0 +1,236 @@
+.staff-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.staff-tasks__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.staff-tasks__header h1 {
+  margin: 0.2rem 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.staff-tasks__header p {
+  margin: 0.35rem 0 0;
+  color: var(--color-gray-dark);
+}
+
+.staff-tasks__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: var(--color-turquoise);
+}
+
+.staff-tasks__refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(83, 164, 151, 0.35);
+  background: rgba(83, 164, 151, 0.1);
+  color: #0f766e;
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.staff-tasks__refresh:hover {
+  transform: translateY(-1px);
+}
+
+.staff-tasks__refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.staff-tasks__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.staff-tasks__stat {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.staff-tasks__stat span {
+  font-size: 0.8rem;
+  color: var(--color-gray-dark);
+}
+
+.staff-tasks__stat strong {
+  font-size: 1.2rem;
+}
+
+.staff-tasks__error {
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.08);
+  color: #991b1b;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.87rem;
+}
+
+.staff-tasks__empty {
+  border: 1px dashed rgba(15, 23, 42, 0.18);
+  border-radius: 12px;
+  padding: 2rem 1.2rem;
+  text-align: center;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.staff-tasks__empty h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.staff-tasks__empty p {
+  margin: 0.5rem 0 0;
+  color: var(--color-gray-dark);
+}
+
+.staff-tasks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.staff-tasks__card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 0.95rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.staff-tasks__card--pending {
+  border-left: 4px solid #f59e0b;
+}
+
+.staff-tasks__card--in_progress {
+  border-left: 4px solid #3b82f6;
+}
+
+.staff-tasks__card--completed {
+  border-left: 4px solid #22c55e;
+}
+
+.staff-tasks__card-main h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-black);
+}
+
+.staff-tasks__card-main p {
+  margin: 0.3rem 0 0;
+  color: var(--color-gray-dark);
+  font-size: 0.87rem;
+}
+
+.staff-tasks__meta {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.staff-tasks__badge {
+  font-size: 0.73rem;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  padding: 0.28rem 0.62rem;
+}
+
+.staff-tasks__badge--status-pending {
+  background: rgba(245, 158, 11, 0.16);
+  color: #b45309;
+}
+
+.staff-tasks__badge--status-in_progress {
+  background: rgba(59, 130, 246, 0.14);
+  color: #1d4ed8;
+}
+
+.staff-tasks__badge--status-completed {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+
+.staff-tasks__badge--priority-high {
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+}
+
+.staff-tasks__badge--priority-medium {
+  background: rgba(245, 158, 11, 0.14);
+  color: #92400e;
+}
+
+.staff-tasks__badge--priority-low {
+  background: rgba(2, 132, 199, 0.14);
+  color: #0c4a6e;
+}
+
+.staff-tasks__date {
+  font-size: 0.76rem;
+  color: var(--color-gray-dark);
+}
+
+.staff-tasks__advance-btn {
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.13);
+  color: #0f766e;
+  border-radius: 10px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.staff-tasks__advance-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .staff-tasks__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .staff-tasks__card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .staff-tasks__stats {
+    grid-template-columns: 1fr;
+  }
+}

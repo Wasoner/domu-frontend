@@ -4,7 +4,9 @@
  */
 export { default as Home } from './Home';
 export { default as About } from './About';
+export { default as Contact } from './Contact';
 export { default as Login } from './Login';
+export { default as ForgotPassword } from './ForgotPassword';
 export { default as Register } from './Register';
 export { default as AdminInviteRegister } from './AdminInviteRegister';
 export { default as Dashboard } from './Dashboard';
@@ -21,7 +23,8 @@ export { default as AdminTasks } from './AdminTasks';
 export { default as AdminStaff } from './AdminStaff';
 
 // Resident pages
-export { default as ResidentPortal } from './ResidentPortal';
+export { default as StaffPortal } from './StaffPortal';
+export { default as StaffTasks } from './StaffTasks';
 export { default as ResidentVisits } from './ResidentVisits';
 export { default as ResidentProfile } from './ResidentProfile';
 export { default as ResidentIncidents } from './ResidentIncidents';

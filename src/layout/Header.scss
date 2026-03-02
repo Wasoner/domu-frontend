@@ -1,4 +1,5 @@
 .app-header {
+  width: 100%;
   background: var(--color-bg-primary);
   padding: 1rem 0;
   position: static;
@@ -7,6 +8,7 @@
 }
 
 .header-inner {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 2rem;
@@ -14,6 +16,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
+  box-sizing: border-box;
 }
 
 .brand-wrap {
@@ -25,7 +28,7 @@
 .brand-link {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0;
   text-decoration: none;
   color: inherit;
   transition: opacity var(--transition-normal);
@@ -33,25 +36,6 @@
 
 .brand-link:hover {
   opacity: 0.8;
-}
-
-.brand-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 68px;
-  height: 68px;
-  border-radius: var(--radius-sm);
-  padding: 4px;
-  transform: translateY(2px);
-}
-
-.brand-img {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  transition: transform var(--transition-slow);
-  display: block;
 }
 
 .brand-name {
@@ -63,24 +47,9 @@
 }
 
 @media (max-width: 768px) {
-  .brand-logo {
-    width: 56px;
-    height: 56px;
-    padding: 4px;
-  }
-
-  .brand-img {
-    width: 52px;
-    height: 52px;
-  }
-
   .brand-name {
     font-size: 1.2rem;
   }
-}
-
-.brand-link:hover .brand-img {
-  transform: scale(1.05);
 }
 
 .main-nav {
@@ -135,9 +104,6 @@
   font-family: inherit;
 }
 
-.dropdown-trigger::after {
-  display: none;
-}
 
 .dropdown-arrow {
   transition: transform 0.25s ease;
@@ -216,8 +182,10 @@
 }
 
 .dropdown-item-icon {
-  font-size: 1.25rem;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-turquoise);
   flex-shrink: 0;
 }
 
@@ -245,6 +213,7 @@
 
   .header-inner {
     gap: 1rem;
+    padding: 0 1.5rem;
   }
 
   .nav-dropdown,
@@ -254,14 +223,13 @@
 }
 
 @media (max-width: 640px) {
-  .header-inner {
-    padding: 0 1rem;
+  .app-header {
+    padding: 0.75rem 0;
   }
 
-  .brand-logo {
-    width: 36px;
-    height: 36px;
-    padding: 6px;
+  .header-inner {
+    padding: 0 1rem;
+    gap: 0.75rem;
   }
 
   .brand-name {
@@ -269,7 +237,22 @@
   }
 
   .header-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .header-inner {
+    padding: 0 0.75rem;
+  }
+
+  .brand-name {
+    font-size: 1rem;
+  }
+
+  .header-btn {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.75rem;
   }
 }

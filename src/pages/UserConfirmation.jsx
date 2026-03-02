@@ -5,6 +5,37 @@ import { api } from '../services';
 import { ROUTES } from '../constants';
 import './UserConfirmation.scss';
 
+const ERROR_CONTENT = {
+  expired: {
+    title: 'Enlace de confirmación expirado',
+    description: 'El enlace que recibiste por correo tiene una validez de 7 días y ya no es válido.',
+    action: 'Contacta a soporte para que te envíen un nuevo enlace de confirmación.',
+  },
+  used: {
+    title: 'Enlace ya utilizado',
+    description: 'Este enlace de confirmación ya fue usado para activar tu cuenta.',
+    action: 'Si aún no puedes iniciar sesión, contacta a soporte.',
+  },
+  invalid: {
+    title: 'Enlace inválido',
+    description: 'El enlace de confirmación no es válido o está incompleto.',
+    action: 'Verifica que copiaste el enlace completo desde el correo. Si el problema persiste, contacta a soporte.',
+  },
+  default: {
+    title: 'No se pudo confirmar tu cuenta',
+    description: 'Ocurrió un problema al procesar tu solicitud.',
+    action: 'Intenta de nuevo más tarde o contacta a soporte si el problema continúa.',
+  },
+};
+
+const getErrorContent = (message) => {
+  const m = (message || '').toLowerCase();
+  if (m.includes('expirado')) return ERROR_CONTENT.expired;
+  if (m.includes('utilizado') || m.includes('ya ha sido')) return ERROR_CONTENT.used;
+  if (m.includes('inválido') || m.includes('no proporcionado')) return ERROR_CONTENT.invalid;
+  return ERROR_CONTENT.default;
+};
+
 const UserConfirmation = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
@@ -62,23 +93,27 @@ const UserConfirmation = () => {
           </div>
         )}
 
-        {status === 'error' && (
-          <div className="user-confirmation-card__error">
-            <div className="status-icon status-icon--error">
-              <Icon name="exclamation" size={32} />
+        {status === 'error' && (() => {
+          const content = getErrorContent(message);
+          return (
+            <div className="user-confirmation-card__error">
+              <div className="status-icon status-icon--error">
+                <Icon name="exclamation" size={32} />
+              </div>
+              <h2>{content.title}</h2>
+              <p>{content.description}</p>
+              <p className="user-confirmation-card__action">{content.action}</p>
+              <div className="error-actions">
+                <Link to={ROUTES.HOME} className="btn btn-secondary">
+                  Volver al inicio
+                </Link>
+                <Link to={ROUTES.CONTACT} className="btn btn-primary">
+                  Contactar soporte
+                </Link>
+              </div>
             </div>
-            <h2>Ups, algo salió mal</h2>
-            <p>{message}</p>
-            <div className="error-actions">
-              <Link to={ROUTES.HOME} className="btn btn-secondary">
-                Volver al inicio
-              </Link>
-              <Link to={ROUTES.CONTACT} className="btn btn-ghost">
-                Contactar soporte
-              </Link>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

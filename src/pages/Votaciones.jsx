@@ -116,7 +116,7 @@ const Votaciones = () => {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(defaultForm);
   const canCreate = user?.userType === 'admin' || user?.userType === 'concierge';
-  const canVote = ['resident', 'admin', 'concierge', 'staff'].includes(user?.userType);
+  const canVote = ['resident', 'admin', 'concierge'].includes(user?.userType);
 
   const openPolls = useMemo(() => polls.open || [], [polls]);
   const closedPolls = useMemo(() => polls.closed || [], [polls]);
@@ -241,7 +241,7 @@ const Votaciones = () => {
             <p className="polls-page__subtitle">Crea votaciones rápidas y permite que la comunidad decida.</p>
           </div>
           {canCreate && (
-            <button type="button" className="polls-page__primary" onClick={() => setShowForm(true)}>
+            <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
               + Nueva votación
             </button>
           )}

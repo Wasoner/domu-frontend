@@ -8,7 +8,7 @@
 // En desarrollo, usar el proxy de Vite para evitar CORS
 // En producción, usar la URL completa del backend
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? '/api' : 'http://localhost:7000/api');
+  (import.meta.env.DEV ? '/api' : 'http://localhost:8080/api');
 
 /**
  * Get authentication token from localStorage
@@ -287,6 +287,26 @@ export const api = {
         localStorage.removeItem('userEmail');
         throw error;
       }
+    },
+
+    /**
+     * Forgot password - Solicitar recuperación de contraseña
+     */
+    forgotPassword: async (email) => {
+      return fetchWrapper('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+    },
+
+    /**
+     * Reset password - Restablecer contraseña con token
+     */
+    resetPassword: async (token, newPassword) => {
+      return fetchWrapper('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, newPassword }),
+      });
     },
 
     /**
@@ -703,6 +723,10 @@ export const api = {
       });
     },
     delete: async (id) => fetchWrapper(`/admin/staff/${id}`, { method: 'DELETE' }),
+  },
+
+  staff: {
+    getMine: async () => fetchWrapper('/staff/me', { method: 'GET' }),
   },
 
   users: {

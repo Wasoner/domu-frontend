@@ -1,0 +1,20 @@
+{
+  "name": "DOMU - Software para Administracion de Edificios",
+  "short_name": "DOMU",
+  "description": "Software para la administracion de edificios y condominios",
+  "lang": "es-CL",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#53a497",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

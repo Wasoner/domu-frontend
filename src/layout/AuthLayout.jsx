@@ -6,7 +6,7 @@ import './AuthLayout.scss';
 const AuthLayout = ({ user, children, navSections, bodyActions }) => {
   return (
     <div className="auth-layout">
-      <AuthHeader user={user} />
+      <AuthHeader user={user} navSections={navSections} />
       <div className="auth-layout__body">
         <Sidebar user={user} navSections={navSections} />
         {bodyActions}

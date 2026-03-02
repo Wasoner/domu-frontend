@@ -179,7 +179,19 @@
 }
 
 .resident-portal__panel-icon {
-  font-size: 1.4rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(83, 164, 151, 0.12);
+  color: var(--color-turquoise);
+  line-height: 0;
+
+  svg {
+    display: block;
+  }
 }
 
 .resident-portal__panel-link {
@@ -278,6 +290,7 @@
 }
 
 .resident-portal__notification-icon svg {
+  display: block;
   width: 18px;
   height: 18px;
 }
@@ -424,7 +437,45 @@
 .resident-portal__upcoming-item small {
   font-size: 0.78rem;
   color: var(--color-gray);
+  white-space: normal;
+}
+
+.resident-portal__upcoming-item--task {
+  align-items: flex-start;
+}
+
+.resident-portal__upcoming-task-info {
+  min-width: 0;
+}
+
+.resident-portal__upcoming-task-info strong {
+  overflow-wrap: anywhere;
+}
+
+.resident-portal__task-action {
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  background: rgba(16, 185, 129, 0.12);
+  color: #0f766e;
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
   white-space: nowrap;
+}
+
+.resident-portal__task-action:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.resident-portal__task-error {
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+  color: #991b1b;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.82rem;
 }
 
 .resident-portal__quick-grid {
@@ -445,6 +496,7 @@
   color: inherit;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
   position: relative;
+  min-width: 0;
 }
 
 .resident-portal__quick-card::before {
@@ -475,8 +527,10 @@
   background: rgba(83, 164, 151, 0.12);
   color: var(--color-turquoise);
   flex-shrink: 0;
+  line-height: 0;
   
   svg {
+    display: block;
     width: 20px;
     height: 20px;
   }

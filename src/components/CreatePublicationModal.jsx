@@ -6,10 +6,10 @@ import Icon from './Icon';
 import './CreatePublicationModal.scss';
 
 const CATEGORIES = [
-  { value: 'announcement', label: 'Anuncio', icon: '📢' },
-  { value: 'alert', label: 'Alerta', icon: '⚠️' },
-  { value: 'news', label: 'Noticia', icon: '📰' },
-  { value: 'event', label: 'Evento', icon: '📅' },
+  { value: 'announcement', label: 'Anuncio', icon: 'speakerWave' },
+  { value: 'alert', label: 'Alerta', icon: 'exclamationTriangle' },
+  { value: 'news', label: 'Noticia', icon: 'newspaper' },
+  { value: 'event', label: 'Evento', icon: 'calendar' },
 ];
 
 const CreatePublicationModal = ({ isOpen, onClose, onSubmit, initialData, isAdmin, loading = false }) => {
@@ -75,7 +75,7 @@ const CreatePublicationModal = ({ isOpen, onClose, onSubmit, initialData, isAdmi
                   className={`category-btn ${formData.category === cat.value ? 'is-active' : ''}`}
                   onClick={() => setFormData({ ...formData, category: cat.value })}
                 >
-                  <span className="category-icon">{cat.icon}</span>
+                  <Icon name={cat.icon} size={16} />
                   {cat.label}
                 </button>
               ))}

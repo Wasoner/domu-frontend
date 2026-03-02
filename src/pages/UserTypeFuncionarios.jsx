@@ -1,36 +1,36 @@
 import { Header, MainContent, Footer } from '../layout';
-import { Button, Seo } from '../components';
+import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
 import './UserTypeLanding.scss';
 
 const features = [
   {
-    icon: '🔍',
+    iconName: 'magnifyingGlass',
     title: 'Fiscalización de comunidades',
     description: 'Supervisa el cumplimiento normativo de edificios y condominios en tu jurisdicción.',
   },
   {
-    icon: '📊',
+    iconName: 'chartBar',
     title: 'Reportes consolidados',
     description: 'Accede a reportes agregados de múltiples comunidades para análisis territorial.',
   },
   {
-    icon: '📑',
+    iconName: 'clipboardCheck',
     title: 'Gestión de permisos',
     description: 'Administra y verifica permisos de operación y certificaciones de edificios.',
   },
   {
-    icon: '📈',
+    iconName: 'buildingBank',
     title: 'Estadísticas territoriales',
     description: 'Visualiza indicadores de gestión comunitaria a nivel municipal o regional.',
   },
   {
-    icon: '⚡',
+    iconName: 'bellAlert',
     title: 'Alertas de cumplimiento',
     description: 'Recibe notificaciones automáticas sobre vencimientos y obligaciones pendientes.',
   },
   {
-    icon: '🤝',
+    iconName: 'users',
     title: 'Coordinación con administradores',
     description: 'Canal de comunicación oficial para requerimientos y consultas a administradores.',
   },
@@ -68,7 +68,6 @@ const UserTypeFuncionarios = () => {
       <section className="usertype-hero animated-section">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__icon">🏛️</span>
             <span className="usertype-hero__eyebrow">Solución para Funcionarios</span>
             <h1 className="usertype-hero__title">
               Fiscalización <strong>inteligente</strong> de comunidades
@@ -87,7 +86,9 @@ const UserTypeFuncionarios = () => {
             </div>
           </div>
           <div className="usertype-hero__visual">
-            <span className="usertype-hero__illustration" aria-hidden="true">🏛️</span>
+            <span className="usertype-hero__illustration" aria-hidden="true">
+              <Icon name="buildingLibrary" className="usertype-hero__illustration-icon" strokeWidth={1.5} />
+            </span>
           </div>
         </div>
       </section>
@@ -103,7 +104,9 @@ const UserTypeFuncionarios = () => {
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
                 <div key={index} className="usertype-feature-card">
-                  <div className="usertype-feature-card__icon">{feature.icon}</div>
+                  <div className="usertype-feature-card__icon" aria-hidden="true">
+                    <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
+                  </div>
                   <h3>{feature.title}</h3>
                   <p>{feature.description}</p>
                 </div>
@@ -126,7 +129,9 @@ const UserTypeFuncionarios = () => {
               </div>
               <div className="usertype-benefits__visual">
                 <div className="usertype-benefits__card">
-                  <span className="usertype-benefits__card-icon">🗂️</span>
+                  <span className="usertype-benefits__card-icon" aria-hidden="true">
+                    <Icon name="archiveBox" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
+                  </span>
                   <h3>Panel de fiscalización</h3>
                   <p>Vista consolidada de comunidades con indicadores de cumplimiento y alertas automáticas.</p>
                   <div className="usertype-benefits__card-stats">

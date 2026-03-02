@@ -1,15 +1,27 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 import { Buffer } from 'node:buffer'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      manifest: false,
+      includeAssets: ['favicon.svg'],
+      devOptions: {
+        enabled: true
+      }
+    })
+  ],
   server: {
     proxy: {
       // Proxy para evitar problemas de CORS en desarrollo
       '/api': {
-        target: 'http://localhost:7000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         // Reescribir la ruta para que /api vaya directamente al backend

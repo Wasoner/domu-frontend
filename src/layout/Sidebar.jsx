@@ -64,27 +64,27 @@ const Sidebar = ({ navSections, user }) => {
     navigate(ROUTES.LOGIN);
   };
 
-  // Auto-expand sections that contain the active route if they aren't already
+  // Auto-expand sections al navegar a una ruta hija (solo cuando cambia la ruta, no al colapsar)
   useEffect(() => {
-    const newExpanded = { ...expandedItems };
-    let changed = false;
+    setExpandedItems((prev) => {
+      const newExpanded = { ...prev };
+      let changed = false;
 
-    safeNavSections.forEach((section) => {
-      section.items.forEach((item) => {
-        if (item.subItems) {
-          const hasActiveChild = item.subItems.some((sub) => location.pathname === sub.to);
-          if (hasActiveChild && !expandedItems[item.label]) {
-            newExpanded[item.label] = true;
-            changed = true;
+      safeNavSections.forEach((section) => {
+        section.items.forEach((item) => {
+          if (item.subItems) {
+            const hasActiveChild = item.subItems.some((sub) => location.pathname === sub.to);
+            if (hasActiveChild && !prev[item.label]) {
+              newExpanded[item.label] = true;
+              changed = true;
+            }
           }
-        }
+        });
       });
-    });
 
-    if (changed) {
-      setExpandedItems(newExpanded);
-    }
-  }, [location.pathname, safeNavSections, expandedItems]);
+      return changed ? newExpanded : prev;
+    });
+  }, [location.pathname, safeNavSections]);
 
   const toggleExpand = (e, label) => {
     e.preventDefault();
@@ -100,18 +100,22 @@ const Sidebar = ({ navSections, user }) => {
       className={`app-sidebar ${isCollapsed ? 'is-collapsed' : ''}`}
       aria-label="Menú principal"
     >
-      <button
-        type="button"
-        className="app-sidebar__toggle"
-        onClick={() => setIsCollapsed((prev) => !prev)}
-        aria-expanded={!isCollapsed}
-        aria-label={isCollapsed ? 'Expandir menú lateral' : 'Contraer menú lateral'}
-      >
-        <span className="app-sidebar__toggle-icon" aria-hidden="true">
-          {isCollapsed ? '›' : '‹'}
-        </span>
-      </button>
       <div className="app-sidebar__inner" ref={innerRef} onScroll={handleInnerScroll}>
+        <button
+          type="button"
+          className="app-sidebar__toggle"
+          onClick={() => setIsCollapsed((prev) => !prev)}
+          aria-expanded={!isCollapsed}
+          aria-label={isCollapsed ? 'Expandir menú lateral' : 'Contraer menú lateral'}
+        >
+          <span className="app-sidebar__toggle-icon" aria-hidden="true">
+            {isCollapsed ? (
+              <Icon name="chevronRight" size={18} />
+            ) : (
+              <Icon name="chevronRight" size={18} style={{ transform: 'rotate(180deg)' }} />
+            )}
+          </span>
+        </button>
         {safeNavSections.map((section) => (
           <div key={section.title} className="app-sidebar__section">
             <p className="app-sidebar__section-title">{section.title}</p>

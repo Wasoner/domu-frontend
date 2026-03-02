@@ -243,7 +243,7 @@ const AdminStaff = () => {
             >
               {loading ? 'Actualizando…' : 'Actualizar'}
             </button>
-            <Link to={ROUTES.ADMIN_CREATE_USER} className="button button--primary">
+            <Link to={ROUTES.ADMIN_CREATE_USER} className="btn btn-primary">
               <Icon name="userPlus" size={18} />
               Crear Funcionario
             </Link>
@@ -569,7 +569,7 @@ const AdminStaff = () => {
                   </button>
                   <button
                     type="submit"
-                    className="button button--primary"
+                    className="btn btn-primary"
                     disabled={submitting || !editingStaff}
                   >
                     {submitting ? 'Guardando...' : 'Actualizar'}
