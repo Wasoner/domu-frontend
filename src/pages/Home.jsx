@@ -59,9 +59,13 @@ const formatRut = (value) => {
 const COMMUNITY_FORM_STORAGE_KEY = 'communityFormDraft';
 const COMMUNITY_DOC_NAME_KEY = 'communityDocName';
 const OPEN_COMMUNITY_MODAL_PARAM = 'openCommunityModal';
+const BUILDING_TYPE_HOUSE = 'HOUSE';
+const BUILDING_TYPE_APARTMENT = 'APARTMENT';
+const BUILDING_TYPE_MIXED = 'MIXED';
 
 const communityFormDefaults = {
   name: '',
+  buildingType: BUILDING_TYPE_HOUSE,
   towerLabel: '',
   address: '',
   commune: '',
@@ -71,8 +75,10 @@ const communityFormDefaults = {
   adminEmail: '',
   adminName: '',
   adminDocument: '',
-  floors: 4,
-  unitsCount: 8,
+  floors: '',
+  unitsCount: '',
+  houseUnitsCount: '',
+  apartmentUnitsCount: '',
   latitude: '',
   longitude: '',
   proofText: '',
@@ -93,6 +99,37 @@ const formatCurrency = (value) => {
 
 const formatNumber = (value) => {
   return new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 }).format(Number(value) || 0);
+};
+
+const parsePositiveInteger = (value) => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
+const normalizeBuildingType = (value) => {
+  if (typeof value !== 'string') return BUILDING_TYPE_HOUSE;
+  const normalized = value.trim().toUpperCase();
+  if ([BUILDING_TYPE_HOUSE, BUILDING_TYPE_APARTMENT, BUILDING_TYPE_MIXED].includes(normalized)) {
+    return normalized;
+  }
+  return BUILDING_TYPE_HOUSE;
+};
+
+const resolveUnitsCountByType = ({ buildingType, houseUnitsCount, apartmentUnitsCount, unitsCount }) => {
+  if (buildingType === BUILDING_TYPE_HOUSE) {
+    return parsePositiveInteger(houseUnitsCount ?? unitsCount);
+  }
+  if (buildingType === BUILDING_TYPE_APARTMENT) {
+    return parsePositiveInteger(apartmentUnitsCount ?? unitsCount);
+  }
+  if (buildingType === BUILDING_TYPE_MIXED) {
+    const houses = parsePositiveInteger(houseUnitsCount) || 0;
+    const apartments = parsePositiveInteger(apartmentUnitsCount) || 0;
+    const total = houses + apartments;
+    return total > 0 ? total : null;
+  }
+  return parsePositiveInteger(unitsCount);
 };
 
 const ResidentHome = ({ user }) => {
@@ -506,6 +543,15 @@ const Home = () => {
     const { recordSelection = false } = options;
     const latitude = Number(mappedCommunity.latitude);
     const longitude = Number(mappedCommunity.longitude);
+    const mappedBuildingTypeRaw = typeof mappedCommunity.buildingType === 'string'
+      ? mappedCommunity.buildingType.trim().toUpperCase()
+      : '';
+    const mappedBuildingType = [BUILDING_TYPE_HOUSE, BUILDING_TYPE_APARTMENT, BUILDING_TYPE_MIXED].includes(mappedBuildingTypeRaw)
+      ? mappedBuildingTypeRaw
+      : null;
+    const mappedUnitsCount = parsePositiveInteger(mappedCommunity.unitsCount);
+    const mappedHouseUnitsCount = parsePositiveInteger(mappedCommunity.houseUnitsCount);
+    const mappedApartmentUnitsCount = parsePositiveInteger(mappedCommunity.apartmentUnitsCount);
 
     setCommunityForm((prev) => ({
       ...prev,
@@ -515,8 +561,13 @@ const Home = () => {
       city: mappedCommunity.city || prev.city,
       postalCode: mappedCommunity.postalCode || prev.postalCode,
       towerLabel: mappedCommunity.towerLabel || prev.towerLabel,
-      unitsCount: mappedCommunity.unitsCount || prev.unitsCount,
-      floors: mappedCommunity.floors || prev.floors,
+      buildingType: mappedBuildingType || prev.buildingType,
+      unitsCount: mappedUnitsCount ?? prev.unitsCount,
+      houseUnitsCount: mappedHouseUnitsCount
+        ?? ((mappedBuildingType === BUILDING_TYPE_HOUSE && mappedUnitsCount) ? mappedUnitsCount : prev.houseUnitsCount),
+      apartmentUnitsCount: mappedApartmentUnitsCount
+        ?? ((mappedBuildingType === BUILDING_TYPE_APARTMENT && mappedUnitsCount) ? mappedUnitsCount : prev.apartmentUnitsCount),
+      floors: mappedCommunity.floors ?? prev.floors,
       latitude: Number.isFinite(latitude) ? latitude.toFixed(6) : prev.latitude,
       longitude: Number.isFinite(longitude) ? longitude.toFixed(6) : prev.longitude,
     }));
@@ -572,19 +623,73 @@ const Home = () => {
     }
   };
 
+  const handleBuildingTypeChange = (event) => {
+    const nextType = normalizeBuildingType(event.target.value);
+    setCommunityForm((prev) => {
+      const next = { ...prev, buildingType: nextType };
+
+      if (nextType === BUILDING_TYPE_HOUSE) {
+        next.apartmentUnitsCount = '';
+        next.floors = '';
+      }
+
+      if (nextType === BUILDING_TYPE_APARTMENT) {
+        next.houseUnitsCount = '';
+      }
+
+      return next;
+    });
+  };
+
   const handleCommunitySubmit = async (event) => {
     event.preventDefault();
     if (!documentFile) {
       setCommunityStatus({ ...getDefaultCommunityStatus(), error: 'Adjunta el documento de propiedad (PDF o imagen).' });
       return;
     }
+
+    const buildingType = normalizeBuildingType(communityForm.buildingType);
+    const houseUnitsCount = parsePositiveInteger(communityForm.houseUnitsCount);
+    const apartmentUnitsCount = parsePositiveInteger(communityForm.apartmentUnitsCount);
+    const floors = buildingType === BUILDING_TYPE_HOUSE ? null : parsePositiveInteger(communityForm.floors);
+    const unitsCount = resolveUnitsCountByType({
+      buildingType,
+      houseUnitsCount,
+      apartmentUnitsCount,
+      unitsCount: communityForm.unitsCount,
+    });
+
+    if (buildingType === BUILDING_TYPE_HOUSE && !houseUnitsCount) {
+      setCommunityStatus({ ...getDefaultCommunityStatus(), error: 'Ingresa el número de casas (unidades).' });
+      return;
+    }
+    if (buildingType === BUILDING_TYPE_APARTMENT && !apartmentUnitsCount) {
+      setCommunityStatus({ ...getDefaultCommunityStatus(), error: 'Ingresa el número de departamentos (unidades).' });
+      return;
+    }
+    if (buildingType === BUILDING_TYPE_MIXED && (!houseUnitsCount || !apartmentUnitsCount)) {
+      setCommunityStatus({ ...getDefaultCommunityStatus(), error: 'Ingresa el número de casas y departamentos.' });
+      return;
+    }
+    if ((buildingType === BUILDING_TYPE_APARTMENT || buildingType === BUILDING_TYPE_MIXED) && !floors) {
+      setCommunityStatus({ ...getDefaultCommunityStatus(), error: 'Ingresa el número de pisos.' });
+      return;
+    }
+    if (!unitsCount) {
+      setCommunityStatus({ ...getDefaultCommunityStatus(), error: 'No pudimos calcular la cantidad total de unidades.' });
+      return;
+    }
+
     setCommunityStatus({ ...getDefaultCommunityStatus(), loading: true });
     try {
       const payload = {
         ...communityForm,
         documentFile,
-        floors: communityForm.floors ? Number(communityForm.floors) : null,
-        unitsCount: communityForm.unitsCount ? Number(communityForm.unitsCount) : null,
+        buildingType,
+        houseUnitsCount,
+        apartmentUnitsCount,
+        floors,
+        unitsCount,
         latitude: communityForm.latitude ? Number(communityForm.latitude) : null,
         longitude: communityForm.longitude ? Number(communityForm.longitude) : null,
         proofText: communityForm.proofText?.trim() || `Documento adjunto: ${documentFile.name}`,
@@ -595,6 +700,9 @@ const Home = () => {
         id: selectedMappedCommunityId || undefined,
         latitude: payload.latitude,
         longitude: payload.longitude,
+        buildingType: payload.buildingType,
+        houseUnitsCount: payload.houseUnitsCount,
+        apartmentUnitsCount: payload.apartmentUnitsCount,
         floors: payload.floors,
         unitsCount: payload.unitsCount,
         source: 'community-request',
@@ -893,25 +1001,95 @@ const Home = () => {
                           />
                         </label>
                         <label>
-                          Pisos
-                          <input
-                            type="number"
-                            min="1"
-                            max="100"
-                            value={communityForm.floors}
-                            onChange={(e) => setCommunityForm({ ...communityForm, floors: e.target.value })}
-                          />
+                          Tipo de comunidad *
+                          <select
+                            value={communityForm.buildingType}
+                            onChange={handleBuildingTypeChange}
+                          >
+                            <option value={BUILDING_TYPE_HOUSE}>Casas</option>
+                            <option value={BUILDING_TYPE_APARTMENT}>Departamentos</option>
+                            <option value={BUILDING_TYPE_MIXED}>Ambos</option>
+                          </select>
                         </label>
-                        <label>
-                          Cantidad de unidades
-                          <input
-                            type="number"
-                            min="1"
-                            max="9999"
-                            value={communityForm.unitsCount}
-                            onChange={(e) => setCommunityForm({ ...communityForm, unitsCount: e.target.value })}
-                          />
-                        </label>
+
+                        {communityForm.buildingType === BUILDING_TYPE_HOUSE && (
+                          <label>
+                            Número de casas (unidades) *
+                            <input
+                              type="number"
+                              min="1"
+                              max="9999"
+                              value={communityForm.houseUnitsCount}
+                              onChange={(e) => setCommunityForm({ ...communityForm, houseUnitsCount: e.target.value })}
+                              required
+                            />
+                          </label>
+                        )}
+
+                        {communityForm.buildingType === BUILDING_TYPE_APARTMENT && (
+                          <>
+                            <label>
+                              Número de departamentos (unidades) *
+                              <input
+                                type="number"
+                                min="1"
+                                max="9999"
+                                value={communityForm.apartmentUnitsCount}
+                                onChange={(e) => setCommunityForm({ ...communityForm, apartmentUnitsCount: e.target.value })}
+                                required
+                              />
+                            </label>
+                            <label>
+                              Número de pisos *
+                              <input
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={communityForm.floors}
+                                onChange={(e) => setCommunityForm({ ...communityForm, floors: e.target.value })}
+                                required
+                              />
+                            </label>
+                          </>
+                        )}
+
+                        {communityForm.buildingType === BUILDING_TYPE_MIXED && (
+                          <>
+                            <label>
+                              Número de casas (unidades) *
+                              <input
+                                type="number"
+                                min="1"
+                                max="9999"
+                                value={communityForm.houseUnitsCount}
+                                onChange={(e) => setCommunityForm({ ...communityForm, houseUnitsCount: e.target.value })}
+                                required
+                              />
+                            </label>
+                            <label>
+                              Número de departamentos (unidades) *
+                              <input
+                                type="number"
+                                min="1"
+                                max="9999"
+                                value={communityForm.apartmentUnitsCount}
+                                onChange={(e) => setCommunityForm({ ...communityForm, apartmentUnitsCount: e.target.value })}
+                                required
+                              />
+                            </label>
+                            <label>
+                              Número de pisos *
+                              <input
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={communityForm.floors}
+                                onChange={(e) => setCommunityForm({ ...communityForm, floors: e.target.value })}
+                                required
+                              />
+                            </label>
+                          </>
+                        )}
                       </div>
                       <div className="community-map-summary">
                         <p className="community-map-summary__title">Mapa comunitario DOMU</p>

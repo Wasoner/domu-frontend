@@ -70,6 +70,8 @@ const normalizeCommunity = (community, previous = null) => {
   const latitude = toSafeNumber(community?.latitude);
   const longitude = toSafeNumber(community?.longitude);
   const unitsCount = toSafeNumber(community?.unitsCount);
+  const houseUnitsCount = toSafeNumber(community?.houseUnitsCount);
+  const apartmentUnitsCount = toSafeNumber(community?.apartmentUnitsCount);
   const floors = toSafeNumber(community?.floors);
   const existingSubmissions = Number(previous?.submissions) || 0;
   const existingSelections = Number(previous?.selectionCount) || 0;
@@ -86,6 +88,9 @@ const normalizeCommunity = (community, previous = null) => {
     longitude,
     floors,
     unitsCount,
+    houseUnitsCount: houseUnitsCount ?? toSafeNumber(previous?.houseUnitsCount),
+    apartmentUnitsCount: apartmentUnitsCount ?? toSafeNumber(previous?.apartmentUnitsCount),
+    buildingType: normalizeText(community?.buildingType) || normalizeText(previous?.buildingType),
     source: normalizeText(community?.source) || previous?.source || 'community-request',
     status: normalizeText(community?.status) || previous?.status || '',
     submissions: Math.max(1, existingSubmissions + 1),

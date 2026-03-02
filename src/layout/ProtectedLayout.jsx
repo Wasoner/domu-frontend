@@ -28,7 +28,7 @@ const filterSectionsByRole = (sections, role) => {
 
 const ProtectedLayout = ({ children, allowedRoles, bodyActions }) => {
   const location = useLocation();
-  const { user, isLoading, isAuthenticated } = useAppContext();
+  const { user, buildingVersion, isLoading, isAuthenticated } = useAppContext();
   const userRole = user?.userType;
 
   const navSections = useMemo(() => filterSectionsByRole(NAV_SECTIONS, userRole), [userRole]);
@@ -85,7 +85,9 @@ const ProtectedLayout = ({ children, allowedRoles, bodyActions }) => {
 
   return (
     <AuthLayout user={user} navSections={navSections} bodyActions={bodyActions}>
-      {children}
+      <div key={`building-${user?.selectedBuildingId ?? 'none'}-v${buildingVersion}`}>
+        {children}
+      </div>
     </AuthLayout>
   );
 };
