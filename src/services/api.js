@@ -498,8 +498,11 @@ export const api = {
       const {
         documentFile,
         proofText,
+        buildingType,
         floors,
         unitsCount,
+        houseUnitsCount,
+        apartmentUnitsCount,
         latitude,
         longitude,
         ...rest
@@ -507,8 +510,11 @@ export const api = {
 
       const payload = {
         ...rest,
+        buildingType: buildingType || 'HOUSE',
         floors: floors ?? null,
         unitsCount: unitsCount ?? null,
+        houseUnitsCount: houseUnitsCount ?? null,
+        apartmentUnitsCount: apartmentUnitsCount ?? null,
         latitude: latitude ?? null,
         longitude: longitude ?? null,
         proofText: (proofText && String(proofText).trim()) || 'Documento de acreditación adjunto',
@@ -874,14 +880,14 @@ export const api = {
       });
     },
     vote: async (pollId, optionId) => {
-      return fetchWrapper(`/polls/${pollId}/vote`, {
+      return fetchWrapper(`/polls/${pollId}/votes`, {
         method: 'POST',
         body: JSON.stringify({ optionId }),
       });
     },
     close: async (pollId) => {
       return fetchWrapper(`/polls/${pollId}/close`, {
-        method: 'POST',
+        method: 'PATCH',
       });
     },
     exportCsv: async (pollId) => {
