@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import {
   Home,
@@ -38,19 +39,34 @@ import {
   ResidentMarketplaceCreate,
   ChatHub,
   Votaciones,
+  NotificationCenter,
+  NotificationPreferences,
   UserTypeConserjeria,
   UserTypeAdministrador,
   UserTypeComite,
   UserTypeResidente,
   UserTypeFuncionarios,
+  UserTypeProveedores,
+  Soluciones,
+  AdminProviders,
+  AdminServiceOrders,
+  ProviderPortal,
+  ProviderServiceOrders,
 } from './pages'
 import { AppProvider } from './context'
+import { ScrollToTop } from './components'
 import { ROUTES } from './constants'
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
+})
 
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <AppProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           {/* Public Routes */}
           <Route path={ROUTES.HOME} element={<Home />} />
@@ -63,11 +79,13 @@ function App() {
           <Route path={ROUTES.ADMIN_INVITE} element={<AdminInviteRegister />} />
 
           {/* Soluciones - Landing pages por tipo de usuario */}
+          <Route path={ROUTES.SOLUCIONES} element={<Soluciones />} />
           <Route path={ROUTES.SOLUCIONES_CONSERJERIA} element={<UserTypeConserjeria />} />
           <Route path={ROUTES.SOLUCIONES_ADMINISTRADOR} element={<UserTypeAdministrador />} />
           <Route path={ROUTES.SOLUCIONES_COMITE} element={<UserTypeComite />} />
           <Route path={ROUTES.SOLUCIONES_RESIDENTE} element={<UserTypeResidente />} />
           <Route path={ROUTES.SOLUCIONES_FUNCIONARIOS} element={<UserTypeFuncionarios />} />
+          <Route path={ROUTES.SOLUCIONES_PROVEEDORES} element={<UserTypeProveedores />} />
 
           {/* Protected Routes - Admin */}
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
@@ -81,6 +99,13 @@ function App() {
           <Route path={ROUTES.ADMIN_PARCELS} element={<AdminParcels />} />
           <Route path={ROUTES.ADMIN_TASKS} element={<AdminTasks />} />
           <Route path={ROUTES.ADMIN_STAFF} element={<AdminStaff />} />
+          <Route path={ROUTES.ADMIN_PROVIDERS} element={<AdminProviders />} />
+          <Route path={ROUTES.ADMIN_SERVICE_ORDERS} element={<AdminServiceOrders />} />
+
+          {/* Protected Routes - Provider */}
+          <Route path={ROUTES.PROVIDER_PORTAL} element={<ProviderPortal />} />
+          <Route path={ROUTES.PROVIDER_SERVICE_ORDERS} element={<ProviderServiceOrders />} />
+          <Route path={ROUTES.PROVIDER_ORDER_DETAIL} element={<ProviderServiceOrders />} />
 
           {/* Protected Routes - Resident */}
           <Route path={ROUTES.RESIDENT_PORTAL} element={<StaffPortal />} />
@@ -106,9 +131,14 @@ function App() {
           <Route path={ROUTES.RESIDENT_MARKETPLACE} element={<ResidentMarketplace />} />
           <Route path={ROUTES.RESIDENT_MARKETPLACE_CREATE} element={<ResidentMarketplaceCreate />} />
           <Route path={ROUTES.RESIDENT_CHAT} element={<ChatHub />} />
+
+          {/* Notifications - All roles */}
+          <Route path={ROUTES.NOTIFICATIONS} element={<NotificationCenter />} />
+          <Route path={ROUTES.NOTIFICATION_PREFERENCES} element={<NotificationPreferences />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>
+    </QueryClientProvider>
   )
 }
 

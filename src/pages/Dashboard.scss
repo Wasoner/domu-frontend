@@ -633,6 +633,21 @@
 /* ----------------------------------------
    Responsive
    ---------------------------------------- */
+@media (max-width: 640px) {
+  .dashboard__feed-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .dashboard__feed-actions {
+    .btn {
+      min-width: 0;
+      flex: 1;
+    }
+  }
+}
+
 @media (max-width: 600px) {
   .dashboard__header {
     flex-direction: column;
@@ -671,5 +686,25 @@
 
   .incident-item__status {
     align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .metric-card {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .metric-card__value {
+    font-size: 1.75rem;
+  }
+
+  .metric-card__label {
+    font-size: 0.875rem;
+  }
+
+  .dashboard__market-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
   }
 }

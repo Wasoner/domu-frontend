@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import PropTypes from 'prop-types';
+
 import { Icon } from '../';
 import './ChargeSelector.scss';
 
@@ -190,23 +190,5 @@ const ChargeSelector = ({
   );
 };
 
-ChargeSelector.propTypes = {
-  charges: PropTypes.arrayOf(
-    PropTypes.shape({
-      chargeId: PropTypes.number,
-      id: PropTypes.number,
-      description: PropTypes.string,
-      amount: PropTypes.number,
-      pending: PropTypes.number,
-      month: PropTypes.number,
-      year: PropTypes.number,
-    })
-  ).isRequired,
-  selectedCharges: PropTypes.object.isRequired,
-  onSelectionChange: PropTypes.func.isRequired,
-  minPaymentPercent: PropTypes.number,
-  onProceed: PropTypes.func.isRequired,
-  loading: PropTypes.bool,
-};
 
 export default ChargeSelector;

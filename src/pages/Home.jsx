@@ -1,13 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button, Icon, LocationPicker, Seo, Skeleton } from '../components';
+import { Button, Icon, Seo, Skeleton } from '../components';
 import { Header, MainContent, Footer, AuthLayout } from '../layout';
 import heroLogo from '../assets/LogotipoDOMU.svg';
 import { ROUTES } from '../constants';
 import { useAppContext } from '../context';
-import { api, communityMaps } from '../services';
+import { useScrollReveal, useStaggerReveal } from '../hooks';
+import { api } from '../services';
 import Dashboard from './Dashboard';
+import CreateCommunityModal from './CreateCommunityModal';
 import './Home.scss';
+
+const constellationNodes = [
+  { iconName: 'creditCard', label: 'Pagos' },
+  { iconName: 'shieldCheck', label: 'Seguridad' },
+  { iconName: 'chatBubbleLeftRight', label: 'Chat' },
+  { iconName: 'archiveBox', label: 'Encomiendas' },
+  { iconName: 'chartBar', label: 'Reportes' },
+  { iconName: 'calendar', label: 'Reservas' },
+  { iconName: 'users', label: 'Comunidad' },
+  { iconName: 'buildingOffice', label: 'Edificios' },
+  { iconName: 'door', label: 'Accesos' },
+];
+
+const heroStats = [
+  { value: '5 roles', label: 'integrados' },
+  { value: '<5s', label: 'registro QR' },
+  { value: '2.000', label: 'unidades' },
+];
 
 const residentChartData = [
   { month: 'May', amount: '$64.3K', value: 70 },
@@ -39,25 +59,11 @@ const residentQuickActions = [
   },
 ];
 
-
-
 const upcomingEvent = {
   title: 'Próximo evento',
   description: 'Gestión de siniestros: aprende cómo llevar el proceso de manera eficiente.',
 };
 
-const formatRut = (value) => {
-  let clean = value.replace(/[^0-9kK]/g, '').toUpperCase();
-  if (clean.length === 0) return '';
-  if (clean.length === 1) return clean;
-  const body = clean.slice(0, -1);
-  const dv = clean.slice(-1);
-  const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return `${formatted}-${dv}`;
-};
-
-const COMMUNITY_FORM_STORAGE_KEY = 'communityFormDraft';
-const COMMUNITY_DOC_NAME_KEY = 'communityDocName';
 const OPEN_COMMUNITY_MODAL_PARAM = 'openCommunityModal';
 const BUILDING_TYPE_HOUSE = 'HOUSE';
 const BUILDING_TYPE_APARTMENT = 'APARTMENT';
@@ -311,12 +317,12 @@ const ResidentHome = ({ user }) => {
           </section>
 
           <section className="resident-card qr-card">
-            <h3>App móvil</h3>
-            <p>Escanea el código para pagar, revisar avisos y reservar espacios comunes.</p>
+            <h3>Acceso desde tu celular</h3>
+            <p>Portal web responsivo optimizado para celulares y tablets. Paga, consulta avisos y reserva espacios desde cualquier navegador.</p>
             <div className="qr-placeholder" aria-hidden="true">QR</div>
             <div className="store-badges">
-              <span>Google Play ⭐4.5</span>
-              <span>App Store ⭐4.3</span>
+              <span>PWA optimizada</span>
+              <span>Sin descarga</span>
             </div>
           </section>
         </aside>
@@ -335,31 +341,13 @@ const Home = () => {
   const location = useLocation();
   const { user, isAuthenticated, isLoading } = useAppContext();
   const [showCommunityModal, setShowCommunityModal] = useState(false);
-  const [step, setStep] = useState(1);
-  const [communityForm, setCommunityForm] = useState(() => {
-    const stored = localStorage.getItem(COMMUNITY_FORM_STORAGE_KEY);
-    if (stored) {
-      try {
-        return { ...communityFormDefaults, ...JSON.parse(stored) };
-      } catch (error) {
-        console.warn('[Community form] No se pudo parsear el borrador guardado', error);
-      }
-    }
-    return communityFormDefaults;
-  });
-  const [documentFile, setDocumentFile] = useState(null);
-  const [documentName, setDocumentName] = useState(() => localStorage.getItem(COMMUNITY_DOC_NAME_KEY) || '');
-  const [communityStatus, setCommunityStatus] = useState(getDefaultCommunityStatus);
-  const [mappedCommunities, setMappedCommunities] = useState([]);
-  const [communityUsageStats, setCommunityUsageStats] = useState(() => communityMaps.getStats());
-  const [selectedMappedCommunityId, setSelectedMappedCommunityId] = useState('');
   const currentOrigin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://domu.app';
   const homeStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Domu',
     applicationCategory: 'BusinessApplication',
-    operatingSystem: 'Web, Android, iOS',
+    operatingSystem: 'Web',
     url: `${currentOrigin}/`,
     description:
       'Software para la administración de edificios y condominios con pagos de gastos comunes en línea, comunicación y control de accesos.',
@@ -378,39 +366,18 @@ const Home = () => {
   };
 
   useEffect(() => {
-    localStorage.setItem(COMMUNITY_FORM_STORAGE_KEY, JSON.stringify(communityForm));
-    if (documentName) {
-      localStorage.setItem(COMMUNITY_DOC_NAME_KEY, documentName);
-    } else {
-      localStorage.removeItem(COMMUNITY_DOC_NAME_KEY);
-    }
-  }, [communityForm, documentName]);
-
-  const syncCommunityRegistry = useCallback(() => {
-    setMappedCommunities(communityMaps.list());
-    setCommunityUsageStats(communityMaps.getStats());
-  }, []);
-
-  useEffect(() => {
-    syncCommunityRegistry();
-  }, [syncCommunityRegistry]);
-
-  useEffect(() => {
     const params = new URLSearchParams(location.search);
     const shouldOpenCommunityModal = params.get(OPEN_COMMUNITY_MODAL_PARAM) === '1';
 
     if (!shouldOpenCommunityModal) return;
 
-    setCommunityStatus(getDefaultCommunityStatus());
-    setStep(1);
-    syncCommunityRegistry();
     setShowCommunityModal(true);
 
     params.delete(OPEN_COMMUNITY_MODAL_PARAM);
     const nextSearch = params.toString();
     const nextUrl = `${location.pathname}${nextSearch ? `?${nextSearch}` : ''}${location.hash || ''}`;
     window.history.replaceState(window.history.state, '', nextUrl);
-  }, [location.hash, location.pathname, location.search, syncCommunityRegistry]);
+  }, [location.hash, location.pathname, location.search]);
 
   const benefitsCarouselRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -439,6 +406,10 @@ const Home = () => {
     };
   }, [updateCarouselButtons]);
 
+  const featuresRef = useStaggerReveal();
+  const benefitsSectionRef = useScrollReveal();
+  const ctaRef = useScrollReveal();
+
   if (isAuthenticated) {
     const isAdmin = user?.roleId === 1 || user?.userType === 'admin';
     if (isAdmin) {
@@ -452,9 +423,9 @@ const Home = () => {
       <div className="home-page">
         <Header />
         <MainContent>
-          <div className="home-loader" role="status" style={{ maxWidth: '720px', margin: '3rem auto', padding: '0 1rem' }}>
+          <div className="home-loader" role="status">
             <Skeleton variant="rect" height="200px" borderRadius="var(--radius-md, 12px)" />
-            <div style={{ marginTop: '1.5rem' }}>
+            <div className="home-loader__group">
               <Skeleton variant="title" width="40%" />
               <Skeleton variant="text" count={3} />
             </div>
@@ -466,34 +437,12 @@ const Home = () => {
     );
   }
 
-  const resetCommunityState = () => {
-    setStep(1);
-    setCommunityForm(communityFormDefaults);
-    setCommunityStatus(getDefaultCommunityStatus());
-    setDocumentFile(null);
-    setDocumentName('');
-    setSelectedMappedCommunityId('');
-    localStorage.removeItem(COMMUNITY_FORM_STORAGE_KEY);
-    localStorage.removeItem(COMMUNITY_DOC_NAME_KEY);
-  };
-
   const handleCreateCommunity = () => {
-    setCommunityStatus(getDefaultCommunityStatus());
-    setStep(1);
-    syncCommunityRegistry();
     setShowCommunityModal(true);
   };
 
-  const handleOverlayClose = () => {
-    setShowCommunityModal(false);
-  };
-
-  const handleCloseAndReset = () => {
-    setShowCommunityModal(false);
-    resetCommunityState();
-  };
-
   const handleDemoAccess = () => {
+    window.location.href = ROUTES.SOLUCIONES;
     window.location.href = ROUTES.ABOUT;
   };
 
@@ -726,20 +675,21 @@ const Home = () => {
   };
 
   const features = [
-    { iconName: 'creditCard', title: 'Gastos Comunes en línea', description: 'Pagos digitales seguros y seguimiento en tiempo real de tus gastos comunes.' },
-    { iconName: 'arrowTopRightOnSquare', title: 'Portal web responsivo', description: 'Gestiona tu comunidad desde cualquier dispositivo con nuestro portal web optimizado para celulares, tablets y computadores.' },
-    { iconName: 'chatBubbleLeftRight', title: 'Comunicación directa', description: 'Mantén a tu comunidad informada con anuncios y mensajería instantánea.' },
-    { iconName: 'shieldCheck', title: 'Control de acceso', description: 'Registra visitas y gestiona el acceso a tu comunidad de forma segura.' },
-    { iconName: 'chartBar', title: 'Reportes y estadísticas', description: 'Visualiza el estado financiero y la gestión de tu comunidad en tiempo real.' },
-    { iconName: 'calendar', title: 'Reserva de espacios', description: 'Gestiona la reserva de espacios comunes como quinchos y salas de eventos.' },
+    { iconName: 'creditCard', title: 'Gastos comunes en línea', description: 'Genera cobros mensuales, recibe pagos digitales y haz seguimiento de morosidad desde un solo lugar.' },
+    { iconName: 'shieldCheck', title: 'Control de acceso con QR', description: 'Registra visitas en menos de 5 segundos con lectura QR de cédula chilena y notificación automática al residente.' },
+    { iconName: 'chatBubbleLeftRight', title: 'Comunicación en tiempo real', description: 'Chat directo entre residentes, foro comunitario y publicaciones para mantener informada a tu comunidad.' },
+    { iconName: 'archiveBox', title: 'Gestión de encomiendas', description: 'Recepción de paquetes con evidencia fotográfica, firma de entrega y aviso inmediato al destinatario.' },
+    { iconName: 'chartBar', title: 'Reportes y dashboard', description: 'Panel administrativo con métricas de gestión, estados financieros y control de tareas del personal.' },
+    { iconName: 'calendar', title: 'Reserva de espacios', description: 'Agenda quinchos, salas y áreas comunes con control de capacidad y bloqueo automático por morosidad.' },
   ];
 
   const solucionesIntegrantes = [
     { title: 'Administrador', route: ROUTES.SOLUCIONES_ADMINISTRADOR, iconName: 'chartBar' },
     { title: 'Comité', route: ROUTES.SOLUCIONES_COMITE, iconName: 'scale' },
     { title: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, iconName: 'buildingOffice' },
-    { title: 'Funcionarios', route: ROUTES.SOLUCIONES_FUNCIONARIOS, iconName: 'buildingLibrary' },
+    { title: 'Cumplimiento normativo', route: ROUTES.SOLUCIONES_FUNCIONARIOS, iconName: 'buildingLibrary' },
     { title: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, iconName: 'home' },
+    { title: 'Proveedores', route: ROUTES.SOLUCIONES_PROVEEDORES, iconName: 'wrench' },
   ];
 
   const scrollBenefitsCarousel = (direction) => {
@@ -754,7 +704,7 @@ const Home = () => {
   };
 
   return (
-    <div className="home-page fade-in">
+    <div className="home-page public-page fade-in">
       <Seo
         title="Domu | Software de administración de edificios y condominios"
         description="Administra edificios y condominios con Domu: gastos comunes en línea, comunicación con residentes y control de accesos desde un portal web responsivo."
@@ -763,14 +713,22 @@ const Home = () => {
         structuredData={homeStructuredData}
       />
       <Header />
-      <section className="home-hero animated-section">
+      <section className="home-hero">
         <div className="container">
           <div className="home-hero__content">
             <div className="home-hero__text">
-              <h1 className="home-hero__title">Software para la administración de <strong>edificios y condominios</strong></h1>
-              <p className="home-hero__subtitle">Administra edificios con DOMU: el software y el portal web responsivo para tu comunidad. Gastos Comunes en línea y mucho más.</p>
+              <h1 className="home-hero__title">La plataforma integral para <strong>edificios y condominios</strong></h1>
+              <p className="home-hero__subtitle">Accesos, finanzas, operación y comunicación en un solo sistema. DOMU reemplaza las planillas, los cuadernos de portería y las herramientas desconectadas.</p>
               <div className="home-hero__actions">
                 <Button onClick={handleCreateCommunity} variant="primary">Crear mi comunidad</Button>
+              </div>
+              <div className="home-hero__stats">
+                {heroStats.map((stat, i) => (
+                  <div key={i} className="home-hero__stat">
+                    <span className="mono-accent">{stat.value}</span>
+                    <span>{stat.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="home-hero__visual">
@@ -782,15 +740,15 @@ const Home = () => {
         </div>
       </section>
       <MainContent>
-        <section className="home-features animated-section">
+        <section ref={featuresRef} className="home-features reveal-section">
           <div className="container">
             <div className="home-section__header">
-              <h2>Funcionalidades principales</h2>
-              <p>Todo lo que necesitas para administrar tu comunidad de forma eficiente</p>
+              <h2>Todo lo que tu comunidad necesita</h2>
+              <p>Módulos integrados que cubren desde el control de accesos hasta la gestión financiera</p>
             </div>
             <div className="home-features__grid">
               {features.map((feature, index) => (
-                <div key={index} className="home-feature-card">
+                <div key={index} className="home-feature-card reveal-stagger-child">
                   <div className="home-feature-card__icon" aria-hidden="true">
                     <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
                   </div>
@@ -801,7 +759,7 @@ const Home = () => {
             </div>
           </div>
         </section>
-        <section className="home-benefits animated-section">
+        <section ref={benefitsSectionRef} className="home-benefits reveal-section">
           <div className="container">
             <div className="home-section__header">
               <h2>DOMU está pensado para cada integrante de la comunidad</h2>
@@ -844,14 +802,14 @@ const Home = () => {
             </div>
           </div>
         </section>
-        <section className="home-cta animated-section">
+        <section ref={ctaRef} className="home-cta reveal-section">
           <div className="container">
             <div className="home-cta__content">
-              <h2>¿Listo para mejorar la gestión de tu comunidad?</h2>
-              <p>Crea tu comunidad ahora y comienza a administrar de forma más eficiente</p>
+              <h2>Deja atrás las planillas y los sistemas desconectados</h2>
+              <p>Crea tu comunidad en DOMU y centraliza toda la gestión en minutos</p>
               <div className="home-cta__actions">
                 <Button onClick={handleCreateCommunity} variant="primary">Crear mi comunidad</Button>
-                <Button onClick={handleDemoAccess} variant="ghost">Ver demo</Button>
+                <Button onClick={handleDemoAccess} variant="ghost">Explorar soluciones</Button>
               </div>
             </div>
           </div>

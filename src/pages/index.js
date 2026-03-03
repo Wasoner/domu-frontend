@@ -43,9 +43,21 @@ export { default as ResidentMarketplaceCreate } from './ResidentMarketplaceCreat
 export { default as ChatHub } from './ChatHub';
 export { default as Votaciones } from './Votaciones';
 
+// Notifications
+export { default as NotificationCenter } from './NotificationCenter';
+export { default as NotificationPreferences } from './NotificationPreferences';
+
 // User type landing pages
 export { default as UserTypeConserjeria } from './UserTypeConserjeria';
 export { default as UserTypeAdministrador } from './UserTypeAdministrador';
 export { default as UserTypeComite } from './UserTypeComite';
 export { default as UserTypeResidente } from './UserTypeResidente';
 export { default as UserTypeFuncionarios } from './UserTypeFuncionarios';
+export { default as UserTypeProveedores } from './UserTypeProveedores';
+export { default as Soluciones } from './Soluciones';
+
+// Provider pages
+export { default as AdminProviders } from './AdminProviders';
+export { default as AdminServiceOrders } from './AdminServiceOrders';
+export { default as ProviderPortal } from './ProviderPortal';
+export { default as ProviderServiceOrders } from './ProviderServiceOrders';

@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import './FormField.scss';
 
 const FormField = ({
@@ -60,19 +60,5 @@ const FormField = ({
   );
 };
 
-FormField.propTypes = {
-  label: PropTypes.string,
-  hint: PropTypes.string,
-  error: PropTypes.string,
-  id: PropTypes.string,
-  name: PropTypes.string,
-  type: PropTypes.string,
-  as: PropTypes.oneOfType([PropTypes.string, PropTypes.elementType]),
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
-  className: PropTypes.string,
-  inputClassName: PropTypes.string,
-  control: PropTypes.node,
-  children: PropTypes.node,
-};
 
 export default FormField;

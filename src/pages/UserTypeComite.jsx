@@ -1,57 +1,62 @@
 import { Header, MainContent, Footer } from '../layout';
 import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
+import { useScrollReveal, useStaggerReveal } from '../hooks';
 import './UserTypeLanding.scss';
 
 const features = [
   {
     iconName: 'chartBar',
     title: 'Supervisión financiera',
-    description: 'Revisa en tiempo real los ingresos, egresos y estado de cuentas de tu comunidad.',
+    description: 'Accede a los ingresos, egresos, estados de morosidad y movimientos financieros de tu comunidad en tiempo real.',
   },
   {
     iconName: 'handRaised',
-    title: 'Sistema de votaciones',
-    description: 'Organiza votaciones digitales para decisiones importantes con resultados transparentes.',
+    title: 'Votaciones digitales',
+    description: 'Organiza votaciones con cierre programable, resultados transparentes y registro exportable en PDF.',
   },
   {
     iconName: 'checkBadge',
-    title: 'Aprobación de proyectos',
-    description: 'Revisa y aprueba cotizaciones, presupuestos y proyectos de mejora del edificio.',
+    title: 'Revisión de cotizaciones',
+    description: 'Revisa las cotizaciones y órdenes de trabajo enviadas por proveedores antes de su aprobación.',
   },
   {
-    iconName: 'chartBar',
-    title: 'Dashboard de transparencia',
-    description: 'Panel visual con indicadores clave de gestión y cumplimiento administrativo.',
+    iconName: 'magnifyingGlass',
+    title: 'Trazabilidad completa',
+    description: 'Historial de todas las operaciones: pagos recibidos, tareas asignadas, incidencias y accesos registrados.',
   },
   {
     iconName: 'document',
-    title: 'Actas digitales',
-    description: 'Registra y almacena actas de reuniones con firmas digitales y acceso histórico.',
+    title: 'Biblioteca documental',
+    description: 'Almacena y consulta reglamentos, actas de reunión y documentos relevantes de la comunidad.',
   },
   {
     iconName: 'chatBubbleLeftRight',
-    title: 'Comunicación con la comunidad',
-    description: 'Canal directo para informar decisiones y recibir feedback de los residentes.',
+    title: 'Canal directo con residentes',
+    description: 'Publica decisiones del comité en el foro y recibe retroalimentación de los copropietarios.',
   },
 ];
 
 const benefits = [
-  'Visión en tiempo real de la gestión administrativa',
-  'Decisiones informadas con datos actualizados',
-  'Historial completo de votaciones y acuerdos',
-  'Mayor participación de copropietarios en decisiones',
-  'Transparencia total en el manejo de fondos',
-  'Documentación digital de toda la gestión',
+  'Acceso directo a la información financiera de la comunidad',
+  'Votaciones digitales con cierre programado y resultados exportables',
+  'Historial auditable de todas las operaciones administrativas',
+  'Canal de comunicación directo con residentes y administrador',
+  'Documentos de la comunidad centralizados y siempre disponibles',
+  'Herramientas para ejercer el rol fiscalizador que establece la Ley 21.442',
 ];
 
 const UserTypeComite = () => {
+  const featuresRef = useStaggerReveal();
+  const benefitsRef = useScrollReveal();
+  const ctaRef = useScrollReveal();
+
   const handleCreateCommunity = () => {
     window.location.href = `${ROUTES.HOME}?openCommunityModal=1`;
   };
 
   const handleDemo = () => {
-    window.location.href = ROUTES.ABOUT;
+    window.location.href = ROUTES.SOLUCIONES;
   };
 
   const handleViewFeatures = () => {
@@ -62,7 +67,7 @@ const UserTypeComite = () => {
   };
 
   return (
-    <div className="usertype-page fade-in">
+    <div className="usertype-page public-page fade-in">
       <Seo
         title="DOMU para Comité de Administración | Supervisión y votaciones"
         description="Herramientas para comités de administración: supervisión financiera, votaciones digitales, aprobación de proyectos y transparencia en la gestión."
@@ -72,23 +77,23 @@ const UserTypeComite = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="usertype-hero animated-section">
+      <section className="usertype-hero">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
             <span className="usertype-hero__eyebrow">Solución para Comité</span>
             <h1 className="usertype-hero__title">
-              Supervisión y <strong>transparencia</strong> para tu comunidad
+              Fiscaliza con datos, no con <strong>suposiciones</strong>
             </h1>
             <p className="usertype-hero__subtitle">
-              Fiscaliza la gestión administrativa, organiza votaciones y toma decisiones 
-              informadas con acceso total a la información de tu edificio.
+              Accede a la información financiera, organiza votaciones digitales y supervisa
+              la gestión administrativa con trazabilidad completa de cada operación.
             </p>
             <div className="usertype-hero__actions">
               <Button onClick={handleViewFeatures} variant="primary">
                 Ver funcionalidades
               </Button>
               <Button onClick={handleDemo} variant="ghost">
-                Ver demo
+                Explorar soluciones
               </Button>
             </div>
           </div>
@@ -102,15 +107,15 @@ const UserTypeComite = () => {
 
       <MainContent>
         {/* Features Section */}
-        <section id="soluciones-funcionalidades" className="usertype-features animated-section">
+        <section id="soluciones-funcionalidades" ref={featuresRef} className="usertype-features reveal-section">
           <div className="container">
             <div className="usertype-section__header">
-              <h2>Funcionalidades para el Comité</h2>
-              <p>Herramientas para fiscalizar, decidir y comunicar de forma efectiva</p>
+              <h2>Herramientas para el rol fiscalizador</h2>
+              <p>Todo lo que necesita el comité para supervisar, votar e informar a la comunidad</p>
             </div>
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
-                <div key={index} className="usertype-feature-card">
+                <div key={index} className="usertype-feature-card reveal-stagger-child">
                   <div className="usertype-feature-card__icon" aria-hidden="true">
                     <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
                   </div>
@@ -123,7 +128,7 @@ const UserTypeComite = () => {
         </section>
 
         {/* Benefits Section */}
-        <section className="usertype-benefits animated-section">
+        <section ref={benefitsRef} className="usertype-benefits reveal-section">
           <div className="container">
             <div className="usertype-benefits__content">
               <div className="usertype-benefits__text">
@@ -140,15 +145,15 @@ const UserTypeComite = () => {
                     <Icon name="magnifyingGlass" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
                   </span>
                   <h3>Panel de fiscalización</h3>
-                  <p>Acceso completo a movimientos financieros, contratos y documentación de la comunidad.</p>
+                  <p>Movimientos financieros, cotizaciones de proveedores y documentación de la comunidad en un solo lugar.</p>
                   <div className="usertype-benefits__card-stats">
                     <div>
-                      <strong>100%</strong>
-                      <span>Transparencia</span>
+                      <strong>16 RF</strong>
+                      <span>Procesos cubiertos</span>
                     </div>
                     <div>
-                      <strong>+80%</strong>
-                      <span>Participación</span>
+                      <strong>5 roles</strong>
+                      <span>Conectados</span>
                     </div>
                   </div>
                 </div>
@@ -158,11 +163,11 @@ const UserTypeComite = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="usertype-cta animated-section">
+        <section ref={ctaRef} className="usertype-cta reveal-section">
           <div className="container">
             <div className="usertype-cta__content">
-              <h2>¿Listo para una gestión más transparente?</h2>
-              <p>Únete a los comités que ya cuentan con herramientas profesionales de supervisión</p>
+              <h2>Dale al comité las herramientas que necesita</h2>
+              <p>Supervisión real con datos reales, no con informes que llegan tarde</p>
               <div className="usertype-cta__actions">
                 <Button onClick={handleCreateCommunity} variant="primary">
                   Crear mi comunidad

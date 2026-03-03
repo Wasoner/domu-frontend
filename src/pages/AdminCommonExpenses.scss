@@ -273,3 +273,45 @@
     }
   }
 }
+
+@media (max-width: 640px) {
+  .admin-ggcc {
+    &__grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+
+      &--compact {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &__tabs {
+      grid-template-columns: 1fr;
+    }
+
+    &__charge-row {
+      grid-template-columns: 1fr;
+    }
+
+    &__form-row {
+      grid-template-columns: 1fr;
+    }
+
+    &__form {
+      input,
+      select {
+        min-height: var(--touch-min);
+        font-size: 1rem;
+      }
+    }
+
+    &__period {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__summary {
+      min-width: auto;
+    }
+  }
+}

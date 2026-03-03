@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../';
 import { ROUTES } from '../../constants';
@@ -94,11 +94,5 @@ const PaymentSuccess = ({
   );
 };
 
-PaymentSuccess.propTypes = {
-  amount: PropTypes.number.isRequired,
-  chargesCount: PropTypes.number.isRequired,
-  paymentMethod: PropTypes.oneOf(['transfer', 'card']).isRequired,
-  redirectDelay: PropTypes.number,
-};
 
 export default PaymentSuccess;

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 
 /**
  * Sistema de iconos SVG profesional para DOMU
@@ -337,12 +336,5 @@ const Icon = ({ name, size = 20, className = '', color, strokeWidth = 1.5, ...pr
   );
 };
 
-Icon.propTypes = {
-  name: PropTypes.string.isRequired,
-  size: PropTypes.number,
-  className: PropTypes.string,
-  color: PropTypes.string,
-  strokeWidth: PropTypes.number,
-};
 
 export default Icon;

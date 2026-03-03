@@ -1,8 +1,12 @@
 .app-header {
   width: 100%;
-  background: var(--color-bg-primary);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 1rem 0;
-  position: static;
+  position: sticky;
+  top: 0;
+  z-index: 50;
   box-shadow: var(--shadow-sm);
   border-bottom: 1px solid var(--color-border-light);
 }
@@ -191,6 +195,25 @@
 
 .dropdown-item-label {
   flex: 1;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: 0.35rem 0.5rem;
+  list-style: none;
+}
+
+.dropdown-item--highlight {
+  justify-content: center;
+  color: var(--color-turquoise);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.dropdown-item--highlight:hover {
+  background: var(--color-bg-accent);
+  color: var(--color-turquoise);
 }
 
 .header-actions {

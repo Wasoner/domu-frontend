@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import './Spinner.scss';
 
 function Spinner({ label, size = 'md', inline = false, overlay = false, variant = 'primary' }) {
@@ -14,12 +14,5 @@ function Spinner({ label, size = 'md', inline = false, overlay = false, variant 
   );
 }
 
-Spinner.propTypes = {
-  label: PropTypes.string,
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
-  inline: PropTypes.bool,
-  overlay: PropTypes.bool,
-  variant: PropTypes.oneOf(['primary', 'white']),
-};
 
 export default Spinner;

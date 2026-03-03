@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import './Skeleton.scss';
 
 /**
@@ -160,15 +160,5 @@ Skeleton.Inline = function SkeletonInline({ width = '80px', label, className = '
   );
 };
 
-Skeleton.propTypes = {
-  variant: PropTypes.oneOf(['text', 'title', 'circle', 'rect', 'card', 'button']),
-  width: PropTypes.string,
-  height: PropTypes.string,
-  borderRadius: PropTypes.string,
-  count: PropTypes.number,
-  gap: PropTypes.string,
-  className: PropTypes.string,
-  style: PropTypes.object,
-};
 
 export default Skeleton;

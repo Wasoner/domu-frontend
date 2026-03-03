@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import Spinner from './Spinner';
 import './Button.scss';
 
@@ -45,17 +45,5 @@ const Button = ({
   );
 };
 
-Button.propTypes = {
-  children: PropTypes.node.isRequired,
-  onClick: PropTypes.func,
-  variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'danger']),
-  size: PropTypes.oneOf(['small', 'sm', 'default', 'large', 'lg']),
-  disabled: PropTypes.bool,
-  loading: PropTypes.bool,
-  type: PropTypes.oneOf(['button', 'submit', 'reset']),
-  fullWidth: PropTypes.bool,
-  icon: PropTypes.node,
-  className: PropTypes.string,
-};
 
 export default Button;

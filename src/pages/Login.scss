@@ -196,6 +196,8 @@
   border: none;
   cursor: pointer;
   padding: 0.25rem;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -268,24 +270,6 @@
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.login-footer p {
-  margin-bottom: 0.75rem;
-  color: var(--color-gray-dark);
-  font-size: 0.9375rem;
-}
-
-.link-register {
-  color: var(--color-turquoise);
-  font-weight: 600;
-  text-decoration: none;
-  transition: color var(--transition-normal);
-}
-
-.link-register:hover {
-  color: var(--color-turquoise);
-  text-decoration: underline;
-}
-
 .link-back {
   display: inline-flex;
   align-items: center;
@@ -348,9 +332,7 @@
   .login-form-panel {
     padding: 2rem 1.5rem;
   }
-}
 
-@media (max-width: 640px) {
   .login-container {
     padding: 1.5rem 1.25rem;
   }

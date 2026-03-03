@@ -1,57 +1,62 @@
 import { Header, MainContent, Footer } from '../layout';
 import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
+import { useScrollReveal, useStaggerReveal } from '../hooks';
 import './UserTypeLanding.scss';
 
 const features = [
   {
     iconName: 'door',
-    title: 'Control de accesos',
-    description: 'Gestiona el ingreso de residentes, visitas y proveedores con registro digital en tiempo real.',
+    title: 'Control de accesos con QR',
+    description: 'Registra el ingreso y salida de visitas en menos de 5 segundos con lectura QR de cédula chilena.',
   },
   {
     iconName: 'clipboard',
-    title: 'Registro de visitas',
-    description: 'Registra y autoriza visitas de forma rápida con notificación automática al residente.',
+    title: 'Preautorización de visitas',
+    description: 'Los residentes preanuncian visitas desde su portal. El conserje solo valida el código QR temporal.',
   },
   {
     iconName: 'archiveBox',
     title: 'Recepción de encomiendas',
-    description: 'Administra la llegada de paquetes y notifica al destinatario para su retiro oportuno.',
+    description: 'Registra paquetes con evidencia fotográfica y notifica automáticamente al residente para su retiro.',
   },
   {
-    iconName: 'chatBubbleLeftRight',
-    title: 'Comunicación con residentes',
-    description: 'Canal directo para avisos urgentes, consultas y coordinación con la comunidad.',
+    iconName: 'clipboardCheck',
+    title: 'Tareas y turnos',
+    description: 'Recibe tareas asignadas por el administrador, registra inicio y fin de turno, y reporta avances.',
   },
   {
     iconName: 'exclamationTriangle',
-    title: 'Reportes de incidencias',
-    description: 'Documenta y reporta incidentes de seguridad o mantenimiento al instante.',
+    title: 'Reporte de incidencias',
+    description: 'Documenta incidentes de seguridad o mantenimiento con evidencia y notificación inmediata.',
   },
   {
     iconName: 'document',
     title: 'Bitácora digital',
-    description: 'Registro cronológico de todas las actividades y eventos del edificio.',
+    description: 'Registro cronológico automático de accesos, encomiendas e incidencias. Sin cuadernos ni papeles.',
   },
 ];
 
 const benefits = [
-  'Gestión simplificada de accesos sin papeles ni registros manuales',
-  'Trazabilidad completa de visitas y encomiendas',
-  'Comunicación directa con residentes y administración',
-  'Historial de incidencias para seguimiento y resolución',
-  'Interfaz intuitiva diseñada para uso diario',
-  'Acceso desde cualquier dispositivo con conexión a internet',
+  'Registro de visitas en segundos, sin cuadernos ni formularios en papel',
+  'Trazabilidad completa de cada acceso, encomienda e incidencia',
+  'Comunicación directa con residentes y administración desde la plataforma',
+  'Control de tareas y turnos con indicadores de cumplimiento',
+  'Interfaz simple diseñada para el ritmo de trabajo de la conserjería',
+  'Funciona desde cualquier dispositivo con navegador web',
 ];
 
 const UserTypeConserjeria = () => {
+  const featuresRef = useStaggerReveal();
+  const benefitsRef = useScrollReveal();
+  const ctaRef = useScrollReveal();
+
   const handleCreateCommunity = () => {
     window.location.href = `${ROUTES.HOME}?openCommunityModal=1`;
   };
 
   const handleDemo = () => {
-    window.location.href = ROUTES.ABOUT;
+    window.location.href = ROUTES.SOLUCIONES;
   };
 
   const handleViewFeatures = () => {
@@ -62,7 +67,7 @@ const UserTypeConserjeria = () => {
   };
 
   return (
-    <div className="usertype-page fade-in">
+    <div className="usertype-page public-page fade-in">
       <Seo
         title="DOMU para Conserjería | Control de accesos y gestión de edificios"
         description="Herramientas digitales para conserjería: control de accesos, registro de visitas, encomiendas y comunicación con residentes en un solo lugar."
@@ -72,23 +77,23 @@ const UserTypeConserjeria = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="usertype-hero animated-section">
+      <section className="usertype-hero">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
             <span className="usertype-hero__eyebrow">Solución para Conserjería</span>
             <h1 className="usertype-hero__title">
-              Gestión digital para <strong>conserjería</strong>
+              Adiós al cuaderno de <strong>portería</strong>
             </h1>
             <p className="usertype-hero__subtitle">
-              Simplifica el control de accesos, registro de visitas y comunicación con residentes. 
-              Todo desde una plataforma intuitiva diseñada para el día a día de la conserjería.
+              Control de accesos con QR, recepción de encomiendas con evidencia y gestión de tareas
+              en una interfaz pensada para el ritmo de trabajo real de la conserjería.
             </p>
             <div className="usertype-hero__actions">
               <Button onClick={handleViewFeatures} variant="primary">
                 Ver funcionalidades
               </Button>
               <Button onClick={handleDemo} variant="ghost">
-                Ver demo
+                Explorar soluciones
               </Button>
             </div>
           </div>
@@ -102,15 +107,15 @@ const UserTypeConserjeria = () => {
 
       <MainContent>
         {/* Features Section */}
-        <section id="soluciones-funcionalidades" className="usertype-features animated-section">
+        <section id="soluciones-funcionalidades" ref={featuresRef} className="usertype-features reveal-section">
           <div className="container">
             <div className="usertype-section__header">
-              <h2>Funcionalidades para Conserjería</h2>
-              <p>Herramientas diseñadas para optimizar las tareas diarias de conserjería</p>
+              <h2>Herramientas para el día a día</h2>
+              <p>Cada función resuelve una tarea concreta que hoy se hace con papel o sistemas manuales</p>
             </div>
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
-                <div key={index} className="usertype-feature-card">
+                <div key={index} className="usertype-feature-card reveal-stagger-child">
                   <div className="usertype-feature-card__icon" aria-hidden="true">
                     <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
                   </div>
@@ -123,7 +128,7 @@ const UserTypeConserjeria = () => {
         </section>
 
         {/* Benefits Section */}
-        <section className="usertype-benefits animated-section">
+        <section ref={benefitsRef} className="usertype-benefits reveal-section">
           <div className="container">
             <div className="usertype-benefits__content">
               <div className="usertype-benefits__text">
@@ -140,15 +145,15 @@ const UserTypeConserjeria = () => {
                     <Icon name="chartBar" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
                   </span>
                   <h3>Panel de conserjería</h3>
-                  <p>Vista centralizada con todas las tareas pendientes, visitas del día y notificaciones importantes.</p>
+                  <p>Tareas pendientes, visitas del día, encomiendas por entregar y turnos activos en una sola vista.</p>
                   <div className="usertype-benefits__card-stats">
                     <div>
-                      <strong>-60%</strong>
-                      <span>Tiempo en registro</span>
+                      <strong>&lt;5 s</strong>
+                      <span>Registro de visita</span>
                     </div>
                     <div>
-                      <strong>100%</strong>
-                      <span>Trazabilidad</span>
+                      <strong>QR</strong>
+                      <span>Cédula chilena</span>
                     </div>
                   </div>
                 </div>
@@ -158,11 +163,11 @@ const UserTypeConserjeria = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="usertype-cta animated-section">
+        <section ref={ctaRef} className="usertype-cta reveal-section">
           <div className="container">
             <div className="usertype-cta__content">
-              <h2>¿Listo para modernizar tu conserjería?</h2>
-              <p>Únete a las comunidades que ya optimizaron la gestión de su edificio con DOMU</p>
+              <h2>Digitaliza la conserjería de tu edificio</h2>
+              <p>Control de accesos, encomiendas y tareas sin papeles ni sistemas manuales</p>
               <div className="usertype-cta__actions">
                 <Button onClick={handleCreateCommunity} variant="primary">
                   Crear mi comunidad

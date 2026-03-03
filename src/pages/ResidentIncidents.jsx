@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { api } from '../services';
@@ -140,15 +140,6 @@ const IncidentItem = ({ incident }) => {
   );
 };
 
-IncidentItem.propTypes = {
-  incident: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    title: PropTypes.string,
-    category: PropTypes.string,
-    createdAt: PropTypes.string,
-    date: PropTypes.string,
-  }).isRequired,
-};
 
 const ResidentIncidentsSkeleton = () => (
   <div className="resident-incidents__panel-list">

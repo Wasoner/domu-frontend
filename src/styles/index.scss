@@ -1,5 +1,6 @@
 /* Botones primarios - estilos globales para consistencia */
 @use '../components/Button.scss';
+@use './public-typography';
 
 :root {
   /* ========================================
@@ -57,6 +58,13 @@
   --radius-xl: 20px;
   --radius-pill: 999px;
 
+  /* Responsive spacing */
+  --space-page-x: clamp(1rem, 3vw, 2.5rem);
+  --space-page-y: clamp(1rem, 2vw, 1.5rem);
+  --space-gap: clamp(1rem, 2vw, 1.5rem);
+  --touch-min: 44px;
+  --modal-max-height: min(90vh, 100dvh - 2rem);
+
   /* Animaciones */
   --motion-duration: 0.6s;
   --motion-ease: cubic-bezier(0.18, 0.8, 0.3, 1);
@@ -72,7 +80,6 @@
 }
 
 html {
-  overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -99,7 +106,6 @@ body {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow-x: hidden;
 }
 
 /* Tipografía mejorada */
@@ -252,16 +258,52 @@ button {
 }
 
 /* ========================================
+   Responsive page-* patterns (dashboard)
+   ======================================== */
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .page-actions {
+    width: 100%;
+
+    .btn {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .page-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-card {
+    padding: 1rem;
+  }
+}
+
+/* ========================================
    Layout de páginas públicas (Header + Content + Footer)
    ======================================== */
 .public-page {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
-.public-page > .app-header {
-  grid-row: 1;
+.public-page > .app-main {
+  flex: 1;
 }
 
 .public-page > .app-main {
@@ -303,11 +345,154 @@ button {
   animation: floatUp 2.4s ease-in-out infinite;
 }
 
+/* Scroll Reveal */
+.reveal-section {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.18, 0.8, 0.3, 1), transform 0.7s cubic-bezier(0.18, 0.8, 0.3, 1);
+}
+
+.reveal-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-stagger-child {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s cubic-bezier(0.18, 0.8, 0.3, 1), transform 0.5s cubic-bezier(0.18, 0.8, 0.3, 1);
+  transition-delay: var(--stagger-delay, 0ms);
+}
+
+.reveal-stagger-child.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .reveal-section,
+  .reveal-stagger-child {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ========================================
+   Utilidades PWA / Mobile
+   ======================================== */
+
+html {
+  -moz-text-size-adjust: 100%;
+}
+
+/* Safe-area utilities para iOS notch */
+.safe-area-top { padding-top: env(safe-area-inset-top); }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-area-x {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+.safe-area-y {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Eliminar highlight de tap en elementos interactivos */
+a,
+button,
+.btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Touch feedback para dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+  a:active,
+  button:active,
+  .btn:active {
+    opacity: 0.85;
+    transition-duration: 0.05s;
+  }
+}
+
+/* ========================================
+   Prevención zoom iOS en inputs
+   ======================================== */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: max(1rem, 16px);
+  }
+}
+
+/* ========================================
+   Modal responsive global
+   ======================================== */
+@supports (height: 100dvh) {
+  .modal-overlay,
+  .confirm-modal-overlay,
+  .chat-modal-overlay,
+  .market-modal-overlay,
+  .admin-staff__modal-overlay,
+  .polls-modal,
+  .payment-method-modal__overlay {
+    min-height: 100dvh;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal,
+  .admin-staff__modal,
+  .publication-modal,
+  .chat-modal,
+  .polls-modal__card {
+    max-width: calc(100vw - 2rem);
+  }
+
+  .modal__header,
+  .admin-staff__modal-header {
+    padding: 1rem;
+
+    h2 {
+      font-size: 1.1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .modal__body,
+  .admin-staff__form {
+    padding: 1rem;
+  }
+
+  .modal__footer,
+  .admin-staff__form-footer {
+    padding: 1rem;
+    flex-direction: column;
+
+    .btn,
+    button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay,
+  .confirm-modal-overlay,
+  .chat-modal-overlay,
+  .market-modal-overlay,
+  .admin-staff__modal-overlay,
+  .polls-modal,
+  .payment-method-modal__overlay {
+    padding: 0.5rem;
   }
 }

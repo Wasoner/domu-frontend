@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
+
 import { api } from '../services';
 import Button from './Button';
 import Skeleton from './Skeleton';
@@ -1040,16 +1040,6 @@ const VisitRegistrationPanel = ({ user }) => {
   );
 };
 
-VisitRegistrationPanel.propTypes = {
-  user: PropTypes.shape({
-    firstName: PropTypes.string,
-    lastName: PropTypes.string,
-    email: PropTypes.string,
-    userType: PropTypes.string,
-    roleId: PropTypes.number,
-    unitId: PropTypes.number,
-  }),
-};
 
 VisitRegistrationPanel.defaultProps = {
   user: null,

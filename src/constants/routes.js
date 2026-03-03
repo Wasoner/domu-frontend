@@ -15,6 +15,7 @@ export const ROUTES = {
   FEATURES: '/features',
   PRICING: '/pricing',
   CONTACT: '/contact',
+  SOLUCIONES: '/soluciones',
 
   // Soluciones - Landing pages por tipo de usuario
   SOLUCIONES_CONSERJERIA: '/soluciones/conserjeria',
@@ -43,6 +44,8 @@ export const ROUTES = {
   ADMIN_AMENITIES: '/dashboard/amenities',
   ADMIN_TASKS: '/dashboard/tasks',
   ADMIN_STAFF: '/dashboard/staff',
+  ADMIN_PROVIDERS: '/dashboard/proveedores',
+  ADMIN_SERVICE_ORDERS: '/dashboard/ordenes-servicio',
   SETTINGS: '/dashboard/settings',
 
   // Protected routes - Resident
@@ -78,6 +81,18 @@ export const ROUTES = {
 
   // Payment Flow
   RESIDENT_PAYMENT: '/resident/pagar',
+
+  // Provider portal
+  PROVIDER_PORTAL: '/proveedor',
+  PROVIDER_SERVICE_ORDERS: '/proveedor/ordenes',
+  PROVIDER_ORDER_DETAIL: '/proveedor/ordenes/:id',
+
+  // Landing publica
+  SOLUCIONES_PROVEEDORES: '/soluciones/proveedores',
+
+  // Notifications
+  NOTIFICATIONS: '/notifications',
+  NOTIFICATION_PREFERENCES: '/notifications/preferences',
 };
 
 /**
@@ -98,6 +113,8 @@ export const ROUTE_CATEGORIES = {
     ROUTES.SOLUCIONES_COMITE,
     ROUTES.SOLUCIONES_RESIDENTE,
     ROUTES.SOLUCIONES_FUNCIONARIOS,
+    ROUTES.SOLUCIONES_PROVEEDORES,
+    ROUTES.SOLUCIONES,
   ],
   ADMIN: [
     ROUTES.DASHBOARD,

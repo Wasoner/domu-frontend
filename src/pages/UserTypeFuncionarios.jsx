@@ -1,87 +1,92 @@
 import { Header, MainContent, Footer } from '../layout';
 import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
+import { useScrollReveal, useStaggerReveal } from '../hooks';
 import './UserTypeLanding.scss';
 
 const features = [
   {
-    iconName: 'magnifyingGlass',
-    title: 'Fiscalización de comunidades',
-    description: 'Supervisa el cumplimiento normativo de edificios y condominios en tu jurisdicción.',
+    iconName: 'document',
+    title: 'Reportes financieros exportables',
+    description: 'Las comunidades en DOMU generan estados financieros, estados de cuenta y reportes de morosidad que pueden compartirse con entidades fiscalizadoras.',
+  },
+  {
+    iconName: 'shieldCheck',
+    title: 'Cumplimiento de Ley 21.442',
+    description: 'DOMU está diseñado para facilitar el cumplimiento de la Ley de Copropiedad Inmobiliaria, con trazabilidad de operaciones y documentación digital.',
   },
   {
     iconName: 'chartBar',
-    title: 'Reportes consolidados',
-    description: 'Accede a reportes agregados de múltiples comunidades para análisis territorial.',
+    title: 'Registro digital de accesos',
+    description: 'Cada ingreso y salida de visitantes queda registrado digitalmente con fecha, hora e identificación, facilitando auditorías de seguridad.',
   },
   {
     iconName: 'clipboardCheck',
-    title: 'Gestión de permisos',
-    description: 'Administra y verifica permisos de operación y certificaciones de edificios.',
+    title: 'Trazabilidad de gestión',
+    description: 'Historial completo de tareas, incidencias, pagos y votaciones que permite verificar la gestión administrativa de una comunidad.',
   },
   {
     iconName: 'buildingBank',
-    title: 'Estadísticas territoriales',
-    description: 'Visualiza indicadores de gestión comunitaria a nivel municipal o regional.',
-  },
-  {
-    iconName: 'bellAlert',
-    title: 'Alertas de cumplimiento',
-    description: 'Recibe notificaciones automáticas sobre vencimientos y obligaciones pendientes.',
+    title: 'Protección de datos personales',
+    description: 'Diseñado conforme a la Ley 21.719 de Protección de Datos, con cifrado, control de acceso por roles y cumplimiento de derechos ARCO.',
   },
   {
     iconName: 'users',
-    title: 'Coordinación con administradores',
-    description: 'Canal de comunicación oficial para requerimientos y consultas a administradores.',
+    title: 'Transparencia para copropietarios',
+    description: 'El sistema permite que comités y residentes accedan a la información financiera, promoviendo la transparencia que exige la normativa.',
   },
 ];
 
 const benefits = [
-  'Supervisión eficiente de múltiples comunidades',
-  'Datos centralizados y actualizados en tiempo real',
-  'Cumplimiento normativo verificable',
-  'Comunicación directa con administradores',
-  'Reportes exportables para informes oficiales',
-  'Trazabilidad completa de gestiones realizadas',
+  'Comunidades con documentación financiera digital y exportable',
+  'Registro de accesos verificable con identificación QR',
+  'Votaciones digitales con resultados trazables y exportables en PDF',
+  'Gestión de incidencias documentada con evidencia',
+  'Cumplimiento normativo facilitado por diseño (Ley 21.442 y 21.719)',
+  'Plataforma que promueve la transparencia entre administrador y copropietarios',
 ];
 
 const UserTypeFuncionarios = () => {
+  const featuresRef = useStaggerReveal();
+  const benefitsRef = useScrollReveal();
+  const ctaRef = useScrollReveal();
+
   const handleContact = () => {
-    window.location.href = ROUTES.ABOUT;
+    window.location.href = ROUTES.CONTACT;
   };
 
   const handleDemo = () => {
-    window.location.href = ROUTES.ABOUT;
+    window.location.href = ROUTES.SOLUCIONES;
   };
 
   return (
-    <div className="usertype-page fade-in">
+    <div className="usertype-page public-page fade-in">
       <Seo
-        title="DOMU para Funcionarios | Fiscalización y supervisión de condominios"
-        description="Herramientas para funcionarios municipales: fiscalización de comunidades, reportes consolidados, estadísticas y coordinación con administradores."
-        keywords="funcionarios domu, fiscalizacion condominios, supervision municipal edificios, reportes comunidades"
+        title="DOMU y el cumplimiento normativo | Transparencia para comunidades"
+        description="Cómo DOMU facilita el cumplimiento de la Ley 21.442 y la Ley 21.719 en comunidades residenciales, con trazabilidad, reportes y documentación digital."
+        keywords="cumplimiento normativo condominios, ley 21442, ley copropiedad inmobiliaria, transparencia comunidades chile"
         canonicalPath="/soluciones/funcionarios"
       />
       <Header />
 
       {/* Hero Section */}
-      <section className="usertype-hero animated-section">
+      <section className="usertype-hero">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
-            <span className="usertype-hero__eyebrow">Solución para Funcionarios</span>
+            <span className="usertype-hero__eyebrow">Cumplimiento normativo</span>
             <h1 className="usertype-hero__title">
-              Fiscalización <strong>inteligente</strong> de comunidades
+              Comunidades preparadas para la <strong>fiscalización</strong>
             </h1>
             <p className="usertype-hero__subtitle">
-              Supervisa el cumplimiento normativo, accede a estadísticas territoriales y 
-              coordina con administradores desde una plataforma centralizada.
+              DOMU genera la documentación, trazabilidad y transparencia que la Ley de Copropiedad
+              Inmobiliaria 21.442 exige a las comunidades residenciales.
             </p>
             <div className="usertype-hero__actions">
               <Button onClick={handleContact} variant="primary">
                 Contactar ventas
               </Button>
               <Button onClick={handleDemo} variant="ghost">
-                Ver demo
+                Explorar soluciones
               </Button>
             </div>
           </div>
@@ -95,15 +100,15 @@ const UserTypeFuncionarios = () => {
 
       <MainContent>
         {/* Features Section */}
-        <section className="usertype-features animated-section">
+        <section ref={featuresRef} className="usertype-features reveal-section">
           <div className="container">
             <div className="usertype-section__header">
-              <h2>Funcionalidades para Funcionarios</h2>
-              <p>Herramientas de supervisión y gestión territorial de comunidades</p>
+              <h2>Qué ofrece DOMU para el cumplimiento normativo</h2>
+              <p>Capacidades de la plataforma que facilitan la fiscalización y la transparencia comunitaria</p>
             </div>
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
-                <div key={index} className="usertype-feature-card">
+                <div key={index} className="usertype-feature-card reveal-stagger-child">
                   <div className="usertype-feature-card__icon" aria-hidden="true">
                     <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
                   </div>
@@ -116,11 +121,11 @@ const UserTypeFuncionarios = () => {
         </section>
 
         {/* Benefits Section */}
-        <section className="usertype-benefits animated-section">
+        <section ref={benefitsRef} className="usertype-benefits reveal-section">
           <div className="container">
             <div className="usertype-benefits__content">
               <div className="usertype-benefits__text">
-                <h2>Beneficios para la gestión pública</h2>
+                <h2>Cómo DOMU facilita el cumplimiento</h2>
                 <ul className="usertype-benefits__list">
                   {benefits.map((benefit, index) => (
                     <li key={index}>{benefit}</li>
@@ -132,16 +137,16 @@ const UserTypeFuncionarios = () => {
                   <span className="usertype-benefits__card-icon" aria-hidden="true">
                     <Icon name="archiveBox" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
                   </span>
-                  <h3>Panel de fiscalización</h3>
-                  <p>Vista consolidada de comunidades con indicadores de cumplimiento y alertas automáticas.</p>
+                  <h3>Diseñado para la normativa chilena</h3>
+                  <p>Cada módulo fue desarrollado considerando los requerimientos de la Ley 21.442 y la Ley 21.719 de Protección de Datos.</p>
                   <div className="usertype-benefits__card-stats">
                     <div>
-                      <strong>+50%</strong>
-                      <span>Eficiencia</span>
+                      <strong>Ley 21.442</strong>
+                      <span>Copropiedad</span>
                     </div>
                     <div>
-                      <strong>100%</strong>
-                      <span>Digital</span>
+                      <strong>Ley 21.719</strong>
+                      <span>Datos personales</span>
                     </div>
                   </div>
                 </div>
@@ -151,11 +156,11 @@ const UserTypeFuncionarios = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="usertype-cta animated-section">
+        <section ref={ctaRef} className="usertype-cta reveal-section">
           <div className="container">
             <div className="usertype-cta__content">
-              <h2>¿Interesado en implementar DOMU en tu municipio?</h2>
-              <p>Contáctanos para conocer planes institucionales y casos de éxito</p>
+              <h2>¿Tu comunidad necesita cumplir con la normativa vigente?</h2>
+              <p>Contáctanos para conocer cómo DOMU ayuda a las comunidades a estar preparadas</p>
               <div className="usertype-cta__actions">
                 <Button onClick={handleContact} variant="primary">
                   Contactar ventas

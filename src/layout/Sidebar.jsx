@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import PropTypes from 'prop-types';
+
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../components';
 import { ROUTES } from '../constants';
@@ -217,34 +217,6 @@ const Sidebar = ({ navSections, user }) => {
   );
 };
 
-Sidebar.propTypes = {
-  user: PropTypes.shape({
-    firstName: PropTypes.string,
-    lastName: PropTypes.string,
-    email: PropTypes.string,
-    avatarBoxId: PropTypes.string,
-  }),
-  navSections: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      items: PropTypes.arrayOf(
-        PropTypes.shape({
-          label: PropTypes.string.isRequired,
-          icon: PropTypes.string,
-          to: PropTypes.string,
-          exact: PropTypes.bool,
-          subItems: PropTypes.arrayOf(
-            PropTypes.shape({
-              label: PropTypes.string.isRequired,
-              to: PropTypes.string.isRequired,
-              exact: PropTypes.bool,
-            })
-          ),
-        })
-      ),
-    })
-  ),
-};
 
 Sidebar.defaultProps = {
   navSections: [],

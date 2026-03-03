@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import { Icon, Button } from './index';
 import './ConfirmModal.scss';
 
@@ -51,17 +51,5 @@ const ConfirmModal = ({
     );
 };
 
-ConfirmModal.propTypes = {
-    open: PropTypes.bool.isRequired,
-    title: PropTypes.string,
-    message: PropTypes.string,
-    confirmLabel: PropTypes.string,
-    cancelLabel: PropTypes.string,
-    variant: PropTypes.oneOf(['danger', 'warning', 'info']),
-    icon: PropTypes.string,
-    loading: PropTypes.bool,
-    onConfirm: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired,
-};
 
 export default ConfirmModal;

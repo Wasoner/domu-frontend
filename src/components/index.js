@@ -15,3 +15,4 @@ export { default as Spinner } from './Spinner';
 export { default as NeighborProfileModal } from './NeighborProfileModal';
 export { default as CreatePublicationModal } from './CreatePublicationModal';
 export { default as ConfirmModal } from './ConfirmModal';
+export { default as ScrollToTop } from './ScrollToTop';

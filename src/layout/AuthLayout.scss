@@ -7,12 +7,13 @@
 .auth-layout__body {
   display: flex;
   align-items: flex-start;
-  gap: 1.5rem;
-  padding: 1.5rem 2.5rem 2.5rem;
+  gap: var(--space-gap);
+  padding: var(--space-page-y) var(--space-page-x);
 }
 
 .auth-layout__content {
   flex: 1;
+  min-width: 0;
   min-height: calc(100vh - 120px);
 }
 
@@ -20,7 +21,8 @@
   background: transparent;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-gap);
+  min-width: 0;
 }
 
 .auth-layout__loading {
@@ -206,7 +208,7 @@
 
 @media (max-width: 1024px) {
   .auth-layout__body {
-    padding: 1.5rem;
+    gap: 1rem;
   }
 
   .auth-layout__loading-skeleton {
@@ -215,10 +217,6 @@
 }
 
 @media (max-width: 768px) {
-  .auth-layout__body {
-    padding: 1rem;
-  }
-
   .auth-layout__loading-skeleton {
     padding: 1rem;
   }

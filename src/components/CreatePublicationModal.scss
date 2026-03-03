@@ -129,3 +129,33 @@
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+@media (max-width: 640px) {
+  .publication-modal {
+    border-radius: 1rem;
+
+    .modal-header {
+      padding: 1rem 1.25rem;
+
+      h3 {
+        font-size: 1.1rem;
+      }
+    }
+
+    form {
+      padding: 1.25rem;
+    }
+
+    .modal-actions {
+      flex-direction: column;
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+
+      button,
+      .btn {
+        width: 100%;
+        min-height: var(--touch-min);
+      }
+    }
+  }
+}

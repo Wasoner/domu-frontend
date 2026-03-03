@@ -80,3 +80,32 @@
     opacity: 1;
   }
 }
+
+@media (max-width: 480px) {
+  .confirm-modal {
+    padding: 1.5rem;
+
+    &__icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
+    }
+
+    &__title {
+      font-size: 1rem;
+    }
+
+    &__message {
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    &__actions {
+      flex-direction: column;
+
+      button {
+        min-height: var(--touch-min);
+      }
+    }
+  }
+}
