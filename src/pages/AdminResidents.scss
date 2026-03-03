@@ -66,7 +66,7 @@
 .admin-residents__search {
   position: relative;
   flex: 1;
-  min-width: 240px;
+  min-width: min(240px, 100%);
 }
 
 .admin-residents__search-input {

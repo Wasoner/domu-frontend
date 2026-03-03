@@ -160,3 +160,26 @@
     color: var(--color-black);
   }
 }
+
+@media (max-width: 480px) {
+  .payment-method-modal {
+    max-width: calc(100vw - 1rem);
+  }
+
+  .payment-method-modal__header {
+    padding: 1.5rem 1.25rem 1rem;
+  }
+
+  .payment-method-modal__options {
+    padding: 0 1rem;
+  }
+
+  .payment-method-modal__option {
+    padding: 1rem;
+    min-height: var(--touch-min);
+  }
+
+  .payment-method-modal__footer {
+    padding: 1rem 1.25rem 1.5rem;
+  }
+}

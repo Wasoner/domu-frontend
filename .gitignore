@@ -3,6 +3,7 @@ node_modules/
 
 # Build de Vite
 dist/
+dev-dist/
 
 # Archivos de entorno
 .env

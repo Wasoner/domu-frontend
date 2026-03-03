@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { Map, Marker, ZoomControl } from 'pigeon-maps';
 
@@ -654,21 +654,5 @@ const LocationPicker = ({ latitude, longitude, onSelect, className, savedLocatio
   );
 };
 
-LocationPicker.propTypes = {
-  latitude: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  longitude: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  onSelect: PropTypes.func,
-  className: PropTypes.string,
-  savedLocations: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    name: PropTypes.string,
-    address: PropTypes.string,
-    city: PropTypes.string,
-    commune: PropTypes.string,
-    latitude: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    longitude: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  })),
-  onSavedLocationSelect: PropTypes.func,
-};
 
 export default LocationPicker;

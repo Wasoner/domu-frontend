@@ -8,8 +8,9 @@ const solucionesItems = [
   { label: 'Administrador', route: ROUTES.SOLUCIONES_ADMINISTRADOR, iconName: 'chartBar' },
   { label: 'Comité', route: ROUTES.SOLUCIONES_COMITE, iconName: 'scale' },
   { label: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, iconName: 'buildingOffice' },
-  { label: 'Funcionarios', route: ROUTES.SOLUCIONES_FUNCIONARIOS, iconName: 'buildingLibrary' },
+  { label: 'Cumplimiento', route: ROUTES.SOLUCIONES_FUNCIONARIOS, iconName: 'buildingLibrary' },
   { label: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, iconName: 'home' },
+  { label: 'Proveedores', route: ROUTES.SOLUCIONES_PROVEEDORES, iconName: 'wrench' },
 ];
 
 const Header = () => {
@@ -73,8 +74,6 @@ const Header = () => {
         </div>
 
         <nav className="main-nav" aria-label="Navegación principal">
-          <Link to={ROUTES.HOME} className="nav-item">Inicio</Link>
-          
           {/* Dropdown Soluciones */}
           <div className="nav-dropdown" ref={dropdownRef}>
             <button
@@ -123,6 +122,17 @@ const Header = () => {
                   </Link>
                 </li>
               ))}
+              <li role="none" className="dropdown-divider" aria-hidden="true" />
+              <li role="none">
+                <Link
+                  to={ROUTES.SOLUCIONES}
+                  className="dropdown-item dropdown-item--highlight"
+                  role="menuitem"
+                  onClick={closeDropdown}
+                >
+                  <span className="dropdown-item-label">Ver todas las soluciones</span>
+                </Link>
+              </li>
             </ul>
           </div>
         </nav>

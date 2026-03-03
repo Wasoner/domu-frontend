@@ -37,7 +37,7 @@ export const AppProvider = ({ children }) => {
   });
 
   const [theme, setTheme] = useState('light');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !!localStorage.getItem('authToken'));
   // Contador para detectar cambios de edificio y forzar recarga de datos
   const [buildingVersion, setBuildingVersion] = useState(0);
 

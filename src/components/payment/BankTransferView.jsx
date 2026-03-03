@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { Icon } from '../';
 import useCountdown from '../../hooks/useCountdown';
 import './BankTransferView.scss';
@@ -150,12 +150,5 @@ Monto: ${formatCurrency(amount)}`;
   );
 };
 
-BankTransferView.propTypes = {
-  amount: PropTypes.number.isRequired,
-  buildingName: PropTypes.string,
-  onComplete: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  countdownSeconds: PropTypes.number,
-};
 
 export default BankTransferView;

@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import './CreditCardSVG.scss';
 
 const CreditCardSVG = ({
@@ -199,12 +199,5 @@ const CreditCardSVG = ({
   );
 };
 
-CreditCardSVG.propTypes = {
-  cardNumber: PropTypes.string,
-  cardHolder: PropTypes.string,
-  expiryDate: PropTypes.string,
-  cvv: PropTypes.string,
-  isFlipped: PropTypes.bool,
-};
 
 export default CreditCardSVG;

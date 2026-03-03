@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link, NavLink } from 'react-router-dom';
-import PropTypes from 'prop-types';
+
 import logo from '../assets/LogotipoDOMU.svg';
 import { Icon } from '../components';
 import { useAppContext } from '../context';
 import { ROUTES } from '../constants';
-import { getNotificationVisual } from '../constants/notifications';
+import { getNotificationVisual, getNotificationRoute } from '../constants/notifications';
 import { useNotifications } from '../hooks/useNotifications';
 import './AuthHeader.scss';
 
@@ -42,7 +42,7 @@ const AuthHeader = ({ user, navSections = [] }) => {
     notificationsPreview,
     unreadCount,
     markRead,
-    hideNotifications,
+    markAllRead,
   } = useNotifications(user);
 
   const formatRelativeTime = (dateString) => {
@@ -60,39 +60,32 @@ const AuthHeader = ({ user, navSections = [] }) => {
   };
 
   const getNotificationDetail = (notification) => {
-    return notification.detail || notification.message || '';
+    return notification.message || '';
   };
 
   const getNotificationTime = (notification) => {
-    return notification.timeLabel || formatRelativeTime(notification.date);
+    return formatRelativeTime(notification.createdAt);
   };
 
   const handleNotificationClick = (notification) => {
     setShowNotificationsDropdown(false);
-    markRead([notification.id]);
-    if (notification.to) {
-      navigate(notification.to);
+    if (!notification.isRead) {
+      markRead(notification.id);
+    }
+    const route = getNotificationRoute(notification);
+    if (route) {
+      navigate(route);
     }
   };
 
   const handleViewAllNotifications = () => {
     setShowNotificationsDropdown(false);
-    navigate(ROUTES.RESIDENT_PUBLICATIONS);
+    navigate(ROUTES.NOTIFICATIONS);
   };
 
-  const handleClearVisible = () => {
-    hideNotifications(notificationsPreview.map((item) => item.id));
+  const handleMarkAllRead = () => {
+    markAllRead();
   };
-
-  useEffect(() => {
-    if (!showNotificationsDropdown) return;
-    const unreadIds = notificationsPreview
-      .filter((item) => item.isUnread)
-      .map((item) => item.id);
-    if (unreadIds.length > 0) {
-      markRead(unreadIds);
-    }
-  }, [showNotificationsDropdown, notificationsPreview, markRead]);
 
   // Asegurar que exista un building seleccionado para el header y la API
   useEffect(() => {
@@ -421,10 +414,10 @@ const AuthHeader = ({ user, navSections = [] }) => {
                   <button
                     type="button"
                     className="auth-header__dropdown-action auth-header__dropdown-action--muted"
-                    onClick={handleClearVisible}
-                    disabled={notificationsPreview.length === 0}
+                    onClick={handleMarkAllRead}
+                    disabled={unreadCount === 0}
                   >
-                    Limpiar visibles
+                    Marcar leidas
                   </button>
                   <button
                     type="button"
@@ -450,7 +443,7 @@ const AuthHeader = ({ user, navSections = [] }) => {
                       <button
                         key={notification.id}
                         type="button"
-                        className={`auth-header__notification ${notification.isUnread ? 'is-new' : 'is-read'}`}
+                        className={`auth-header__notification ${!notification.isRead ? 'is-new' : 'is-read'}`}
                         onClick={() => handleNotificationClick(notification)}
                       >
                         <div className="auth-header__notification-type">
@@ -466,7 +459,7 @@ const AuthHeader = ({ user, navSections = [] }) => {
                         <div className="auth-header__notification-content">
                           <div className="auth-header__notification-title-row">
                             <span className="auth-header__notification-title">{notification.title}</span>
-                            {notification.isUnread && <span className="auth-header__notification-dot" aria-hidden="true" />}
+                            {!notification.isRead && <span className="auth-header__notification-dot" aria-hidden="true" />}
                           </div>
                           <span className="auth-header__notification-detail">{detail}</span>
                         </div>
@@ -488,36 +481,6 @@ const AuthHeader = ({ user, navSections = [] }) => {
   );
 };
 
-AuthHeader.propTypes = {
-  user: PropTypes.shape({
-    firstName: PropTypes.string,
-    lastName: PropTypes.string,
-    email: PropTypes.string,
-    userType: PropTypes.string,
-    unitId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    avatarBoxId: PropTypes.string,
-  }),
-  navSections: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      items: PropTypes.arrayOf(
-        PropTypes.shape({
-          label: PropTypes.string.isRequired,
-          icon: PropTypes.string,
-          to: PropTypes.string,
-          exact: PropTypes.bool,
-          subItems: PropTypes.arrayOf(
-            PropTypes.shape({
-              label: PropTypes.string.isRequired,
-              to: PropTypes.string.isRequired,
-              exact: PropTypes.bool,
-            })
-          ),
-        })
-      ),
-    })
-  ),
-};
 
 AuthHeader.defaultProps = {
   user: null,

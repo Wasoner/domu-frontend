@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { Icon, Spinner } from '../';
 import CreditCardSVG from './CreditCardSVG';
 import './CardPaymentView.scss';
@@ -226,10 +226,5 @@ const CardPaymentView = ({ amount, onComplete, onCancel }) => {
   );
 };
 
-CardPaymentView.propTypes = {
-  amount: PropTypes.number.isRequired,
-  onComplete: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-};
 
 export default CardPaymentView;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+
 import { useNavigate } from 'react-router-dom';
 import { Icon, Button, Skeleton } from './index';
 import { api } from '../services';
@@ -136,10 +136,5 @@ const NeighborProfileModal = ({ userId, onClose, onContact }) => {
     );
 };
 
-NeighborProfileModal.propTypes = {
-    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    onClose: PropTypes.func.isRequired,
-    onContact: PropTypes.func,
-};
 
 export default NeighborProfileModal;

@@ -139,7 +139,7 @@
 
 .about-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
   gap: 0.95rem;
 }
 
@@ -165,6 +165,16 @@
   color: var(--color-gray-dark);
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .about-metric-card:active,
+  .about-pillar-card:active,
+  .about-module-card:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+    transition-duration: 0.05s;
+  }
+}
+
 .about-section--accent {
   margin: 0.5rem 0;
   background: linear-gradient(135deg, rgba(83, 164, 151, 0.08), rgba(241, 107, 50, 0.08));
@@ -174,7 +184,7 @@
 
 .about-pillars {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 1rem;
 }
 
@@ -219,7 +229,7 @@
 
 .about-modules-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(205px, 100%), 1fr));
   gap: 0.9rem;
 }
 

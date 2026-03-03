@@ -1,61 +1,66 @@
 import { Header, MainContent, Footer } from '../layout';
 import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
+import { useScrollReveal, useStaggerReveal } from '../hooks';
 import './UserTypeLanding.scss';
 
 const features = [
   {
     iconName: 'creditCard',
-    title: 'Pago de gastos comunes',
-    description: 'Paga tus gastos comunes en línea de forma segura con múltiples medios de pago.',
+    title: 'Paga tus gastos comunes',
+    description: 'Pago en línea seguro vía Mercado Pago. Consulta tu estado de cuenta y descarga comprobantes en PDF.',
   },
   {
     iconName: 'calendar',
-    title: 'Reserva de espacios',
-    description: 'Reserva quinchos, salas de eventos y otros espacios comunes en segundos.',
+    title: 'Reserva espacios comunes',
+    description: 'Agenda quinchos, salas de eventos y áreas comunes directamente desde tu portal, con disponibilidad en tiempo real.',
   },
   {
     iconName: 'users',
-    title: 'Registro de visitas',
-    description: 'Anuncia visitas y proveedores con anticipación para agilizar su ingreso.',
+    title: 'Preanuncia tus visitas',
+    description: 'Registra visitas con anticipación para que ingresen de forma ágil. Recibe notificación cuando lleguen.',
   },
   {
     iconName: 'exclamationTriangle',
-    title: 'Reportar incidencias',
-    description: 'Informa problemas de mantenimiento o seguridad directamente a la administración.',
+    title: 'Reporta incidencias',
+    description: 'Informa problemas de mantenimiento o seguridad con evidencia fotográfica y haz seguimiento del ticket.',
   },
   {
-    iconName: 'speakerWave',
-    title: 'Ver comunicados',
-    description: 'Mantente informado con los avisos oficiales y noticias de tu comunidad.',
+    iconName: 'chatBubbleLeftRight',
+    title: 'Comunidad conectada',
+    description: 'Foro comunitario, marketplace vecinal para compra y venta, y chat directo con otros residentes.',
   },
   {
-    iconName: 'clockHistory',
-    title: 'Historial de pagos',
-    description: 'Consulta tu historial de pagos, saldos pendientes y descarga comprobantes.',
+    iconName: 'archiveBox',
+    title: 'Encomiendas con aviso',
+    description: 'Recibe notificación cuando llegue un paquete a conserjería y confirma su retiro desde el portal.',
   },
 ];
 
 const benefits = [
-  'Pagos desde cualquier lugar, las 24 horas del día',
-  'Reservas de espacios comunes al instante',
-  'Comunicación directa con la administración',
-  'Notificaciones de avisos importantes',
-  'Seguimiento de incidencias reportadas',
-  'Acceso desde el portal web o aplicación móvil',
+  'Paga gastos comunes desde tu celular, a cualquier hora',
+  'Reserva espacios comunes con disponibilidad en tiempo real',
+  'Comunicación directa con administración y vecinos',
+  'Notificaciones de encomiendas, avisos e incidencias',
+  'Seguimiento del estado de tus reportes y solicitudes',
+  'Acceso desde cualquier dispositivo: celular, tablet o computador',
 ];
 
 const UserTypeResidente = () => {
+  const featuresRef = useStaggerReveal();
+  const benefitsRef = useScrollReveal();
+  const ctaRef = useScrollReveal();
+
   const handleLogin = () => {
     window.location.href = ROUTES.LOGIN;
   };
 
   const handleDemo = () => {
-    window.location.href = ROUTES.ABOUT;
+    window.location.href = ROUTES.SOLUCIONES;
   };
 
   return (
-    <div className="usertype-page fade-in">
+    <div className="usertype-page public-page fade-in">
       <Seo
         title="DOMU para Residentes | Portal de pagos y servicios"
         description="Portal para residentes: paga gastos comunes en línea, reserva espacios, registra visitas y mantente comunicado con tu comunidad."
@@ -65,23 +70,23 @@ const UserTypeResidente = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="usertype-hero animated-section">
+      <section className="usertype-hero">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
             <span className="usertype-hero__eyebrow">Solución para Residentes</span>
             <h1 className="usertype-hero__title">
-              Tu comunidad en la <strong>palma de tu mano</strong>
+              Tu edificio, siempre al <strong>alcance</strong>
             </h1>
             <p className="usertype-hero__subtitle">
-              Paga gastos comunes, reserva espacios y mantente conectado con tu edificio. 
-              Todo desde un portal web diseñado para tu comodidad.
+              Paga gastos comunes, reserva el quincho, anuncia visitas y mantente al día
+              con tu comunidad. Todo desde el portal web, sin instalar nada.
             </p>
             <div className="usertype-hero__actions">
               <Button onClick={handleLogin} variant="primary">
                 Soy residente
               </Button>
               <Button onClick={handleDemo} variant="ghost">
-                Ver demo
+                Explorar soluciones
               </Button>
             </div>
           </div>
@@ -95,15 +100,15 @@ const UserTypeResidente = () => {
 
       <MainContent>
         {/* Features Section */}
-        <section className="usertype-features animated-section">
+        <section ref={featuresRef} className="usertype-features reveal-section">
           <div className="container">
             <div className="usertype-section__header">
-              <h2>Funcionalidades para Residentes</h2>
-              <p>Todo lo que necesitas para interactuar con tu comunidad de forma simple</p>
+              <h2>Todo lo que necesitas como residente</h2>
+              <p>Pagos, reservas, comunicación y gestiones con tu edificio en un solo lugar</p>
             </div>
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
-                <div key={index} className="usertype-feature-card">
+                <div key={index} className="usertype-feature-card reveal-stagger-child">
                   <div className="usertype-feature-card__icon" aria-hidden="true">
                     <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
                   </div>
@@ -116,7 +121,7 @@ const UserTypeResidente = () => {
         </section>
 
         {/* Benefits Section */}
-        <section className="usertype-benefits animated-section">
+        <section ref={benefitsRef} className="usertype-benefits reveal-section">
           <div className="container">
             <div className="usertype-benefits__content">
               <div className="usertype-benefits__text">
@@ -130,18 +135,18 @@ const UserTypeResidente = () => {
               <div className="usertype-benefits__visual">
                 <div className="usertype-benefits__card">
                   <span className="usertype-benefits__card-icon" aria-hidden="true">
-                    <Icon name="cpuChip" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
+                    <Icon name="home" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
                   </span>
                   <h3>Portal del residente</h3>
-                  <p>Accede a todos los servicios de tu comunidad desde cualquier dispositivo, cuando lo necesites.</p>
+                  <p>Pagos, reservas, encomiendas y comunicación con tu comunidad desde cualquier navegador.</p>
                   <div className="usertype-benefits__card-stats">
                     <div>
                       <strong>24/7</strong>
-                      <span>Disponibilidad</span>
+                      <span>Disponible siempre</span>
                     </div>
                     <div>
-                      <strong>2 min</strong>
-                      <span>Pago promedio</span>
+                      <strong>0</strong>
+                      <span>Descargas necesarias</span>
                     </div>
                   </div>
                 </div>
@@ -151,11 +156,11 @@ const UserTypeResidente = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="usertype-cta animated-section">
+        <section ref={ctaRef} className="usertype-cta reveal-section">
           <div className="container">
             <div className="usertype-cta__content">
-              <h2>¿Ya eres residente de una comunidad DOMU?</h2>
-              <p>Ingresa a tu portal para acceder a todos los servicios de tu edificio</p>
+              <h2>Accede al portal de tu comunidad</h2>
+              <p>Ingresa para pagar, reservar y mantenerte conectado con tu edificio</p>
               <div className="usertype-cta__actions">
                 <Button onClick={handleLogin} variant="primary">
                   Ingresar al portal
