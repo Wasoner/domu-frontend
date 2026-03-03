@@ -47,7 +47,7 @@
 .admin-housing-units__search {
   position: relative;
   flex: 1;
-  min-width: 240px;
+  min-width: min(240px, 100%);
 }
 
 .admin-housing-units__search-input {
@@ -627,9 +627,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .admin-housing-units {
-  }
-
   .admin-housing-units__header {
     flex-direction: column;
     align-items: stretch;
@@ -668,23 +665,82 @@
     font-size: 0.875rem;
   }
 
+  .admin-housing-units__table-container {
+    margin-left: calc(var(--space-page-x) * -1);
+    margin-right: calc(var(--space-page-x) * -1);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    -webkit-overflow-scrolling: touch;
+    background:
+      linear-gradient(to right, var(--color-bg-primary) 30%, transparent),
+      linear-gradient(to left, var(--color-bg-primary) 30%, transparent),
+      linear-gradient(to right, rgba(0,0,0,0.08), transparent 20px),
+      linear-gradient(to left, rgba(0,0,0,0.08), transparent 20px);
+    background-position: left center, right center, left center, right center;
+    background-repeat: no-repeat;
+    background-size: 20px 100%, 20px 100%, 20px 100%, 20px 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+
   .admin-housing-units__table {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
   .admin-housing-units__table th,
   .admin-housing-units__table td {
-    padding: 0.75rem 0.5rem;
+    padding: 0.625rem 0.5rem;
   }
 
-  .modal {
+  .admin-housing-units__table th:first-child,
+  .admin-housing-units__table td:first-child {
+    position: sticky;
+    left: 0;
+    background: inherit;
+    z-index: 1;
+  }
+
+  .admin-housing-units__table thead th:first-child {
+    background: var(--color-turquoise);
+  }
+
+  .admin-housing-units__modal {
     max-width: 100%;
-    margin: 0 1rem;
+  }
+
+  .admin-housing-units__modal-body {
+    padding: 1rem;
+  }
+
+  .admin-housing-units__modal-header {
+    padding: 1rem;
+
+    h2 {
+      font-size: 1.1rem;
+    }
+  }
+
+  .admin-housing-units__modal-footer {
+    padding: 1rem;
+    flex-direction: column;
+
+    .btn,
+    .button {
+      width: 100%;
+    }
   }
 
   .resident-item {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-housing-units__table th,
+  .admin-housing-units__table td {
+    padding: 0.5rem 0.4rem;
+    font-size: 0.8rem;
   }
 }

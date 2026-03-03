@@ -1,57 +1,62 @@
 import { Header, MainContent, Footer } from '../layout';
 import { Button, Icon, Seo } from '../components';
 import { ROUTES } from '../constants';
+import { useScrollReveal, useStaggerReveal } from '../hooks';
 import './UserTypeLanding.scss';
 
 const features = [
   {
     iconName: 'banknotes',
-    title: 'Gestión de gastos comunes',
-    description: 'Genera y administra cobros mensuales con cálculo automático de prorrateos y multas.',
-  },
-  {
-    iconName: 'bellAlert',
-    title: 'Cobranza automatizada',
-    description: 'Envía recordatorios de pago automáticos y gestiona la cartera de morosos eficientemente.',
-  },
-  {
-    iconName: 'chartBar',
-    title: 'Reportes financieros',
-    description: 'Visualiza el estado financiero de la comunidad con reportes detallados y exportables.',
-  },
-  {
-    iconName: 'speakerWave',
-    title: 'Comunicados masivos',
-    description: 'Envía avisos a toda la comunidad por email, notificaciones push o publicaciones en el muro.',
+    title: 'Gastos comunes integrados',
+    description: 'Genera cobros mensuales con prorrateos, emite estados de cuenta en PDF y recibe pagos en línea vía Mercado Pago.',
   },
   {
     iconName: 'exclamationTriangle',
     title: 'Control de morosidad',
-    description: 'Monitorea deudores, aplica intereses y gestiona convenios de pago desde un solo lugar.',
+    description: 'Visualiza saldos pendientes por unidad, aplica intereses y restringe servicios automáticamente al tercer mes de mora.',
+  },
+  {
+    iconName: 'chartBar',
+    title: 'Dashboard y reportes',
+    description: 'Panel con métricas clave de tu comunidad: ingresos, egresos, estado de morosidad y cumplimiento de tareas.',
   },
   {
     iconName: 'clipboardCheck',
-    title: 'Gestión de proveedores',
-    description: 'Administra contratos, pagos y evaluación de proveedores de servicios del edificio.',
+    title: 'Gestión de personal y tareas',
+    description: 'Asigna tareas a conserjes y personal de apoyo, controla turnos y mide cumplimiento con indicadores.',
+  },
+  {
+    iconName: 'chatBubbleLeftRight',
+    title: 'Comunicación comunitaria',
+    description: 'Publica avisos en el muro de la comunidad, gestiona el foro y mantén un canal directo con residentes.',
+  },
+  {
+    iconName: 'wrench',
+    title: 'Proveedores y mantenimiento',
+    description: 'Registra proveedores, genera órdenes de trabajo, recibe cotizaciones y haz seguimiento de cada servicio.',
   },
 ];
 
 const benefits = [
-  'Ahorro significativo de tiempo en tareas administrativas',
-  'Reducción de morosidad con cobranza automatizada',
-  'Transparencia total con reportes en tiempo real',
-  'Comunicación eficiente con toda la comunidad',
-  'Gestión centralizada de múltiples comunidades',
-  'Cumplimiento normativo con documentación digital',
+  'Genera y distribuye estados de cuenta sin trabajo manual',
+  'Seguimiento de morosidad con restricción automática de servicios',
+  'Reportes financieros exportables para rendición de cuentas',
+  'Comunicación directa con residentes, comité y proveedores',
+  'Control de tareas y turnos de personal operativo',
+  'Plataforma alineada con la Ley de Copropiedad 21.442',
 ];
 
 const UserTypeAdministrador = () => {
+  const featuresRef = useStaggerReveal();
+  const benefitsRef = useScrollReveal();
+  const ctaRef = useScrollReveal();
+
   const handleCreateCommunity = () => {
     window.location.href = `${ROUTES.HOME}?openCommunityModal=1`;
   };
 
   const handleDemo = () => {
-    window.location.href = ROUTES.ABOUT;
+    window.location.href = ROUTES.SOLUCIONES;
   };
 
   const handleViewFeatures = () => {
@@ -62,7 +67,7 @@ const UserTypeAdministrador = () => {
   };
 
   return (
-    <div className="usertype-page fade-in">
+    <div className="usertype-page public-page fade-in">
       <Seo
         title="DOMU para Administradores | Software de gestión de condominios"
         description="Software completo para administradores de edificios: gestión de gastos comunes, cobranza, reportes financieros y comunicación con residentes."
@@ -72,23 +77,23 @@ const UserTypeAdministrador = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="usertype-hero animated-section">
+      <section className="usertype-hero">
         <div className="usertype-hero__content">
           <div className="usertype-hero__text">
             <span className="usertype-hero__eyebrow">Solución para Administradores</span>
             <h1 className="usertype-hero__title">
-              Administración <strong>profesional</strong> de condominios
+              Administra sin planillas ni sistemas <strong>desconectados</strong>
             </h1>
             <p className="usertype-hero__subtitle">
-              Gestiona gastos comunes, cobranza y comunicación desde una plataforma integral. 
-              Optimiza tu tiempo y mejora la satisfacción de tus comunidades.
+              Gastos comunes, cobranza, personal y proveedores en una sola plataforma.
+              Deja de perder tiempo con herramientas fragmentadas y centraliza toda la operación.
             </p>
             <div className="usertype-hero__actions">
               <Button onClick={handleViewFeatures} variant="primary">
                 Ver funcionalidades
               </Button>
               <Button onClick={handleDemo} variant="ghost">
-                Ver demo
+                Explorar soluciones
               </Button>
             </div>
           </div>
@@ -102,15 +107,15 @@ const UserTypeAdministrador = () => {
 
       <MainContent>
         {/* Features Section */}
-        <section id="soluciones-funcionalidades" className="usertype-features animated-section">
+        <section id="soluciones-funcionalidades" ref={featuresRef} className="usertype-features reveal-section">
           <div className="container">
             <div className="usertype-section__header">
-              <h2>Funcionalidades para Administradores</h2>
-              <p>Todo lo que necesitas para gestionar tus comunidades de forma profesional</p>
+              <h2>Herramientas pensadas para el administrador</h2>
+              <p>Cada módulo resuelve un problema real de la gestión diaria de edificios y condominios</p>
             </div>
             <div className="usertype-features__grid">
               {features.map((feature, index) => (
-                <div key={index} className="usertype-feature-card">
+                <div key={index} className="usertype-feature-card reveal-stagger-child">
                   <div className="usertype-feature-card__icon" aria-hidden="true">
                     <Icon name={feature.iconName} size={42} strokeWidth={1.8} />
                   </div>
@@ -123,7 +128,7 @@ const UserTypeAdministrador = () => {
         </section>
 
         {/* Benefits Section */}
-        <section className="usertype-benefits animated-section">
+        <section ref={benefitsRef} className="usertype-benefits reveal-section">
           <div className="container">
             <div className="usertype-benefits__content">
               <div className="usertype-benefits__text">
@@ -140,15 +145,15 @@ const UserTypeAdministrador = () => {
                     <Icon name="buildingOffice" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
                   </span>
                   <h3>Dashboard administrativo</h3>
-                  <p>Control total de tus comunidades con métricas clave, alertas y tareas pendientes en un solo vistazo.</p>
+                  <p>Métricas financieras, estado de tareas y alertas de morosidad en un panel centralizado.</p>
                   <div className="usertype-benefits__card-stats">
                     <div>
-                      <strong>-40%</strong>
-                      <span>Morosidad</span>
+                      <strong>≤500 ms</strong>
+                      <span>Tiempo de respuesta</span>
                     </div>
                     <div>
-                      <strong>3x</strong>
-                      <span>Más eficiencia</span>
+                      <strong>2.000</strong>
+                      <span>Unidades soportadas</span>
                     </div>
                   </div>
                 </div>
@@ -158,11 +163,11 @@ const UserTypeAdministrador = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="usertype-cta animated-section">
+        <section ref={ctaRef} className="usertype-cta reveal-section">
           <div className="container">
             <div className="usertype-cta__content">
-              <h2>¿Listo para profesionalizar tu administración?</h2>
-              <p>Únete a los administradores que ya optimizaron su gestión con DOMU</p>
+              <h2>Centraliza la gestión de tu edificio hoy</h2>
+              <p>Crea tu comunidad en DOMU y empieza a administrar con herramientas profesionales</p>
               <div className="usertype-cta__actions">
                 <Button onClick={handleCreateCommunity} variant="primary">
                   Crear mi comunidad

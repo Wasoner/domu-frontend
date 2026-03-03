@@ -221,4 +221,25 @@
   .bank-transfer__value {
     font-size: 0.875rem;
   }
+
+  .bank-transfer__header {
+    padding-top: 2rem;
+
+    h2 {
+      font-size: 1.1rem;
+    }
+  }
+
+  .bank-transfer__row {
+    padding: 0.75rem;
+  }
+
+  .bank-transfer__copy {
+    min-width: var(--touch-min);
+    min-height: var(--touch-min);
+  }
+
+  .bank-transfer__copy-all {
+    min-height: var(--touch-min);
+  }
 }

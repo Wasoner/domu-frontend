@@ -13,11 +13,28 @@ export const INCIDENT_CATEGORIES = {
 };
 
 export const NOTIFICATION_TYPES = {
-  visit: { label: 'Visita', icon: 'door', color: '#0ea5e9', bg: '#e0f2fe' },
-  parcel: { label: 'Encomienda', icon: 'cube', color: '#f59e0b', bg: '#fff7ed' },
-  admin: { label: 'Administracion', icon: 'bellAlert', color: '#0f766e', bg: '#ecfdf5' },
-  payment: { label: 'Pago', icon: 'banknotes', color: '#16a34a', bg: '#ecfdf5' },
-  maintenance: { label: 'Mantencion', icon: 'wrench', color: '#6366f1', bg: '#eef2ff' },
+  INCIDENT_CREATED:        { label: 'Incidente creado',     icon: 'ticket',    color: '#f43f5e', bg: '#fff1f2' },
+  INCIDENT_ASSIGNED:       { label: 'Incidente asignado',   icon: 'ticket',    color: '#f97316', bg: '#fff7ed' },
+  INCIDENT_STATUS_CHANGED: { label: 'Estado de incidente',  icon: 'ticket',    color: '#6366f1', bg: '#eef2ff' },
+  VISIT_AUTHORIZED:        { label: 'Visita autorizada',    icon: 'door',      color: '#0ea5e9', bg: '#e0f2fe' },
+  VISIT_CHECKED_IN:        { label: 'Check-in de visita',   icon: 'door',      color: '#10b981', bg: '#ecfdf5' },
+  PARCEL_RECEIVED:         { label: 'Encomienda recibida',  icon: 'cube',      color: '#f59e0b', bg: '#fff7ed' },
+  PARCEL_COLLECTED:        { label: 'Encomienda retirada',  icon: 'cube',      color: '#16a34a', bg: '#ecfdf5' },
+  CHARGE_PERIOD_CREATED:   { label: 'Gasto comun',          icon: 'banknotes', color: '#0f766e', bg: '#ecfdf5' },
+  PAYMENT_CONFIRMED:       { label: 'Pago confirmado',      icon: 'banknotes', color: '#16a34a', bg: '#ecfdf5' },
+  TASK_ASSIGNED:           { label: 'Tarea asignada',       icon: 'wrench',    color: '#2563eb', bg: '#eff6ff' },
+  TASK_COMPLETED:          { label: 'Tarea completada',     icon: 'wrench',    color: '#10b981', bg: '#ecfdf5' },
+  POLL_CREATED:            { label: 'Nueva votacion',       icon: 'chartBar',  color: '#8b5cf6', bg: '#f5f3ff' },
+  POLL_CLOSED:             { label: 'Votacion cerrada',     icon: 'chartBar',  color: '#64748b', bg: '#f1f5f9' },
+  RESERVATION_CONFIRMED:   { label: 'Reserva confirmada',   icon: 'calendar',  color: '#0ea5e9', bg: '#e0f2fe' },
+  RESERVATION_CANCELLED:   { label: 'Reserva cancelada',    icon: 'calendar',  color: '#ef4444', bg: '#fef2f2' },
+  FORUM_THREAD_CREATED:    { label: 'Nueva publicacion',    icon: 'chatBubbleLeftRight', color: '#6366f1', bg: '#eef2ff' },
+  ADMIN_ANNOUNCEMENT:      { label: 'Aviso administracion', icon: 'bellAlert', color: '#0f766e', bg: '#ecfdf5' },
+  MARKET_ITEM_CREATED:     { label: 'Nuevo en marketplace', icon: 'shoppingBag', color: '#f59e0b', bg: '#fff7ed' },
+  CHAT_REQUEST_RECEIVED:   { label: 'Solicitud de chat',    icon: 'chatBubbleLeftRight', color: '#0ea5e9', bg: '#e0f2fe' },
+  CHAT_REQUEST_ACCEPTED:   { label: 'Chat aceptado',        icon: 'chatBubbleLeftRight', color: '#10b981', bg: '#ecfdf5' },
+  MAINTENANCE_SCHEDULED:   { label: 'Mantenimiento programado', icon: 'wrench', color: '#2563eb', bg: '#eff6ff' },
+  MAINTENANCE_COMPLETED:   { label: 'Mantenimiento completado', icon: 'wrench', color: '#10b981', bg: '#ecfdf5' },
 };
 
 export const PRIORITY_LABELS = {
@@ -26,82 +43,41 @@ export const PRIORITY_LABELS = {
   low: 'Baja',
 };
 
-export const MOCK_NOTIFICATIONS = [
-  {
-    id: 1,
-    type: 'incident',
-    category: 'water',
-    title: 'Incidente abierto en torre B',
-    detail: 'Piso 4 • Seguimiento en curso',
-    message: 'Filtracion reportada en pasillo del piso 4. Seguimiento en curso.',
-    date: '2026-02-01T09:20:00',
-    timeLabel: 'Hace 12 min',
-    priority: 'high',
-    source: 'Administracion',
-    isNew: true,
-    to: ROUTES.RESIDENT_INCIDENTS,
-  },
-  {
-    id: 2,
-    type: 'parcel',
-    title: 'Encomienda disponible en conserjeria',
-    detail: 'Paquete recibido a las 10:45',
-    message: 'Paquete recibido hoy a las 10:45. Retiralo con tu identificacion.',
-    date: '2026-02-01T10:52:00',
-    timeLabel: 'Hace 1 h',
-    priority: 'medium',
-    source: 'Conserjeria',
-    isNew: true,
-    to: ROUTES.RESIDENT_PARCELS,
-  },
-  {
-    id: 3,
-    type: 'visit',
-    title: 'Visita autorizada para hoy',
-    detail: 'Juan Perez • Hoy 19:30',
-    message: 'Juan Perez ingresara a las 19:30. Recuerda habilitar acceso en porteria.',
-    date: '2026-01-31T15:05:00',
-    timeLabel: 'Hoy',
-    priority: 'low',
-    source: 'Accesos',
-    to: ROUTES.RESIDENT_EVENTS,
-  },
-  {
-    id: 4,
-    type: 'admin',
-    title: 'Aviso de administracion',
-    detail: 'Corte programado martes 3',
-    message: 'Corte programado de agua el martes 3 de febrero entre 09:00 y 12:00.',
-    date: '2026-01-30T08:30:00',
-    timeLabel: 'Ayer',
-    priority: 'medium',
-    source: 'Administracion',
-    to: ROUTES.RESIDENT_PUBLICATIONS,
-  },
-  {
-    id: 5,
-    type: 'payment',
-    title: 'Pago registrado',
-    detail: 'Gasto comun de enero confirmado',
-    message: 'Confirmamos el pago de tu gasto comun de enero.',
-    date: '2026-01-29T12:40:00',
-    timeLabel: 'Jue',
-    priority: 'low',
-    source: 'Finanzas',
-    to: ROUTES.RESIDENT_CHARGES_DETAIL_VIEW,
-  },
-];
+export const getNotificationRoute = (notification) => {
+  if (!notification || !notification.type) return null;
+  const type = notification.type;
+  const routes = {
+    INCIDENT_CREATED:        ROUTES.ADMIN_INCIDENTS,
+    INCIDENT_ASSIGNED:       ROUTES.ADMIN_INCIDENTS,
+    INCIDENT_STATUS_CHANGED: ROUTES.RESIDENT_INCIDENTS,
+    VISIT_AUTHORIZED:        ROUTES.RESIDENT_EVENTS,
+    VISIT_CHECKED_IN:        ROUTES.RESIDENT_EVENTS,
+    PARCEL_RECEIVED:         ROUTES.RESIDENT_PARCELS,
+    PARCEL_COLLECTED:        ROUTES.ADMIN_PARCELS,
+    CHARGE_PERIOD_CREATED:   ROUTES.RESIDENT_CHARGES_DETAIL_VIEW,
+    PAYMENT_CONFIRMED:       ROUTES.COMMON_CHARGES,
+    TASK_ASSIGNED:           ROUTES.ADMIN_TASKS,
+    TASK_COMPLETED:          ROUTES.ADMIN_TASKS,
+    POLL_CREATED:            ROUTES.VOTINGS,
+    POLL_CLOSED:             ROUTES.VOTINGS,
+    RESERVATION_CONFIRMED:   ROUTES.RESIDENT_AMENITIES,
+    RESERVATION_CANCELLED:   ROUTES.RESIDENT_AMENITIES,
+    FORUM_THREAD_CREATED:    ROUTES.RESIDENT_PUBLICATIONS,
+    ADMIN_ANNOUNCEMENT:      ROUTES.RESIDENT_PUBLICATIONS,
+    MARKET_ITEM_CREATED:     ROUTES.RESIDENT_MARKETPLACE,
+    CHAT_REQUEST_RECEIVED:   ROUTES.RESIDENT_CHAT,
+    CHAT_REQUEST_ACCEPTED:   ROUTES.RESIDENT_CHAT,
+    MAINTENANCE_SCHEDULED:   ROUTES.ADMIN_TASKS,
+    MAINTENANCE_COMPLETED:   ROUTES.ADMIN_TASKS,
+  };
+  return routes[type] || null;
+};
 
 export const getNotificationVisual = (notification) => {
-  if (notification.type === 'incident') {
-    const categoryKey = notification.category || 'general';
-    const category = INCIDENT_CATEGORIES[categoryKey] || INCIDENT_CATEGORIES.general;
-    return {
-      ...category,
-      tag: `Incidente • ${category.label}`,
-    };
+  const meta = NOTIFICATION_TYPES[notification.type];
+  if (meta) {
+    return { ...meta, tag: meta.label };
   }
-
-  const meta = NOTIFICATION_TYPES[notification.type] || NOTIFICATION_TYPES.admin;
-  return { ...meta, tag: meta.label };
+  // Fallback
+  return { label: 'Notificacion', icon: 'bellAlert', color: '#64748b', bg: '#f1f5f9', tag: 'Notificacion' };
 };

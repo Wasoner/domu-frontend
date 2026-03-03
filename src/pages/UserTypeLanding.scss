@@ -141,7 +141,7 @@
 
 .usertype-features__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 1.75rem;
 }
 
@@ -164,6 +164,14 @@
   transform: translateY(-4px);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.09);
   border-color: rgba(83, 164, 151, 0.35);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .usertype-feature-card:active {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.07);
+    transition-duration: 0.05s;
+  }
 }
 
 .usertype-feature-card__icon {
@@ -427,12 +435,21 @@
   }
 
   .usertype-features__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
   }
 
   .usertype-feature-card {
     padding: 1.5rem;
+  }
+
+  .usertype-cta__actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+    }
   }
 
   .usertype-benefits__card {
@@ -444,10 +461,24 @@
   }
 }
 
+@media (max-width: 640px) {
+  .usertype-features__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .usertype-hero__visual {
+    order: 2;
+  }
+}
+
 @media (max-width: 480px) {
   .usertype-hero__icon-svg {
     width: 3rem;
     height: 3rem;
+  }
+
+  .usertype-hero__visual {
+    display: none;
   }
 
   .usertype-hero__illustration-icon {
@@ -458,5 +489,15 @@
   .usertype-benefits__card-stats {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .usertype-features .container,
+  .usertype-benefits .container,
+  .usertype-cta .container {
+    padding: 0 1rem;
+  }
+
+  .usertype-hero__content {
+    padding: 0 1rem;
   }
 }

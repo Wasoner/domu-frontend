@@ -171,12 +171,6 @@ const Login = () => {
                             </form>
 
                             <div className="login-footer">
-                                <p>
-                                    ¿No tienes una cuenta?{' '}
-                                    <Link to={ROUTES.REGISTER} className="link-register">
-                                        Regístrate aquí
-                                    </Link>
-                                </p>
                                 <Link to={ROUTES.HOME} className="link-back">
                                     ← Volver al inicio
                                 </Link>

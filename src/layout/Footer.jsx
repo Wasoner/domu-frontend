@@ -17,9 +17,9 @@ const Footer = () => {
         <nav className="app-footer__nav" aria-label="Enlaces del sitio">
           <div className="app-footer__nav-group">
             <span className="app-footer__nav-title">Producto</span>
-            <Link to={ROUTES.HOME}>Inicio</Link>
             <Link to={ROUTES.ABOUT}>Acerca de</Link>
-            <Link to={ROUTES.SOLUCIONES_ADMINISTRADOR}>Soluciones</Link>
+            <Link to={ROUTES.SOLUCIONES}>Soluciones</Link>
+            <Link to={ROUTES.CONTACT}>Contacto</Link>
           </div>
         </nav>
       </div>

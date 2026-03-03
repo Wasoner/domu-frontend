@@ -184,7 +184,7 @@
   min-height: 420px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .kanban-board__columns {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(3, minmax(280px, 1fr));
@@ -192,6 +192,14 @@
 
   .kanban-column {
     min-height: 280px;
+  }
+
+  .kanban-card__drag-hint {
+    display: none;
+  }
+
+  .incidents-board__stats {
+    flex-wrap: wrap;
   }
 }
 

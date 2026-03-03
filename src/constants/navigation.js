@@ -53,6 +53,16 @@ export const NAV_SECTIONS = [
       { label: 'Personal', icon: 'userGroup', to: ROUTES.ADMIN_STAFF, roles: ['admin'], exact: true },
       { label: 'Tareas Staff', icon: 'listBullet', to: ROUTES.ADMIN_TASKS, roles: ['admin'], exact: true },
       { label: 'Cargar gastos', icon: 'banknotes', to: ROUTES.COMMON_CHARGES, roles: ['admin'], exact: true },
+      { label: 'Proveedores', icon: 'briefcase', to: ROUTES.ADMIN_PROVIDERS, roles: ['admin'], exact: true },
+      { label: 'Órdenes servicio', icon: 'wrench', to: ROUTES.ADMIN_SERVICE_ORDERS, roles: ['admin'], exact: true },
+    ],
+  },
+  {
+    title: 'Proveedor',
+    roles: ['proveedor'],
+    items: [
+      { label: 'Mi portal', icon: 'home', to: ROUTES.PROVIDER_PORTAL, roles: ['proveedor'], exact: true },
+      { label: 'Órdenes asignadas', icon: 'clipboardCheck', to: ROUTES.PROVIDER_SERVICE_ORDERS, roles: ['proveedor'], exact: true },
     ],
   },
 ];

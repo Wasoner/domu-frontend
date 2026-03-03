@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+
 import Button from './Button';
 import FormField from './FormField';
 import Icon from './Icon';
@@ -118,12 +118,5 @@ const CreatePublicationModal = ({ isOpen, onClose, onSubmit, initialData, isAdmi
   );
 };
 
-CreatePublicationModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  initialData: PropTypes.object,
-  isAdmin: PropTypes.bool,
-};
 
 export default CreatePublicationModal;

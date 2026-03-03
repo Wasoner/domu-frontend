@@ -92,3 +92,16 @@
   align-items: center;
 }
 
+@media (max-width: 640px) {
+  .btn {
+    min-height: var(--touch-min);
+    padding: 0.6rem 1.1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn--small {
+    min-height: 36px;
+    padding: 0.45rem 0.85rem;
+  }
+}
+

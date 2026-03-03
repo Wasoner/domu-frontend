@@ -28,6 +28,7 @@ const roleIdToUserType = (roleId) => {
   if (roleId === 1) return 'admin';
   if (roleId === 3) return 'concierge';
   if (roleId === 4) return 'staff';
+  if (roleId === 5) return 'proveedor';
   return 'resident';
 };
 
@@ -996,6 +997,18 @@ export const api = {
     delete: async (id) => fetchWrapper(`/forum/threads/${id}`, { method: 'DELETE' }),
   },
 
+  notifications: {
+    list: async (page = 0, size = 20) => fetchWrapper(`/notifications?page=${page}&size=${size}`, { method: 'GET' }),
+    getUnreadCount: async () => fetchWrapper('/notifications/unread-count', { method: 'GET' }),
+    markRead: async (id) => fetchWrapper(`/notifications/${id}/read`, { method: 'PATCH' }),
+    markAllRead: async () => fetchWrapper('/notifications/read-all', { method: 'PATCH' }),
+    getPreferences: async () => fetchWrapper('/notifications/preferences', { method: 'GET' }),
+    updatePreference: async (notificationType, inAppEnabled) => fetchWrapper('/notifications/preferences', {
+      method: 'PUT',
+      body: JSON.stringify({ notificationType, inAppEnabled }),
+    }),
+  },
+
   chat: {
     listRooms: async () => fetchWrapper('/chat/rooms', { method: 'GET' }),
     getMessages: async (roomId) => fetchWrapper(`/chat/rooms/${roomId}/messages`, { method: 'GET' }),
@@ -1017,5 +1030,100 @@ export const api = {
       body: JSON.stringify({ status }),
     }),
     hideRoom: async (roomId) => fetchWrapper(`/chat/rooms/${roomId}`, { method: 'DELETE' }),
+  },
+
+  adminProviders: {
+    list: async () => fetchWrapper('/admin/providers', { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        businessName: String(data.businessName || '').trim(),
+        rut: String(data.rut || '').trim(),
+        contactName: data.contactName ? String(data.contactName).trim() : null,
+        email: data.email ? String(data.email).trim() : null,
+        phone: data.phone ? String(data.phone).trim() : null,
+        address: data.address ? String(data.address).trim() : null,
+        serviceCategory: String(data.serviceCategory || '').trim(),
+        active: data.active !== undefined ? Boolean(data.active) : true,
+        userId: data.userId ? Number(data.userId) : null,
+      };
+      return fetchWrapper('/admin/providers', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (id, data) => {
+      const payload = {
+        businessName: String(data.businessName || '').trim(),
+        rut: String(data.rut || '').trim(),
+        contactName: data.contactName ? String(data.contactName).trim() : null,
+        email: data.email ? String(data.email).trim() : null,
+        phone: data.phone ? String(data.phone).trim() : null,
+        address: data.address ? String(data.address).trim() : null,
+        serviceCategory: String(data.serviceCategory || '').trim(),
+        active: data.active !== undefined ? Boolean(data.active) : true,
+        userId: data.userId ? Number(data.userId) : null,
+      };
+      return fetchWrapper(`/admin/providers/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    delete: async (id) => fetchWrapper(`/admin/providers/${id}`, { method: 'DELETE' }),
+  },
+
+  adminServiceOrders: {
+    list: async () => fetchWrapper('/admin/service-orders', { method: 'GET' }),
+    create: async (data) => {
+      const payload = {
+        providerId: Number(data.providerId),
+        title: String(data.title || '').trim(),
+        description: data.description ? String(data.description).trim() : null,
+        scheduledDate: data.scheduledDate || null,
+        priority: data.priority || 'NORMAL',
+        adminNotes: data.adminNotes ? String(data.adminNotes).trim() : null,
+      };
+      return fetchWrapper('/admin/service-orders', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+    update: async (id, data) => {
+      const payload = {
+        providerId: Number(data.providerId),
+        title: String(data.title || '').trim(),
+        description: data.description ? String(data.description).trim() : null,
+        scheduledDate: data.scheduledDate || null,
+        priority: data.priority || 'NORMAL',
+        adminNotes: data.adminNotes ? String(data.adminNotes).trim() : null,
+      };
+      return fetchWrapper(`/admin/service-orders/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+    },
+    updateStatus: async (id, status, notes) => fetchWrapper(`/admin/service-orders/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, notes }),
+    }),
+    getQuotations: async (id) => fetchWrapper(`/admin/service-orders/${id}/quotations`, { method: 'GET' }),
+  },
+
+  provider: {
+    getMe: async () => fetchWrapper('/provider/me', { method: 'GET' }),
+    listOrders: async () => fetchWrapper('/provider/service-orders', { method: 'GET' }),
+    getOrder: async (id) => fetchWrapper(`/provider/service-orders/${id}`, { method: 'GET' }),
+    accept: async (id) => fetchWrapper(`/provider/service-orders/${id}/accept`, { method: 'PATCH' }),
+    reject: async (id, notes) => fetchWrapper(`/provider/service-orders/${id}/reject`, {
+      method: 'PATCH',
+      body: JSON.stringify({ notes }),
+    }),
+    complete: async (id, notes) => fetchWrapper(`/provider/service-orders/${id}/complete`, {
+      method: 'PATCH',
+      body: JSON.stringify({ notes }),
+    }),
+    submitQuotation: async (orderId, data) => fetchWrapper(`/provider/service-orders/${orderId}/quotations`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   },
 };

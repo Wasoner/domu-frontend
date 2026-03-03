@@ -310,15 +310,61 @@
     div {
       display: flex;
       flex-direction: column;
-      
+
       strong {
         color: var(--color-text-dark);
       }
-      
+
       span {
         font-size: 0.8125rem;
         color: var(--color-text-muted);
       }
+    }
+  }
+}
+
+/* Responsive marketplace */
+@media (max-width: 640px) {
+  .resident-marketplace {
+    &__header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .market-modal {
+    border-radius: 1rem;
+
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__gallery {
+      height: 280px;
+    }
+
+    &__info {
+      padding: 1.25rem;
+    }
+
+    &__header {
+      margin-bottom: 1.25rem;
+
+      h1 {
+        font-size: 1.25rem;
+      }
+
+      .market-modal__price {
+        font-size: 1.4rem;
+      }
+    }
+
+    &__section {
+      margin-bottom: 1.25rem;
     }
   }
 }

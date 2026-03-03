@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import { Icon } from '../';
 import './PaymentMethodModal.scss';
 
@@ -91,12 +91,5 @@ const PaymentMethodModal = ({
   );
 };
 
-PaymentMethodModal.propTypes = {
-  open: PropTypes.bool.isRequired,
-  totalAmount: PropTypes.number.isRequired,
-  onSelectTransfer: PropTypes.func.isRequired,
-  onSelectCard: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-};
 
 export default PaymentMethodModal;

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import PropTypes from 'prop-types';
+
 
 const DEFAULT_TITLE = 'Domu - Software para Administración de Edificios y Condominios';
 const DEFAULT_DESCRIPTION =
@@ -104,14 +104,5 @@ function Seo({
   return null;
 }
 
-Seo.propTypes = {
-  title: PropTypes.string,
-  description: PropTypes.string,
-  keywords: PropTypes.string,
-  canonicalPath: PropTypes.string,
-  imageUrl: PropTypes.string,
-  noindex: PropTypes.bool,
-  structuredData: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-};
 
 export default Seo;

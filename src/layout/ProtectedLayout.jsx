@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+
 import { useMemo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { AuthLayout } from '.';
@@ -92,11 +92,6 @@ const ProtectedLayout = ({ children, allowedRoles, bodyActions }) => {
   );
 };
 
-ProtectedLayout.propTypes = {
-  children: PropTypes.node.isRequired,
-  allowedRoles: PropTypes.arrayOf(PropTypes.string),
-  bodyActions: PropTypes.node,
-};
 
 ProtectedLayout.defaultProps = {
   allowedRoles: null,

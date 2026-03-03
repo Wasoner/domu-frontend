@@ -161,4 +161,17 @@
   .card-payment__row {
     grid-template-columns: 1fr;
   }
+
+  .card-payment__field input {
+    min-height: var(--touch-min);
+    font-size: 1rem;
+  }
+
+  .card-payment__submit {
+    min-height: var(--touch-min);
+  }
+
+  .card-payment__cancel {
+    min-height: var(--touch-min);
+  }
 }
