@@ -17,6 +17,9 @@ export default defineConfig({
       }
     })
   ],
+  preview: {
+    host: true
+  },
   server: {
     proxy: {
       // Proxy para evitar problemas de CORS en desarrollo
