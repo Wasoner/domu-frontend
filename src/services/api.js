@@ -4,11 +4,8 @@
  * Handles HTTP requests and authentication
  */
 
-// Backend URL - puerto 8080 según configuración del backend
-// En desarrollo, usar el proxy de Vite para evitar CORS
-// En producción, usar la URL completa del backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? '/api' : 'http://localhost:8080/api');
+// Prefer same-origin /api so dev proxy and production reverse proxy behave the same.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
  * Get authentication token from localStorage
