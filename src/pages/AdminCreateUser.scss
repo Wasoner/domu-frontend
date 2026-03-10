@@ -176,6 +176,26 @@
       cursor: not-allowed;
     }
   }
+
+  /* Input fecha: diseño alineado y calendario en español */
+  input[type="date"] {
+    color-scheme: light;
+    font-family: inherit;
+
+    &::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 0.6;
+      padding: 0.25rem;
+    }
+
+    &::-webkit-datetime-edit {
+      padding: 0;
+    }
+
+    &::-webkit-datetime-edit-fields-wrapper {
+      color: var(--color-gray-dark);
+    }
+  }
 }
 
 .admin-create-user__footer {

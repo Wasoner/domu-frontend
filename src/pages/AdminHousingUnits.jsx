@@ -6,9 +6,11 @@ import { Icon, Skeleton } from '../components';
 import { api } from '../services';
 import './AdminHousingUnits.scss';
 
-/**
- * Página de administración de unidades habitacionales
- */
+const ModalPortal = ({ children }) => {
+  if (typeof document === 'undefined') return null;
+  return createPortal(children, document.body);
+};
+
 const AdminHousingUnits = () => {
   const { user, buildingVersion } = useAppContext();
   const [units, setUnits] = useState([]);
@@ -27,6 +29,7 @@ const AdminHousingUnits = () => {
   const [selectedResidentId, setSelectedResidentId] = useState('');
   const [formData, setFormData] = useState({
     number: '',
+    unitType: 'DEPARTAMENTO',
     tower: '',
     floor: '',
     aliquotPercentage: '',
@@ -34,11 +37,6 @@ const AdminHousingUnits = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
-
-  const ModalPortal = ({ children }) => {
-    if (typeof document === 'undefined') return null;
-    return createPortal(children, document.body);
-  };
 
   // Fetch units
   const fetchUnits = useCallback(async () => {
@@ -82,6 +80,7 @@ const AdminHousingUnits = () => {
     setSelectedUnit(null);
     setFormData({
       number: '',
+      unitType: 'DEPARTAMENTO',
       tower: '',
       floor: '',
       aliquotPercentage: '',
@@ -96,6 +95,7 @@ const AdminHousingUnits = () => {
     setSelectedUnit(unit);
     setFormData({
       number: unit.unit.number || '',
+      unitType: unit.unit.unitType || 'DEPARTAMENTO',
       tower: unit.unit.tower || '',
       floor: unit.unit.floor || '',
       aliquotPercentage: unit.unit.aliquotPercentage || '',
@@ -109,8 +109,6 @@ const AdminHousingUnits = () => {
   const validateForm = () => {
     const errors = {};
     if (!formData.number.trim()) errors.number = 'El número es requerido';
-    if (!formData.tower.trim()) errors.tower = 'La torre es requerida';
-    if (!formData.floor.trim()) errors.floor = 'El piso es requerido';
 
     if (formData.aliquotPercentage && Number(formData.aliquotPercentage) < 0) {
       errors.aliquotPercentage = 'La alícuota no puede ser negativa';
@@ -181,8 +179,10 @@ const AdminHousingUnits = () => {
     if (residentDirectoryLoaded && !force) {
       return residentDirectory;
     }
-    const residents = await api.adminUsers.getResidents();
-    const safeResidents = residents || [];
+    const data = await api.adminUsers.getResidents();
+    const safeResidents = (data && typeof data === 'object' && !Array.isArray(data))
+      ? (data.residents || [])
+      : (Array.isArray(data) ? data : []);
     setResidentDirectory(safeResidents);
     setResidentDirectoryLoaded(true);
     return safeResidents;
@@ -416,6 +416,7 @@ const AdminHousingUnits = () => {
               <thead>
                 <tr>
                   <th>Número</th>
+                  <th>Tipo</th>
                   <th>Torre</th>
                   <th>Piso</th>
                   <th>Alícuota %</th>
@@ -434,6 +435,7 @@ const AdminHousingUnits = () => {
                       <td><span className="skeleton-block skeleton-block--xs" /></td>
                       <td><span className="skeleton-block skeleton-block--xs" /></td>
                       <td><span className="skeleton-block skeleton-block--xs" /></td>
+                      <td><span className="skeleton-block skeleton-block--xs" /></td>
                       <td><span className="skeleton-block skeleton-block--sm" /></td>
                       <td><span className="skeleton-block skeleton-block--md" /></td>
                       <td>
@@ -447,8 +449,9 @@ const AdminHousingUnits = () => {
                   : filteredUnits.map((item) => (
                     <tr key={item.unit.id}>
                       <td><strong>{item.unit.number}</strong></td>
-                      <td>{item.unit.tower}</td>
-                      <td>{item.unit.floor}</td>
+                      <td>{item.unit.unitType === 'CASA' ? 'Casa' : 'Depto.'}</td>
+                      <td>{item.unit.tower || '-'}</td>
+                      <td>{item.unit.floor || '-'}</td>
                       <td>{item.unit.aliquotPercentage ? `${item.unit.aliquotPercentage}%` : '-'}</td>
                       <td>{item.unit.squareMeters ? `${item.unit.squareMeters} m²` : '-'}</td>
                       <td>
@@ -515,30 +518,50 @@ const AdminHousingUnits = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="tower">Torre *</label>
-                    <input
-                      type="text"
-                      id="tower"
-                      value={formData.tower}
-                      onChange={(e) => setFormData({ ...formData, tower: e.target.value })}
-                      className={formErrors.tower ? 'input-error' : ''}
+                    <label htmlFor="unitType">Tipo de unidad *</label>
+                    <select
+                      id="unitType"
+                      value={formData.unitType}
+                      onChange={(e) => {
+                        const newType = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          unitType: newType,
+                          ...(newType === 'CASA' ? { tower: '', floor: '' } : {}),
+                        }));
+                      }}
                       required
-                    />
-                    {formErrors.tower && <span className="error-text">{formErrors.tower}</span>}
+                    >
+                      <option value="DEPARTAMENTO">Departamento</option>
+                      <option value="CASA">Casa</option>
+                    </select>
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="floor">Piso *</label>
-                    <input
-                      type="text"
-                      id="floor"
-                      value={formData.floor}
-                      onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
-                      className={formErrors.floor ? 'input-error' : ''}
-                      required
-                    />
-                    {formErrors.floor && <span className="error-text">{formErrors.floor}</span>}
-                  </div>
+                  {formData.unitType === 'DEPARTAMENTO' && (
+                    <>
+                      <div className="form-group">
+                        <label htmlFor="tower">Torre</label>
+                        <input
+                          type="text"
+                          id="tower"
+                          value={formData.tower}
+                          onChange={(e) => setFormData({ ...formData, tower: e.target.value })}
+                          placeholder="Ej. A"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="floor">Piso</label>
+                        <input
+                          type="text"
+                          id="floor"
+                          value={formData.floor}
+                          onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
+                          placeholder="Ej. 3"
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <div className="form-group">
                     <label htmlFor="aliquotPercentage">Alícuota % (opcional)</label>

@@ -48,10 +48,6 @@ import {
   UserTypeFuncionarios,
   UserTypeProveedores,
   Soluciones,
-  AdminProviders,
-  AdminServiceOrders,
-  ProviderPortal,
-  ProviderServiceOrders,
 } from './pages'
 import { AppProvider } from './context'
 import { ScrollToTop } from './components'
@@ -99,13 +95,6 @@ function App() {
           <Route path={ROUTES.ADMIN_PARCELS} element={<AdminParcels />} />
           <Route path={ROUTES.ADMIN_TASKS} element={<AdminTasks />} />
           <Route path={ROUTES.ADMIN_STAFF} element={<AdminStaff />} />
-          <Route path={ROUTES.ADMIN_PROVIDERS} element={<AdminProviders />} />
-          <Route path={ROUTES.ADMIN_SERVICE_ORDERS} element={<AdminServiceOrders />} />
-
-          {/* Protected Routes - Provider */}
-          <Route path={ROUTES.PROVIDER_PORTAL} element={<ProviderPortal />} />
-          <Route path={ROUTES.PROVIDER_SERVICE_ORDERS} element={<ProviderServiceOrders />} />
-          <Route path={ROUTES.PROVIDER_ORDER_DETAIL} element={<ProviderServiceOrders />} />
 
           {/* Protected Routes - Resident */}
           <Route path={ROUTES.RESIDENT_PORTAL} element={<StaffPortal />} />
