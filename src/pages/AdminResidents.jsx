@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+/* eslint-disable react/prop-types */
 import { Link } from 'react-router-dom';
 import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
@@ -15,6 +16,7 @@ const ROLE_ICONS = {
   Residente: 'home',
   Conserje: 'key',
   Personal: 'wrench',
+  Comité: 'users',
   Usuario: 'user',
 };
 
@@ -26,15 +28,38 @@ const ROLE_COLORS = {
   Residente: 'var(--color-turquoise)',
   Conserje: 'var(--color-info)',
   Personal: 'var(--color-gray)',
+  Comité: 'var(--color-info)',
   Usuario: 'var(--color-gray-dark)',
 };
 
+const STATUS_LABELS = {
+  ACTIVE: 'Activo',
+  PENDING: 'Pendiente',
+  INACTIVE: 'Inactivo',
+};
+
 /**
- * Tarjeta de residente
+ * Tarjeta de residente con acciones de gestión
  */
-const ResidentCard = ({ resident }) => {
+const ResidentCard = ({ resident, onAction, isAdmin }) => {
   const roleIcon = ROLE_ICONS[resident.roleName] || ROLE_ICONS.Usuario;
   const roleColor = ROLE_COLORS[resident.roleName] || ROLE_COLORS.Usuario;
+  const [showActions, setShowActions] = useState(false);
+  const actionsRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (actionsRef.current && !actionsRef.current.contains(e.target)) {
+        setShowActions(false);
+      }
+    };
+    if (showActions) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showActions]);
+
+  const isCommittee = resident.roleId === 5;
+  const isResident = resident.roleId === 2 || resident.roleId == null;
+  const canActivate = resident.status === 'PENDING' || resident.status === 'INACTIVE';
 
   return (
     <div className="resident-card">
@@ -49,9 +74,6 @@ const ResidentCard = ({ resident }) => {
           <span className="resident-card__role" style={{ color: roleColor }}>
             <Icon name={roleIcon} size={14} /> {resident.roleName}
           </span>
-          {resident.resident && (
-            <span className="resident-card__badge">Residente</span>
-          )}
         </div>
         <div className="resident-card__contact">
           <a href={`mailto:${resident.email}`} className="resident-card__email">
@@ -62,20 +84,61 @@ const ResidentCard = ({ resident }) => {
           )}
         </div>
       </div>
-      <div className="resident-card__status">
+      <div className="resident-card__right">
         <span className={`resident-card__status-badge resident-card__status-badge--${resident.status?.toLowerCase() || 'active'}`}>
-          {resident.status === 'ACTIVE' ? 'Activo' : resident.status}
+          {STATUS_LABELS[resident.status] || resident.status}
         </span>
+        {isAdmin && (
+          <div className="resident-card__actions-wrapper" ref={actionsRef}>
+            <button
+              type="button"
+              className="resident-card__menu-btn"
+              onClick={() => setShowActions(!showActions)}
+              title="Acciones"
+            >
+              <Icon name="ellipsisVertical" size={18} />
+            </button>
+            {showActions && (
+              <div className="resident-card__dropdown">
+                {canActivate && (
+                  <button type="button" onClick={() => { onAction('activate', resident); setShowActions(false); }}>
+                    <Icon name="checkBadge" size={14} /> Activar
+                  </button>
+                )}
+                {isResident && (
+                  <button type="button" onClick={() => { onAction('makeCommittee', resident); setShowActions(false); }}>
+                    <Icon name="users" size={14} /> Asignar Comité
+                  </button>
+                )}
+                {isCommittee && (
+                  <button type="button" onClick={() => { onAction('removeCommittee', resident); setShowActions(false); }}>
+                    <Icon name="home" size={14} /> Quitar Comité
+                  </button>
+                )}
+                {resident.status !== 'INACTIVE' && resident.roleId !== 1 && (
+                  <button
+                    type="button"
+                    className="resident-card__dropdown-danger"
+                    onClick={() => { onAction('deactivate', resident); setShowActions(false); }}
+                  >
+                    <Icon name="close" size={14} /> Desactivar
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 /**
- * Sección de unidad con sus residentes
+ * Sección de unidad con sus residentes (o personal sin unidad)
  */
-const UnitSection = ({ unitNumber, tower, floor, residents, isExpanded, onToggle }) => {
+const UnitSection = ({ unitNumber, tower, floor, residents, isExpanded, onToggle, sectionLabel, onAction, isAdmin }) => {
   const unitLabel = useMemo(() => {
+    if (sectionLabel) return sectionLabel;
     if (!unitNumber && !tower && !floor) {
       return 'Sin unidad asignada';
     }
@@ -84,7 +147,7 @@ const UnitSection = ({ unitNumber, tower, floor, residents, isExpanded, onToggle
     if (tower) label += ` - Torre ${tower}`;
     if (floor) label += ` - Piso ${floor}`;
     return label;
-  }, [unitNumber, tower, floor]);
+  }, [unitNumber, tower, floor, sectionLabel]);
 
   return (
     <section className="unit-section">
@@ -115,7 +178,7 @@ const UnitSection = ({ unitNumber, tower, floor, residents, isExpanded, onToggle
       {isExpanded && (
         <div className="unit-section__content">
           {residents.map((resident) => (
-            <ResidentCard key={resident.id} resident={resident} />
+            <ResidentCard key={resident.id} resident={resident} onAction={onAction} isAdmin={isAdmin} />
           ))}
         </div>
       )}
@@ -135,13 +198,22 @@ const AdminResidents = () => {
   const [expandedUnits, setExpandedUnits] = useState(new Set());
   const lastFetchKeyRef = useRef(null);
 
+  const [buildingStaff, setBuildingStaff] = useState([]);
+
   const fetchResidents = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     setError(null);
     try {
       const data = await api.adminUsers.getResidents();
-      setResidents(data || []);
+      // Soportar formato nuevo { residents, buildingStaff } y legacy (array)
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        setResidents(data.residents || []);
+        setBuildingStaff(data.buildingStaff || []);
+      } else {
+        setResidents(Array.isArray(data) ? data : []);
+        setBuildingStaff([]);
+      }
     } catch (err) {
       console.error('Error cargando residentes:', err);
       setError(err.message || 'Error al cargar los residentes');
@@ -203,13 +275,32 @@ const AdminResidents = () => {
       .filter((group) => group.residents.length > 0);
   }, [groupedResidents, searchTerm]);
 
+  const filteredBuildingStaff = useMemo(() => {
+    if (!searchTerm.trim()) return buildingStaff;
+    const term = searchTerm.toLowerCase();
+    return buildingStaff.filter(
+      (r) =>
+        r.firstName?.toLowerCase().includes(term) ||
+        r.lastName?.toLowerCase().includes(term) ||
+        r.email?.toLowerCase().includes(term) ||
+        r.phone?.includes(term)
+    );
+  }, [buildingStaff, searchTerm]);
+
   useEffect(() => {
     if (searchTerm.trim()) {
-      setExpandedUnits(new Set(filteredGroups.map((group) => group.unitId)));
+      const keys = filteredGroups.map((group) => group.unitId);
+      if (filteredBuildingStaff.length > 0) keys.push('staff');
+      setExpandedUnits(new Set(keys));
       return;
     }
-    setExpandedUnits(new Set());
-  }, [searchTerm, filteredGroups]);
+    // Sin búsqueda: expandir "Administradores y personal" por defecto si hay staff
+    if (filteredBuildingStaff.length > 0) {
+      setExpandedUnits(new Set(['staff']));
+    } else {
+      setExpandedUnits(new Set());
+    }
+  }, [searchTerm, filteredGroups, filteredBuildingStaff.length]);
 
   // Estadísticas
   const stats = useMemo(() => {
@@ -234,12 +325,38 @@ const AdminResidents = () => {
   };
 
   const handleExpandAll = () => {
-    setExpandedUnits(new Set(filteredGroups.map((group) => group.unitId)));
+    const keys = filteredGroups.map((group) => group.unitId);
+    if (filteredBuildingStaff.length > 0) keys.push('staff');
+    setExpandedUnits(new Set(keys));
   };
 
   const handleCollapseAll = () => {
     setExpandedUnits(new Set());
   };
+
+  const isAdmin = user?.userType === 'admin' || user?.roleId === 1;
+
+  const handleResidentAction = useCallback(async (action, resident) => {
+    try {
+      if (action === 'activate') {
+        if (!window.confirm(`¿Activar a ${resident.firstName} ${resident.lastName}?`)) return;
+        await api.adminUsers.activate(resident.id);
+      } else if (action === 'makeCommittee') {
+        if (!window.confirm(`¿Asignar rol Comité a ${resident.firstName} ${resident.lastName}?`)) return;
+        await api.adminUsers.changeRole(resident.id, 5);
+      } else if (action === 'removeCommittee') {
+        if (!window.confirm(`¿Quitar rol Comité a ${resident.firstName} ${resident.lastName} y volver a Residente?`)) return;
+        await api.adminUsers.changeRole(resident.id, 2);
+      } else if (action === 'deactivate') {
+        if (!window.confirm(`¿Desactivar a ${resident.firstName} ${resident.lastName}? Ya no podrá acceder al sistema.`)) return;
+        await api.adminUsers.deactivate(resident.id);
+      }
+      fetchResidents();
+    } catch (err) {
+      console.error('Error en acción de residente:', err);
+      setError(err.message || 'Error al ejecutar la acción');
+    }
+  }, [fetchResidents]);
 
   return (
     <ProtectedLayout allowedRoles={['admin', 'concierge']}>
@@ -308,7 +425,7 @@ const AdminResidents = () => {
               type="button"
               className="admin-residents__ghost"
               onClick={handleExpandAll}
-              disabled={filteredGroups.length === 0}
+              disabled={filteredGroups.length === 0 && filteredBuildingStaff.length === 0}
             >
               Expandir todo
             </button>
@@ -316,7 +433,7 @@ const AdminResidents = () => {
               type="button"
               className="admin-residents__ghost"
               onClick={handleCollapseAll}
-              disabled={filteredGroups.length === 0}
+              disabled={filteredGroups.length === 0 && filteredBuildingStaff.length === 0}
             >
               Contraer todo
             </button>
@@ -357,7 +474,7 @@ const AdminResidents = () => {
           </div>
         )}
 
-        {!loading && !error && filteredGroups.length === 0 && (
+        {!loading && !error && filteredGroups.length === 0 && filteredBuildingStaff.length === 0 && (
           <div className="admin-residents__empty">
             {searchTerm ? (
               <>
@@ -378,15 +495,31 @@ const AdminResidents = () => {
         )}
 
         <div className="admin-residents__list">
+          {filteredBuildingStaff.length > 0 && (
+            <UnitSection
+              key="building-staff"
+              unitNumber={null}
+              tower={null}
+              floor={null}
+              residents={filteredBuildingStaff}
+              isExpanded={expandedUnits.has('staff')}
+              onToggle={() => handleToggleUnit('staff')}
+              sectionLabel="Administradores y personal"
+              onAction={handleResidentAction}
+              isAdmin={isAdmin}
+            />
+          )}
           {filteredGroups.map((group) => (
             <UnitSection
-              key={group.unitId}
+              key={group.unitId ?? `unit-${group.unitNumber}`}
               unitNumber={group.unitNumber}
               tower={group.tower}
               floor={group.floor}
               residents={group.residents}
               isExpanded={expandedUnits.has(group.unitId)}
               onToggle={() => handleToggleUnit(group.unitId)}
+              onAction={handleResidentAction}
+              isAdmin={isAdmin}
             />
           ))}
         </div>

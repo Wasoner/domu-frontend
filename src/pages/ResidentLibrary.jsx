@@ -10,7 +10,7 @@ import './ResidentLibrary.scss';
  * Document repository and community files
  */
 const ResidentLibrary = () => {
-  const { user } = useAppContext();
+  const { user, hasPermission } = useAppContext();
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [documents, setDocuments] = useState([]);
@@ -28,7 +28,7 @@ const ResidentLibrary = () => {
     file: null
   });
 
-  const isAdmin = user?.roleId === 1;
+  const canUpload = hasPermission('DOCUMENTS_UPLOAD');
 
   const categories = [
     { id: 'all', label: 'Todos', iconName: 'folder' },
@@ -173,7 +173,7 @@ const ResidentLibrary = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            {isAdmin && (
+            {canUpload && (
               <Button 
                 variant="primary" 
                 onClick={() => setShowUploadForm(!showUploadForm)}
@@ -184,7 +184,7 @@ const ResidentLibrary = () => {
           </div>
         </header>
 
-        {showUploadForm && isAdmin && (
+        {showUploadForm && canUpload && (
           <section className="resident-library__upload-card">
             <h3>Cargar nuevo documento</h3>
             <form onSubmit={handleUpload}>
@@ -289,7 +289,7 @@ const ResidentLibrary = () => {
                     <Icon name="download" size={18} />
                     Descargar
                   </a>
-                  {isAdmin && (
+                  {canUpload && (
                     <button 
                       type="button"
                       className="resident-library__delete-btn"

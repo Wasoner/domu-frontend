@@ -1,8 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProtectedLayout } from '../layout';
 import { Seo, Skeleton, Icon } from '../components';
+import { useAppContext } from '../context';
 import { api } from '../services';
 import './AdminCreateUser.scss';
+
+const formatRut = (raw) => {
+  let clean = raw.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length > 9) clean = clean.slice(0, 9);
+  if (clean.length <= 1) return clean;
+  const dv = clean.slice(-1);
+  const body = clean.slice(0, -1);
+  let formatted = '';
+  for (let i = body.length - 1, count = 0; i >= 0; i--, count++) {
+    if (count > 0 && count % 3 === 0) formatted = '.' + formatted;
+    formatted = body[i] + formatted;
+  }
+  return formatted + '-' + dv;
+};
 
 const ROLE_TYPES = [
   { 
@@ -11,6 +26,14 @@ const ROLE_TYPES = [
     label: 'Residente', 
     icon: 'home', 
     description: 'Propietarios o arrendatarios que viven en el edificio.',
+    resident: true
+  },
+  { 
+    id: 'committee', 
+    roleId: 5, 
+    label: 'Comité', 
+    icon: 'scale', 
+    description: 'Residente miembro del comité de administración.',
     resident: true
   },
   { 
@@ -40,6 +63,7 @@ const ROLE_TYPES = [
 ];
 
 const AdminCreateUser = () => {
+  const { user, buildingVersion } = useAppContext();
   const [selectedType, setSelectedType] = useState(ROLE_TYPES[0]);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -53,9 +77,36 @@ const AdminCreateUser = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [units, setUnits] = useState([]);
+  const [unitsLoading, setUnitsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const load = async () => {
+      setUnitsLoading(true);
+      try {
+        const data = await api.housingUnits.list();
+        if (!cancelled) {
+          const normalized = (data || []).map((item) => item?.unit || item).filter(Boolean);
+          setUnits(normalized);
+        }
+      } catch {
+        if (!cancelled) setUnits([]);
+      } finally {
+        if (!cancelled) setUnitsLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [user, buildingVersion]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if (name === 'documentNumber') {
+      setFormData((prev) => ({ ...prev, documentNumber: formatRut(value) }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -75,7 +126,7 @@ const AdminCreateUser = () => {
     if (!formData.email.trim()) {
       return 'El correo es obligatorio.';
     }
-    if (selectedType.id === 'resident' && !formData.unitNumber.trim()) {
+    if (selectedType.resident && !formData.unitNumber.trim()) {
       return 'Para un residente es obligatorio indicar la unidad.';
     }
     return null;
@@ -240,6 +291,7 @@ const AdminCreateUser = () => {
                     placeholder="12.345.678-9"
                     required
                     disabled={loading}
+                    maxLength={12}
                   />
                 </div>
 
@@ -249,6 +301,7 @@ const AdminCreateUser = () => {
                     id="birthDate"
                     type="date"
                     name="birthDate"
+                    lang="es-CL"
                     value={formData.birthDate}
                     onChange={handleChange}
                     disabled={loading}
@@ -256,22 +309,26 @@ const AdminCreateUser = () => {
                   />
                 </div>
 
-                {(selectedType.id === 'resident' || selectedType.id === 'staff') && (
+                {(selectedType.resident || selectedType.id === 'staff') && (
                   <div className="form-group form-group--full">
                     <label htmlFor="unitNumber">
-                      Unidad {selectedType.id === 'resident' && <span className="required">*</span>}
+                      Unidad {selectedType.resident && <span className="required">*</span>}
                     </label>
-                    <input
+                    <select
                       id="unitNumber"
-                      type="number"
                       name="unitNumber"
                       value={formData.unitNumber}
                       onChange={handleChange}
-                      placeholder="Ej. 101"
-                      min="1"
-                      disabled={loading}
-                      required={selectedType.id === 'resident'}
-                    />
+                      disabled={loading || unitsLoading}
+                      required={selectedType.resident}
+                    >
+                      <option value="">{unitsLoading ? 'Cargando unidades...' : 'Selecciona una unidad'}</option>
+                      {units.map((u) => (
+                        <option key={u.id} value={u.number}>
+                          {u.number}{u.tower ? ` - Torre ${u.tower}` : ''}{u.floor ? ` - Piso ${u.floor}` : ''}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 )}
               </div>

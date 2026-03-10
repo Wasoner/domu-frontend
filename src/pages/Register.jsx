@@ -288,6 +288,7 @@ const Register = () => {
                                 id="birthDate"
                                 type="date"
                                 name="birthDate"
+                                lang="es-CL"
                                 value={formData.birthDate}
                                 onChange={handleChange}
                                 required

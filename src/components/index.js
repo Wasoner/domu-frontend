@@ -14,5 +14,6 @@ export { default as Skeleton } from './Skeleton';
 export { default as Spinner } from './Spinner';
 export { default as NeighborProfileModal } from './NeighborProfileModal';
 export { default as CreatePublicationModal } from './CreatePublicationModal';
+export { default as CreatePollModal } from './CreatePollModal';
 export { default as ConfirmModal } from './ConfirmModal';
 export { default as ScrollToTop } from './ScrollToTop';

@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom';
+import { Icon } from '../components';
 import { ROUTES } from '../constants';
 import './Footer.scss';
+
+const footerLinks = [
+  { to: ROUTES.ABOUT, label: 'Acerca de', icon: 'info' },
+  { to: ROUTES.SOLUCIONES, label: 'Soluciones', icon: 'sparkles' },
+  { to: ROUTES.CONTACT, label: 'Contacto', icon: 'chatBubbleLeftRight' },
+];
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -17,9 +24,12 @@ const Footer = () => {
         <nav className="app-footer__nav" aria-label="Enlaces del sitio">
           <div className="app-footer__nav-group">
             <span className="app-footer__nav-title">Producto</span>
-            <Link to={ROUTES.ABOUT}>Acerca de</Link>
-            <Link to={ROUTES.SOLUCIONES}>Soluciones</Link>
-            <Link to={ROUTES.CONTACT}>Contacto</Link>
+            {footerLinks.map(({ to, label, icon }) => (
+              <Link key={to} to={to} className="app-footer__link">
+                <Icon name={icon} size={18} className="app-footer__link-icon" />
+                {label}
+              </Link>
+            ))}
           </div>
         </nav>
       </div>

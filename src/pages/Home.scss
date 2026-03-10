@@ -148,7 +148,7 @@
 
 .hero-constellation {
   position: relative;
-  width: min(380px, 65vw);
+  width: min(420px, 70vw);
   aspect-ratio: 1;
 }
 
@@ -157,8 +157,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 72px;
-  height: 72px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   background: var(--color-turquoise);
   display: grid;
@@ -168,7 +168,7 @@
 }
 
 .hero-constellation__logo {
-  width: 48px;
+  width: 64px;
   height: auto;
   filter: brightness(0) invert(1);
 }
@@ -188,13 +188,19 @@
 
   /* Position nodes in a circle using CSS custom property */
   --angle: calc(var(--node-index) * 40deg);
-  --radius: 44%;
+  --radius: 32%;
   --cx: calc(50% + var(--radius) * cos(var(--angle)) - 22px);
   --cy: calc(50% + var(--radius) * sin(var(--angle)) - 22px);
-  left: calc(50% + 44% * cos(var(--angle)) - 22px);
-  top: calc(50% + 44% * sin(var(--angle)) - 22px);
+  left: calc(50% + 32% * cos(var(--angle)) - 22px);
+  top: calc(50% + 32% * sin(var(--angle)) - 22px);
   animation: constellationFloat 3.5s ease-in-out infinite;
   animation-delay: calc(var(--node-index) * 0.25s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-constellation__node {
+    animation: none;
+  }
 }
 
 /* Features Section */
@@ -250,26 +256,10 @@
   text-align: center;
 }
 
-.home-feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--color-turquoise), var(--color-orange));
-  opacity: 0;
-  transition: opacity var(--transition-slow);
-}
-
 .home-feature-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.09);
   border-color: rgba(83, 164, 151, 0.35);
-}
-
-.home-feature-card:hover::before {
-  opacity: 1;
 }
 
 .home-feature-card__icon {
@@ -304,10 +294,9 @@
   margin: 0;
 }
 
-/* Touch feedback for feature and benefit cards */
+/* Touch feedback for feature cards only */
 @media (hover: none) and (pointer: coarse) {
-  .home-feature-card:active,
-  .home-benefit-card:active {
+  .home-feature-card:active {
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.07);
     transition-duration: 0.05s;
@@ -395,14 +384,11 @@
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   padding: 2rem;
-  transition: all var(--transition-slow);
-  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-slow);
   position: relative;
   overflow: hidden;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.09);
     border-color: rgba(83, 164, 151, 0.35);
   }
 }
@@ -902,7 +888,7 @@
   }
 
   .hero-constellation {
-    width: min(300px, 55vw);
+    width: min(340px, 60vw);
   }
 
   .home-hero__stats {
@@ -961,7 +947,7 @@
   }
 }
 
-/* Responsive: ≤640px */
+/* Responsive: ≤640px — transición a móvil */
 @media (max-width: 640px) {
   .home-grid {
     gap: 2rem;
@@ -982,12 +968,41 @@
   .home-hero__visual {
     order: 2;
   }
+
+  .home-hero::before {
+    opacity: 0.2;
+  }
+
+  .hero-constellation {
+    width: min(280px, 70vw);
+  }
+
+  .hero-constellation__center {
+    width: 80px;
+    height: 80px;
+  }
+
+  .hero-constellation__logo {
+    width: 52px;
+  }
+
+  .hero-constellation__node {
+    width: 38px;
+    height: 38px;
+    --radius: 33%;
+    left: calc(50% + 33% * cos(var(--angle)) - 19px);
+    top: calc(50% + 33% * sin(var(--angle)) - 19px);
+  }
 }
 
-/* Responsive: ≤480px */
+/* Responsive: ≤480px — móvil ligero, sin sobrecarga visual */
 @media (max-width: 480px) {
   .home-hero {
     padding: 2rem 0 3rem;
+  }
+
+  .home-hero::before {
+    opacity: 0.2;
   }
 
   .home-hero__content {
@@ -998,8 +1013,31 @@
     font-size: clamp(1.5rem, 5.5vw, 2rem);
   }
 
-  .home-hero__visual {
-    display: none;
+  .hero-constellation {
+    width: min(240px, 75vw);
+  }
+
+  .hero-constellation__center {
+    width: 64px;
+    height: 64px;
+    box-shadow: 0 4px 12px rgba(83, 164, 151, 0.25);
+  }
+
+  .hero-constellation__logo {
+    width: 42px;
+  }
+
+  .hero-constellation__node {
+    width: 34px;
+    height: 34px;
+    --radius: 34%;
+    left: calc(50% + 34% * cos(var(--angle)) - 17px);
+    top: calc(50% + 34% * sin(var(--angle)) - 17px);
+  }
+
+  .hero-constellation__node svg {
+    width: 16px;
+    height: 16px;
   }
 
   .home-hero__stats {
@@ -1027,7 +1065,7 @@
   }
 }
 
-/* Responsive: ≤380px */
+/* Responsive: ≤380px — pantallas muy pequeñas */
 @media (max-width: 380px) {
   .home-hero {
     padding: 1.5rem 0 2.5rem;
@@ -1035,6 +1073,32 @@
 
   .home-hero__title {
     font-size: 1.35rem;
+  }
+
+  .hero-constellation {
+    width: min(200px, 80vw);
+  }
+
+  .hero-constellation__center {
+    width: 56px;
+    height: 56px;
+  }
+
+  .hero-constellation__logo {
+    width: 36px;
+  }
+
+  .hero-constellation__node {
+    width: 28px;
+    height: 28px;
+    --radius: 36%;
+    left: calc(50% + 36% * cos(var(--angle)) - 14px);
+    top: calc(50% + 36% * sin(var(--angle)) - 14px);
+  }
+
+  .hero-constellation__node svg {
+    width: 14px;
+    height: 14px;
   }
 
   .home-hero__stats {

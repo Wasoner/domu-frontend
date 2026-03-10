@@ -295,10 +295,10 @@ const AdminIncidentsBoard = () => {
 
   const fetchStaff = useCallback(async () => {
     try {
-      const members = await api.adminUsers.getResidents();
-      // Filtrar por roles que pueden ser asignados (Concierge, Staff)
-      // O simplemente mostrar todos los que no son residentes
-      const staff = (members || []).filter(m => m.roleId !== 2);
+      const data = await api.adminUsers.getResidents();
+      const staff = (data && typeof data === 'object' && !Array.isArray(data))
+        ? (data.buildingStaff || [])
+        : (Array.isArray(data) ? data.filter(m => m.roleId !== 2) : []);
       setStaffMembers(staff);
     } catch (error) {
       console.error('Error fetching staff:', error);

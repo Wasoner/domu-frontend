@@ -1,12 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AppContext } from './appContextDefinition';
 import { api } from '../services';
-
-/**
- * App Context Provider
- * Global state management using React Context API
- * Handles authentication state and user data
- */
 
 const resolveUserType = (userData) => {
   if (!userData) return 'resident';
@@ -26,11 +20,14 @@ export const AppProvider = ({ children }) => {
     const selectedBuildingId = localStorage.getItem('selectedBuildingId');
 
     if (token && userEmail) {
+      let permissions = [];
+      try { permissions = JSON.parse(localStorage.getItem('userPermissions') || '[]'); } catch { /* empty */ }
       return {
         email: userEmail,
         userType: userType || 'resident',
         isAuthenticated: true,
         selectedBuildingId: selectedBuildingId ? Number(selectedBuildingId) : undefined,
+        permissions,
       };
     }
     return null;
@@ -62,11 +59,15 @@ export const AppProvider = ({ children }) => {
               localStorage.setItem('selectedBuildingId', buildingId);
             }
 
+            if (userData.permissions) {
+              localStorage.setItem('userPermissions', JSON.stringify(userData.permissions));
+            }
             setUser({
               ...userData,
               userType: resolveUserType(userData),
               isAuthenticated: true,
               selectedBuildingId: buildingId,
+              permissions: userData.permissions || [],
             });
           }
         } catch (error) {
@@ -105,6 +106,7 @@ export const AppProvider = ({ children }) => {
         userType: resolveUserType(userData),
         isAuthenticated: true,
         selectedBuildingId: resolvedBuildingId,
+        permissions: userData.permissions || [],
       }
       : null;
 
@@ -112,6 +114,9 @@ export const AppProvider = ({ children }) => {
     if (normalizedUser) {
       localStorage.setItem('userEmail', normalizedUser.email || '');
       localStorage.setItem('userType', normalizedUser.userType || 'resident');
+      if (normalizedUser.permissions) {
+        localStorage.setItem('userPermissions', JSON.stringify(normalizedUser.permissions));
+      }
       if (normalizedUser.selectedBuildingId !== undefined && normalizedUser.selectedBuildingId !== null) {
         localStorage.setItem('selectedBuildingId', normalizedUser.selectedBuildingId);
       }
@@ -135,12 +140,18 @@ export const AppProvider = ({ children }) => {
     setUser(null);
   };
 
+  const hasPermission = useCallback((perm) => {
+    const perms = user?.permissions || [];
+    return perms.includes('ALL') || perms.includes(perm);
+  }, [user?.permissions]);
+
   const value = {
     user,
     setUser: updateUser,
     selectBuilding,
-    buildingVersion, // Usado para detectar cambios de edificio y recargar datos
+    buildingVersion,
     logout,
+    hasPermission,
     theme,
     setTheme,
     toggleTheme: () => setTheme(prev => prev === 'light' ? 'dark' : 'light'),
