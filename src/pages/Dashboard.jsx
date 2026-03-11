@@ -54,8 +54,10 @@ const Dashboard = () => {
             const inProgress = incidentData?.inProgress || [];
             const closed = incidentData?.closed || [];
 
-            // Process residents
-            const residents = residentData || [];
+            // Process residents (soportar formato { residents, buildingStaff })
+            const residents = (residentData && typeof residentData === 'object' && !Array.isArray(residentData))
+                ? (residentData.residents || [])
+                : (Array.isArray(residentData) ? residentData : []);
             
             // Process periods
             const latestPeriod = periodData && periodData.length > 0 ? periodData[0] : null;

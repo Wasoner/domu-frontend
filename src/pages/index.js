@@ -56,8 +56,6 @@ export { default as UserTypeFuncionarios } from './UserTypeFuncionarios';
 export { default as UserTypeProveedores } from './UserTypeProveedores';
 export { default as Soluciones } from './Soluciones';
 
-// Provider pages
+// Provider pages (admin)
 export { default as AdminProviders } from './AdminProviders';
 export { default as AdminServiceOrders } from './AdminServiceOrders';
-export { default as ProviderPortal } from './ProviderPortal';
-export { default as ProviderServiceOrders } from './ProviderServiceOrders';

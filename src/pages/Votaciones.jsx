@@ -1,26 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ProtectedLayout } from '../layout';
-import { Icon } from '../components';
+import { Icon, Button, CreatePollModal, Skeleton } from '../components';
 import { useAppContext } from '../context';
 import { api } from '../services';
 import './Votaciones.scss';
-
-const buildOptionId = () => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
-
-const defaultForm = () => ({
-  title: '',
-  description: '',
-  closesAt: '',
-  options: [
-    { id: buildOptionId(), label: '' },
-    { id: buildOptionId(), label: '' },
-  ],
-});
 
 const formatRemaining = (closesAt) => {
   if (!closesAt) return { text: 'Sin fecha', expired: false };
@@ -44,23 +27,30 @@ const PollCard = ({ poll, onVote, onExport, onClose, canVote, loadingPollId }) =
   const isClosed = poll.status === 'CLOSED' || remaining.expired;
 
   return (
-    <article className="poll-card">
-      <header className="poll-card__header">
-        <div>
-          <p className="poll-card__eyebrow">{poll.status === 'CLOSED' ? 'Histórico' : 'Activa'}</p>
-          <h3>{poll.title}</h3>
-          {poll.description && <p className="poll-card__description">{poll.description}</p>}
+    <article className="resident-votaciones__card">
+      <div className="resident-votaciones__card-header">
+        <span
+          className={`resident-votaciones__type-badge ${isClosed ? 'is-closed' : 'is-open'}`}
+          data-status={isClosed ? 'closed' : 'open'}
+        >
+          <Icon name={isClosed ? 'archiveBox' : 'checkBadge'} size={12} />
+          {isClosed ? 'Cerrada' : 'Abierta'}
+        </span>
+        <div className="resident-votaciones__meta">
+          <span className="resident-votaciones__time">{remaining.text}</span>
+          <span className="resident-votaciones__votes">{total} voto{total === 1 ? '' : 's'}</span>
         </div>
-        <div className="poll-card__meta">
-          <span className={`poll-card__badge ${isClosed ? 'is-closed' : 'is-open'}`}>
-            {isClosed ? 'Cerrada' : 'Abierta'}
-          </span>
-          <span className="poll-card__time">{remaining.text}</span>
-          <span className="poll-card__votes">{total} voto{total === 1 ? '' : 's'}</span>
-        </div>
-      </header>
+      </div>
+      <h3 className="resident-votaciones__title">{poll.title}</h3>
+      {poll.description && (
+        <p className="resident-votaciones__content">{poll.description}</p>
+      )}
 
-      <div className="poll-card__options" role="group" aria-label={`Opciones para ${poll.title}`}>
+      <div
+        className="resident-votaciones__options"
+        role="group"
+        aria-label={`Opciones para ${poll.title}`}
+      >
         {poll.options.map((opt) => {
           const percentage = Math.round(opt.percentage || 0);
           const selected = poll.selectedOptionId === opt.id;
@@ -70,17 +60,17 @@ const PollCard = ({ poll, onVote, onExport, onClose, canVote, loadingPollId }) =
               key={opt.id}
               type="button"
               disabled={disabled}
-              className={`poll-card__option ${selected ? 'is-selected' : ''}`}
+              className={`resident-votaciones__option ${selected ? 'is-selected' : ''}`}
               onClick={() => onVote(poll.id, opt.id)}
             >
-              <div className="poll-card__option-top">
+              <div className="resident-votaciones__option-top">
                 <span>{opt.label}</span>
-                <span className="poll-card__percentage">{percentage}%</span>
+                <span className="resident-votaciones__percentage">{percentage}%</span>
               </div>
-              <div className="poll-card__bar" aria-hidden="true">
+              <div className="resident-votaciones__bar" aria-hidden="true">
                 <span style={{ width: `${percentage}%` }} />
               </div>
-              <small className="poll-card__votes-option">
+              <small className="resident-votaciones__votes-option">
                 {opt.votes ?? 0} voto{(opt.votes ?? 0) === 1 ? '' : 's'}
               </small>
             </button>
@@ -88,35 +78,47 @@ const PollCard = ({ poll, onVote, onExport, onClose, canVote, loadingPollId }) =
         })}
       </div>
 
-      <footer className="poll-card__footer">
+      <div className="resident-votaciones__card-footer">
         {isClosed && (
-          <button type="button" className="poll-card__ghost" onClick={() => onExport(poll.id)}>
+          <button
+            type="button"
+            className="resident-votaciones__ghost-btn"
+            onClick={() => onExport(poll.id)}
+          >
             <Icon name="download" size={16} /> Exportar CSV
           </button>
         )}
         {!isClosed && onClose && (
-          <button type="button" className="poll-card__ghost" onClick={() => onClose(poll.id)}>
+          <button
+            type="button"
+            className="resident-votaciones__ghost-btn"
+            onClick={() => onClose(poll.id)}
+          >
             Cerrar ahora
           </button>
         )}
-        {voted && !isClosed && <span className="poll-card__hint">Ya registraste tu voto</span>}
-        {!canVote && <span className="poll-card__hint">Sin permisos para votar</span>}
-      </footer>
+        {voted && !isClosed && (
+          <span className="resident-votaciones__hint">Ya registraste tu voto</span>
+        )}
+        {!canVote && (
+          <span className="resident-votaciones__hint">Sin permisos para votar</span>
+        )}
+      </div>
     </article>
   );
 };
 
 const Votaciones = () => {
-  const { user } = useAppContext();
+  const { hasPermission } = useAppContext();
   const [tab, setTab] = useState('open');
   const [loading, setLoading] = useState(false);
   const [loadingPollId, setLoadingPollId] = useState(null);
   const [error, setError] = useState(null);
   const [polls, setPolls] = useState({ open: [], closed: [] });
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(defaultForm);
-  const canCreate = user?.userType === 'admin' || user?.userType === 'concierge';
-  const canVote = ['resident', 'admin', 'concierge'].includes(user?.userType);
+  const [creating, setCreating] = useState(false);
+  const canCreate = hasPermission('VOTES_CREATE');
+  const canVote = hasPermission('VOTES_VIEW');
 
   const openPolls = useMemo(() => polls.open || [], [polls]);
   const closedPolls = useMemo(() => polls.closed || [], [polls]);
@@ -141,49 +143,18 @@ const Votaciones = () => {
     fetchPolls();
   }, []);
 
-  const updateOption = (id, label) => {
-    setForm((prev) => ({
-      ...prev,
-      options: prev.options.map((opt) => (opt.id === id ? { ...opt, label } : opt)),
-    }));
-  };
-
-  const addOption = () => {
-    setForm((prev) => ({
-      ...prev,
-      options: [...prev.options, { id: buildOptionId(), label: '' }],
-    }));
-  };
-
-  const removeOption = (id) => {
-    setForm((prev) => ({
-      ...prev,
-      options: prev.options.filter((opt) => opt.id !== id),
-    }));
-  };
-
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleCreate = async (payload) => {
+    setCreating(true);
     setError(null);
     try {
-      const payload = {
-        title: form.title.trim(),
-        description: form.description?.trim() || '',
-        closesAt: form.closesAt,
-        options: form.options
-          .map((opt) => opt.label.trim())
-          .filter((opt) => opt.length > 0),
-      };
       await api.polls.create(payload);
-      setForm(defaultForm);
       setShowForm(false);
       setTab('open');
       fetchPolls();
     } catch (err) {
       setError(err.message || 'No pudimos crear la votación.');
     } finally {
-      setLoading(false);
+      setCreating(false);
     }
   };
 
@@ -233,68 +204,70 @@ const Votaciones = () => {
 
   return (
     <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge', 'staff']}>
-      <article className="polls-page page-shell">
-        <header className="polls-page__header">
+      <article className="resident-votaciones page-shell">
+        <header className="resident-votaciones__header">
           <div>
-            <p className="polls-page__eyebrow">Participación</p>
             <h1>Votaciones</h1>
-            <p className="polls-page__subtitle">Crea votaciones rápidas y permite que la comunidad decida.</p>
+            <p className="resident-votaciones__subtitle">
+              Crea votaciones rápidas y permite que la comunidad decida.
+            </p>
           </div>
           {canCreate && (
-            <button type="button" className="btn btn-primary" onClick={() => setShowForm(true)}>
-              + Nueva votación
-            </button>
+            <Button onClick={() => setShowForm(true)} variant="primary" icon={<Icon name="plus" />}>
+              Nueva votación
+            </Button>
           )}
         </header>
 
-        {error && <div className="polls-page__error">{error}</div>}
+        {error && (
+          <div className="resident-votaciones__message resident-votaciones__message--error" role="alert">
+            {error}
+          </div>
+        )}
 
-        <div className="polls-page__tabs" role="tablist">
-          <button
-            type="button"
-            className={`polls-page__tab ${tab === 'open' ? 'is-active' : ''}`}
-            onClick={() => setTab('open')}
-            role="tab"
-            aria-selected={tab === 'open'}
-          >
-            Abiertas ({openPolls.length})
-          </button>
-          <button
-            type="button"
-            className={`polls-page__tab ${tab === 'closed' ? 'is-active' : ''}`}
-            onClick={() => setTab('closed')}
-            role="tab"
-            aria-selected={tab === 'closed'}
-          >
-            Cerradas ({closedPolls.length})
-          </button>
-          <button type="button" className="polls-page__ghost" onClick={fetchPolls} disabled={loading}>
-            {loading ? 'Actualizando…' : 'Refrescar'}
-          </button>
+        <div className="resident-votaciones__filters">
+          <div className="resident-votaciones__categories">
+            <button
+              className={`category-pill ${tab === 'open' ? 'is-active' : ''}`}
+              onClick={() => setTab('open')}
+              role="tab"
+              aria-selected={tab === 'open'}
+            >
+              <Icon name="checkBadge" size={16} /> Abiertas ({openPolls.length})
+            </button>
+            <button
+              className={`category-pill ${tab === 'closed' ? 'is-active' : ''}`}
+              onClick={() => setTab('closed')}
+              role="tab"
+              aria-selected={tab === 'closed'}
+            >
+              <Icon name="archiveBox" size={16} /> Cerradas ({closedPolls.length})
+            </button>
+            <button
+              type="button"
+              className="category-pill category-pill--ghost"
+              onClick={fetchPolls}
+              disabled={loading}
+            >
+              {loading ? 'Actualizando…' : 'Refrescar'}
+            </button>
+          </div>
         </div>
 
-        <section className="polls-page__list" aria-live="polite">
+        <section className="resident-votaciones__list" aria-live="polite">
           {loading && currentList.length === 0 && (
-            <div className="polls-page__skeleton" aria-hidden="true">
-              {[0, 1, 2].map((key) => (
-                <div key={key} className="polls-page__skeleton-card">
-                  <div className="polls-page__skeleton-header">
-                    <span className="polls-page__skeleton-block polls-page__skeleton-block--lg" />
-                    <span className="polls-page__skeleton-block polls-page__skeleton-block--sm" />
-                  </div>
-                  <span className="polls-page__skeleton-block polls-page__skeleton-block--md" />
-                  <span className="polls-page__skeleton-block polls-page__skeleton-block--xl" />
-                  <div className="polls-page__skeleton-footer">
-                    <span className="polls-page__skeleton-block polls-page__skeleton-block--sm" />
-                    <span className="polls-page__skeleton-block polls-page__skeleton-block--sm" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Skeleton.Cards count={3} />
           )}
           {!loading && currentList.length === 0 && (
-            <div className="polls-page__empty">
-              {tab === 'open' ? 'Sin votaciones abiertas por ahora.' : 'Aún no hay histórico de votaciones.'}
+            <div className="resident-votaciones__empty">
+              <span className="resident-votaciones__empty-icon" aria-hidden="true">
+                <Icon name="checkBadge" size={48} />
+              </span>
+              <p>
+                {tab === 'open'
+                  ? 'Sin votaciones abiertas por ahora.'
+                  : 'Aún no hay histórico de votaciones.'}
+              </p>
             </div>
           )}
           {!loading &&
@@ -311,79 +284,12 @@ const Votaciones = () => {
             ))}
         </section>
 
-        {showForm && (
-          <div className="polls-modal" role="dialog" aria-modal="true">
-            <div className="polls-modal__card">
-              <header className="polls-modal__header">
-                <h2>Nueva votación</h2>
-                <button type="button" className="polls-modal__close" onClick={() => setShowForm(false)}>
-                  ✕
-                </button>
-              </header>
-              <form className="polls-form" onSubmit={handleCreate}>
-                <label className="polls-form__field">
-                  <span>Título</span>
-                  <input
-                    type="text"
-                    value={form.title}
-                    onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                    required
-                    maxLength={180}
-                  />
-                </label>
-                <label className="polls-form__field">
-                  <span>Descripción</span>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-                    rows={3}
-                  />
-                </label>
-                <label className="polls-form__field">
-                  <span>Cierre</span>
-                  <input
-                    type="datetime-local"
-                    value={form.closesAt}
-                    onChange={(e) => setForm((prev) => ({ ...prev, closesAt: e.target.value }))}
-                    required
-                  />
-                </label>
-                <div className="polls-form__options">
-                  <div className="polls-form__options-header">
-                    <span>Opciones (mínimo 2)</span>
-                    <button type="button" onClick={addOption} className="polls-form__ghost">
-                      + Agregar opción
-                    </button>
-                  </div>
-                  {form.options.map((opt, index) => (
-                    <div key={opt.id} className="polls-form__option">
-                      <input
-                        type="text"
-                        value={opt.label}
-                        onChange={(e) => updateOption(opt.id, e.target.value)}
-                        placeholder={`Opción ${index + 1}`}
-                        required={index < 2}
-                      />
-                      {form.options.length > 2 && (
-                        <button type="button" onClick={() => removeOption(opt.id)} className="polls-form__ghost">
-                          Eliminar
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="polls-form__actions">
-                  <button type="button" className="polls-form__ghost" onClick={() => setShowForm(false)}>
-                    Cancelar
-                  </button>
-                  <button type="submit" className="polls-form__submit" disabled={loading}>
-                    {loading ? 'Creando…' : 'Crear votación'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <CreatePollModal
+          isOpen={showForm}
+          onClose={() => setShowForm(false)}
+          onSubmit={handleCreate}
+          loading={creating}
+        />
       </article>
     </ProtectedLayout>
   );

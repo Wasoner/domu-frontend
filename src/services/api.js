@@ -4,11 +4,8 @@
  * Handles HTTP requests and authentication
  */
 
-// Backend URL - puerto 8080 según configuración del backend
-// En desarrollo, usar el proxy de Vite para evitar CORS
-// En producción, usar la URL completa del backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? '/api' : 'http://localhost:8080/api');
+// Prefer same-origin /api so dev proxy and production reverse proxy behave the same.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
  * Get authentication token from localStorage
@@ -28,7 +25,6 @@ const roleIdToUserType = (roleId) => {
   if (roleId === 1) return 'admin';
   if (roleId === 3) return 'concierge';
   if (roleId === 4) return 'staff';
-  if (roleId === 5) return 'proveedor';
   return 'resident';
 };
 
@@ -37,6 +33,19 @@ const userTypeToRoleId = (userType) => {
   if (userType === 'concierge') return 3;
   if (userType === 'staff') return 4;
   return 2;
+};
+
+const getPermissions = () => {
+  try {
+    return JSON.parse(localStorage.getItem('userPermissions') || '[]');
+  } catch {
+    return [];
+  }
+};
+
+const hasPermission = (permission) => {
+  const perms = getPermissions();
+  return perms.includes('ALL') || perms.includes(permission);
 };
 
 /**
@@ -257,10 +266,12 @@ export const api = {
         if (responseData.token) {
           localStorage.setItem('authToken', responseData.token);
           localStorage.setItem('userEmail', email);
-          // Determinar userType basado en roleId del usuario
           if (responseData.user && responseData.user.roleId) {
             const userType = roleIdToUserType(responseData.user.roleId);
             localStorage.setItem('userType', userType);
+          }
+          if (responseData.user && responseData.user.permissions) {
+            localStorage.setItem('userPermissions', JSON.stringify(responseData.user.permissions));
           }
         }
 
@@ -282,10 +293,10 @@ export const api = {
 
         return responseData;
       } catch (error) {
-        // Limpiar datos de autenticación en caso de error
         localStorage.removeItem('authToken');
         localStorage.removeItem('userType');
         localStorage.removeItem('userEmail');
+        localStorage.removeItem('userPermissions');
         throw error;
       }
     },
@@ -317,6 +328,7 @@ export const api = {
       localStorage.removeItem('authToken');
       localStorage.removeItem('userType');
       localStorage.removeItem('userEmail');
+      localStorage.removeItem('userPermissions');
       localStorage.removeItem('selectedBuildingId');
     },
 
@@ -418,10 +430,10 @@ export const api = {
 
         return responseData;
       } catch (error) {
-        // Limpiar datos de autenticación en caso de error
         localStorage.removeItem('authToken');
         localStorage.removeItem('userType');
         localStorage.removeItem('userEmail');
+        localStorage.removeItem('userPermissions');
         throw error;
       }
     },
@@ -694,6 +706,16 @@ export const api = {
       });
     },
     getResidents: async () => fetchWrapper('/admin/residents', { method: 'GET' }),
+    changeRole: async (userId, roleId) => fetchWrapper(`/admin/residents/${userId}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ roleId }),
+    }),
+    activate: async (userId) => fetchWrapper(`/admin/residents/${userId}/activate`, {
+      method: 'PATCH',
+    }),
+    deactivate: async (userId) => fetchWrapper(`/admin/residents/${userId}`, {
+      method: 'DELETE',
+    }),
   },
 
   adminStaff: {
@@ -903,8 +925,9 @@ export const api = {
     create: async (data) => {
       const payload = {
         number: String(data.number || '').trim(),
-        tower: String(data.tower || '').trim(),
-        floor: String(data.floor || '').trim(),
+        unitType: String(data.unitType || 'DEPARTAMENTO').trim(),
+        tower: data.tower ? String(data.tower).trim() : null,
+        floor: data.floor ? String(data.floor).trim() : null,
         aliquotPercentage: data.aliquotPercentage ? Number(data.aliquotPercentage) : null,
         squareMeters: data.squareMeters ? Number(data.squareMeters) : null,
       };
@@ -916,8 +939,9 @@ export const api = {
     update: async (id, data) => {
       const payload = {
         number: String(data.number || '').trim(),
-        tower: String(data.tower || '').trim(),
-        floor: String(data.floor || '').trim(),
+        unitType: String(data.unitType || 'DEPARTAMENTO').trim(),
+        tower: data.tower ? String(data.tower).trim() : null,
+        floor: data.floor ? String(data.floor).trim() : null,
         aliquotPercentage: data.aliquotPercentage ? Number(data.aliquotPercentage) : null,
         squareMeters: data.squareMeters ? Number(data.squareMeters) : null,
       };
@@ -1108,22 +1132,6 @@ export const api = {
     getQuotations: async (id) => fetchWrapper(`/admin/service-orders/${id}/quotations`, { method: 'GET' }),
   },
 
-  provider: {
-    getMe: async () => fetchWrapper('/provider/me', { method: 'GET' }),
-    listOrders: async () => fetchWrapper('/provider/service-orders', { method: 'GET' }),
-    getOrder: async (id) => fetchWrapper(`/provider/service-orders/${id}`, { method: 'GET' }),
-    accept: async (id) => fetchWrapper(`/provider/service-orders/${id}/accept`, { method: 'PATCH' }),
-    reject: async (id, notes) => fetchWrapper(`/provider/service-orders/${id}/reject`, {
-      method: 'PATCH',
-      body: JSON.stringify({ notes }),
-    }),
-    complete: async (id, notes) => fetchWrapper(`/provider/service-orders/${id}/complete`, {
-      method: 'PATCH',
-      body: JSON.stringify({ notes }),
-    }),
-    submitQuotation: async (orderId, data) => fetchWrapper(`/provider/service-orders/${orderId}/quotations`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-  },
 };
+
+export { getPermissions, hasPermission };

@@ -319,11 +319,18 @@
 @media (max-width: 960px) {
   .login-card {
     grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .login-form-panel {
+    order: -1;
   }
 
   .login-intro {
+    order: 0;
     border-right: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -331,6 +338,23 @@
   .login-intro,
   .login-form-panel {
     padding: 2rem 1.5rem;
+  }
+
+  .login-intro h1 {
+    font-size: 1.5rem;
+  }
+
+  .login-intro__lead {
+    font-size: 0.9375rem;
+    margin-bottom: 1rem;
+  }
+
+  .login-intro__list {
+    gap: 0.5rem;
+  }
+
+  .login-intro__list li {
+    font-size: 0.875rem;
   }
 
   .login-container {
