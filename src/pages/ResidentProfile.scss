@@ -1,9 +1,7 @@
 .resident-profile {
+  @include dashboard-page($gap: 1.75rem);
   width: 100%;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
 }
 
 .resident-profile__header {
@@ -167,7 +165,7 @@
   border: 1px solid rgba(0, 0, 0, 0.14);
   padding: 0.75rem 0.9rem;
   font-size: 0.95rem;
-  background: #f9fafb;
+  background: var(--color-bg-input);
 }
 
 .resident-profile__info-item input:focus {
@@ -306,10 +304,10 @@
   }
 
   &.is-privacy {
-    background: #e2e8f0;
-    color: #64748b;
+    background: var(--color-border-default);
+    color: var(--color-text-muted);
     box-shadow: none;
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed var(--color-border-soft);
 
     // Cuando hay imagen de privacidad, también eliminar fondo y bordes
     &:has(img) {
@@ -350,7 +348,7 @@
   font-size: 0.95rem;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .resident-profile__info-grid {
     grid-template-columns: 1fr;
   }

@@ -1,0 +1,25 @@
+// ========================================
+// Keyframes y animaciones compartidas
+// ========================================
+
+@keyframes modal-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@mixin skeleton-shimmer($duration: 1.4s) {
+  background: linear-gradient(90deg, #f1f3f5 25%, #e7eaee 45%, #f1f3f5 65%);
+  background-size: 200% 100%;
+  animation: shimmer $duration ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}

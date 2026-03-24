@@ -301,7 +301,7 @@
   animation: fadeIn 0.6s ease;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .login-page {
     padding: 1rem 0;
   }
@@ -334,7 +334,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .login-intro,
   .login-form-panel {
     padding: 2rem 1.5rem;

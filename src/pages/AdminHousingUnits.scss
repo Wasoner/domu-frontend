@@ -1,11 +1,10 @@
 .admin-housing-units {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  @include dashboard-page;
   width: 100%;
 }
 
 .admin-housing-units__header {
+  @include dashboard-header;
 }
 
 .admin-housing-units__header>div {
@@ -161,37 +160,11 @@
 }
 
 .admin-housing-units__table-container {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border-light);
-  overflow-x: auto;
+  @include data-table-container;
 }
 
 .admin-housing-units__table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-housing-units__table thead {
-  background: linear-gradient(135deg, rgba(83, 164, 151, 1), rgba(60, 140, 130, 1));
-  color: white;
-}
-
-.admin-housing-units__table th {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.admin-housing-units__table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-gray-light);
-}
-
-.admin-housing-units__table tbody tr:hover {
-  background: var(--color-gray-lightest);
+  @include data-table;
 }
 
 .admin-housing-units__creator {
@@ -239,43 +212,14 @@
   height: 18px;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
 /* Modal styles - Unidades */
 .admin-housing-units__modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: grid;
-  place-items: center;
-  margin: 0;
+  @include modal-overlay(1200, rgba(15, 23, 42, 0.55));
   padding: clamp(1rem, 2vw, 2rem);
-  width: 100vw;
-  height: 100vh;
-  background: rgba(15, 23, 42, 0.55);
-  z-index: 1200;
-  backdrop-filter: blur(6px);
 }
 
 .admin-housing-units__modal {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 520px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-xl);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  @include modal-container(520px);
 }
 
 .admin-housing-units__modal--large {
@@ -283,60 +227,19 @@
 }
 
 .admin-housing-units__modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-}
-
-.admin-housing-units__modal-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-black);
+  @include modal-header;
 }
 
 .admin-housing-units__modal-close {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-medium);
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: var(--color-gray);
-  padding: 0.35rem 0.6rem;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  height: auto;
-  line-height: 1;
-}
-
-.admin-housing-units__modal-close:hover {
-  background: var(--color-error-bg);
-  color: var(--color-error);
-  border-color: var(--color-error);
+  @include modal-close-btn;
 }
 
 .admin-housing-units__modal-body {
-  padding: 1.5rem;
-  flex: 1;
-  overflow-y: auto;
-  background: var(--color-bg-primary);
+  @include modal-body;
 }
 
 .admin-housing-units__modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-top: 1px solid var(--color-border-light);
-  background: var(--color-bg-secondary);
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  @include modal-footer;
 }
 
 .form-group {
@@ -626,7 +529,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@include below-lg {
   .admin-housing-units__header {
     flex-direction: column;
     align-items: stretch;
@@ -737,7 +640,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .admin-housing-units__table th,
   .admin-housing-units__table td {
     padding: 0.5rem 0.4rem;

@@ -1,13 +1,9 @@
 .resident-library {
+  @include dashboard-page;
 }
 
 .resident-library__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  @include dashboard-header;
 }
 
 .resident-library__header h1 {
@@ -22,10 +18,8 @@
 }
 
 .resident-library__actions {
-  display: flex;
+  @include dashboard-controls;
   gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
 }
 
 .resident-library__search {
@@ -316,14 +310,7 @@
 }
 
 .resident-library__preview-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1200;
-  padding: 1rem;
+  @include modal-overlay(1200, rgba(15, 23, 42, 0.55), 0px);
 }
 
 .resident-library__preview-modal {
@@ -404,7 +391,7 @@
   background: var(--color-bg-primary);
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .resident-library {
     padding: 1.5rem;
   }

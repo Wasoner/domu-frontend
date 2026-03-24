@@ -1,0 +1,14 @@
+// ========================================
+// Barrel file - auto-inyectado por Vite
+// @use "domu-mixins" as *;
+// ========================================
+
+@forward 'variables';
+@forward 'breakpoints';
+@forward 'modal';
+@forward 'form';
+@forward 'table';
+@forward 'badge';
+@forward 'card';
+@forward 'page';
+@forward 'animations';

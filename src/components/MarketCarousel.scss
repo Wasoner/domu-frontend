@@ -78,8 +78,8 @@
     height: 220px;
     border-radius: 1rem;
     overflow: hidden;
-    background: #f8fafc;
-    border: 1px solid #f1f5f9;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-bg-hover);
 
     img {
       width: 100%;
@@ -93,7 +93,7 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #cbd5e1;
+    color: var(--color-border-soft);
   }
 
   &__price {

@@ -316,7 +316,7 @@
   }
 }
 
-@media (max-width: 1024px) {
+@include below-2xl {
   .about-hero__content,
   .about-modules-wrap {
     grid-template-columns: 1fr;

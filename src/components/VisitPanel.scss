@@ -674,7 +674,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@include below-lg {
   .visit-panel__header {
     padding: 1.25rem;
   }

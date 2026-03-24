@@ -1,4 +1,5 @@
 .resident-funds {
+  @include dashboard-page;
 }
 
 .resident-funds__header {
@@ -165,7 +166,7 @@
   font-size: 0.9375rem;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .resident-funds {
     padding: 1.5rem;
   }

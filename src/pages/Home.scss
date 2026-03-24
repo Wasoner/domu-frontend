@@ -430,7 +430,7 @@
   border-color: var(--color-turquoise);
 }
 
-@media (max-width: 480px) {
+@include below-sm {
   .home-benefits__nav {
     min-width: 44px;
     min-height: 44px;
@@ -825,7 +825,7 @@
 }
 
 /* Responsive: ≤1024px */
-@media (max-width: 1024px) {
+@include below-2xl {
   .home-hero {
     padding: 3rem 0 4.5rem;
   }
@@ -870,7 +870,7 @@
 }
 
 /* Responsive: ≤768px (merged) */
-@media (max-width: 768px) {
+@include below-lg {
   .home-hero {
     padding: 2.5rem 0 3.5rem;
   }
@@ -948,7 +948,7 @@
 }
 
 /* Responsive: ≤640px — transición a móvil */
-@media (max-width: 640px) {
+@include below-md {
   .home-grid {
     gap: 2rem;
   }
@@ -996,7 +996,7 @@
 }
 
 /* Responsive: ≤480px — móvil ligero, sin sobrecarga visual */
-@media (max-width: 480px) {
+@include below-sm {
   .home-hero {
     padding: 2rem 0 3rem;
   }
@@ -1066,7 +1066,7 @@
 }
 
 /* Responsive: ≤380px — pantallas muy pequeñas */
-@media (max-width: 380px) {
+@include below-xs {
   .home-hero {
     padding: 1.5rem 0 2.5rem;
   }

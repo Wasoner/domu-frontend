@@ -212,7 +212,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@include below-sm {
   .bank-transfer__label {
     flex: 0 0 90px;
     font-size: 0.75rem;

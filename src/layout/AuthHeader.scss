@@ -273,7 +273,7 @@
   gap: 0.75rem;
   padding: 0.45rem 1rem;
   border-bottom: 1px solid var(--color-border-light);
-  background: #f8fafc;
+  background: var(--color-bg-secondary);
   font-size: 0.65rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -710,7 +710,7 @@
 }
 
 /* Tablet y móvil */
-@media (max-width: 768px) {
+@include below-lg {
   .auth-header {
     padding: 0.75rem 1rem;
     min-height: 56px;
@@ -834,7 +834,7 @@
 }
 
 /* Móvil pequeño (iPhone SE, Android compacto) */
-@media (max-width: 480px) {
+@include below-sm {
   .auth-header {
     padding: 0.5rem 0.75rem;
     min-height: 52px;
@@ -898,7 +898,7 @@
 }
 
 /* Móvil muy pequeño (iPhone SE 320px, Android 360px) */
-@media (max-width: 380px) {
+@include below-xs {
   .auth-header {
     padding: 0.4rem 0.5rem;
     min-height: 48px;

@@ -1,0 +1,29 @@
+// ========================================
+// Breakpoint mixins
+// Uso: @include below-lg { ... }
+// ========================================
+@use 'variables' as *;
+
+@mixin below-2xl {
+  @media (max-width: $bp-2xl) { @content; }
+}
+
+@mixin below-xl {
+  @media (max-width: $bp-xl) { @content; }
+}
+
+@mixin below-lg {
+  @media (max-width: $bp-lg) { @content; }
+}
+
+@mixin below-md {
+  @media (max-width: $bp-md) { @content; }
+}
+
+@mixin below-sm {
+  @media (max-width: $bp-sm) { @content; }
+}
+
+@mixin below-xs {
+  @media (max-width: $bp-xs) { @content; }
+}

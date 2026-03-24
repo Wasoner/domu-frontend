@@ -96,7 +96,7 @@
 }
 
 .close-button:hover {
-  background: #fff6db;
+  background: var(--color-warning-bg);
   color: var(--color-black);
   border-color: rgba(247, 206, 15, 0.8);
   transform: scale(1.05);
@@ -165,7 +165,7 @@
   border-radius: 12px;
   padding: 0.7rem 0.85rem;
   font-size: 0.95rem;
-  background: #f9fafb;
+  background: var(--color-bg-input);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
@@ -434,7 +434,7 @@
 
 .location-picker__btn {
   border: 1px solid rgba(0, 0, 0, 0.16);
-  background: #f3f4f6;
+  background: var(--color-border-subtle);
   border-radius: 10px;
   padding: 0.6rem 0.9rem;
   cursor: pointer;
@@ -445,7 +445,7 @@
 }
 
 .location-picker__btn:hover {
-  background: #fff6db;
+  background: var(--color-warning-bg);
   border-color: rgba(247, 206, 15, 0.8);
   transform: translateY(-1px);
 }
@@ -602,7 +602,7 @@
 }
 
 /* Responsive: Modal buttons min-height for touch */
-@media (max-width: 640px) {
+@include below-md {
   .community-modal__actions {
     flex-direction: column-reverse;
     align-items: stretch;
@@ -615,7 +615,7 @@
 }
 
 /* Responsive: Modal on tablet */
-@media (max-width: 768px) {
+@include below-lg {
   .modal-overlay {
     padding: 1rem;
     padding-top: calc(1rem + env(safe-area-inset-top));
@@ -646,7 +646,7 @@
 }
 
 /* Responsive: Modal on desktop */
-@media (max-width: 1024px) {
+@include below-2xl {
   .community-modal {
     max-height: 92vh;
     max-height: 92dvh;
@@ -660,7 +660,7 @@
 }
 
 /* Responsive: Hide stepper labels on very small screens */
-@media (max-width: 380px) {
+@include below-xs {
   .stepper__label {
     display: none;
   }

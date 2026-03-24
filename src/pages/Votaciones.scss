@@ -2,12 +2,8 @@
   margin: 0 auto;
 
   &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    @include dashboard-header;
     margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
 
     h1 {
       font-size: 1.75rem;
@@ -71,17 +67,17 @@
       gap: 0.5rem;
       padding: 0.5rem 1rem;
       background: white;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--color-border-soft);
       border-radius: 999px;
       white-space: nowrap;
-      color: #475569;
+      color: var(--color-text-secondary);
       font-weight: 600;
       font-size: 0.875rem;
       cursor: pointer;
       transition: all 0.2s ease;
 
       &:hover:not(:disabled) {
-        background: #f8fafc;
+        background: var(--color-bg-secondary);
         border-color: var(--color-turquoise);
         color: var(--color-turquoise);
       }
@@ -97,7 +93,7 @@
         border-style: dashed;
 
         &:hover:not(:disabled) {
-          background: #f8fafc;
+          background: var(--color-bg-secondary);
         }
       }
 
@@ -160,26 +156,20 @@
   }
 
   &__type-badge {
+    @include status-badge;
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
     letter-spacing: 0.025em;
 
     &[data-status="open"],
     &.is-open {
-      background: #ecfdf5;
-      color: #047857;
+      @include badge-variant(#ecfdf5, #047857);
     }
 
     &[data-status="closed"],
     &.is-closed {
-      background: #fef2f2;
-      color: #b91c1c;
+      @include badge-variant(#fef2f2, #b91c1c);
     }
   }
 
@@ -303,7 +293,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .resident-votaciones {
     &__header {
       flex-direction: column;

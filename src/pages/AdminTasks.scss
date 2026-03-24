@@ -1,15 +1,10 @@
 .admin-tasks {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  @include dashboard-page;
 }
 
 .admin-tasks__header {
-  display: flex;
-  justify-content: space-between;
+  @include dashboard-header;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
 }
 
 .admin-tasks__title-section h1 {
@@ -64,41 +59,11 @@
 
 /* Table */
 .admin-tasks__table-container {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border-light);
-  overflow-x: auto;
+  @include data-table-container;
 }
 
 .admin-tasks__table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-tasks__table thead {
-  background: linear-gradient(135deg, rgba(83, 164, 151, 1), rgba(60, 140, 130, 1));
-  color: white;
-}
-
-.admin-tasks__table th {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  white-space: nowrap;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.admin-tasks__table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-border-light);
-  font-size: 0.9375rem;
-}
-
-.admin-tasks__table tbody tr:hover {
-  background: var(--color-bg-secondary);
+  @include data-table;
 }
 
 .admin-tasks__task-title {
@@ -119,54 +84,38 @@
 
 /* Priority badges */
 .admin-tasks__priority-badge {
-  display: inline-block;
+  @include status-badge;
   padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
 }
 
 .admin-tasks__priority-badge--high {
-  background: rgba(239, 68, 68, 0.1);
-  color: #991b1b;
+  @include badge-priority-high;
 }
 
 .admin-tasks__priority-badge--medium {
-  background: rgba(245, 158, 11, 0.1);
-  color: #92400e;
+  @include badge-priority-medium;
 }
 
 .admin-tasks__priority-badge--low {
-  background: rgba(59, 130, 246, 0.1);
-  color: #1e40af;
+  @include badge-priority-low;
 }
 
 /* Status badges */
 .admin-tasks__status-badge {
-  display: inline-block;
+  @include status-badge;
   padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
 }
 
 .admin-tasks__status-badge--completed {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
+  @include badge-completed;
 }
 
 .admin-tasks__status-badge--in_progress {
-  background: rgba(59, 130, 246, 0.1);
-  color: #1e40af;
+  @include badge-in-progress;
 }
 
 .admin-tasks__status-badge--pending {
-  background: rgba(245, 158, 11, 0.1);
-  color: #b7791f;
+  @include badge-pending;
 }
 
 /* Action buttons */
@@ -215,77 +164,27 @@
 
 /* Modal */
 .admin-tasks__modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  display: grid;
-  place-items: center;
-  z-index: 1200;
-  backdrop-filter: blur(6px);
-  padding: 1rem;
+  @include modal-overlay(1200, rgba(15, 23, 42, 0.55));
 }
 
 .admin-tasks__modal {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-xl);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  @include modal-container(500px);
 }
 
 .admin-tasks__modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-}
-
-.admin-tasks__modal-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-black);
+  @include modal-header;
 }
 
 .admin-tasks__modal-close {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-medium);
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: var(--color-gray);
-  padding: 0.35rem 0.6rem;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.admin-tasks__modal-close:hover {
-  background: var(--color-error-bg);
-  color: var(--color-error);
-  border-color: var(--color-error);
+  @include modal-close-btn;
 }
 
 .admin-tasks__form {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  @include form-container(1.25rem);
 }
 
 .admin-tasks__form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  @include form-group;
 }
 
 .admin-tasks__form-group label {
@@ -399,7 +298,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@include below-lg {
   .admin-tasks__header {
     flex-direction: column;
     align-items: stretch;

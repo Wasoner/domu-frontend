@@ -40,7 +40,7 @@
   border-radius: 50%;
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.9) 25%, rgba(248, 250, 252, 0.95) 50%, rgba(226, 232, 240, 0.9) 75%);
   background-size: 200% 100%;
-  animation: cartola-shimmer 1.6s infinite;
+  animation: cartola-shimmer 1.4s infinite;
   flex-shrink: 0;
 }
 
@@ -57,7 +57,7 @@
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.9) 25%, rgba(248, 250, 252, 0.95) 50%, rgba(226, 232, 240, 0.9) 75%);
   background-size: 200% 100%;
-  animation: cartola-shimmer 1.6s infinite;
+  animation: cartola-shimmer 1.4s infinite;
 }
 
 .resident-cartola__skeleton-block--xs {
@@ -216,30 +216,22 @@
 }
 
 .resident-cartola__status {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  @include status-badge;
 }
 
 .resident-cartola__status--paid {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+  @include badge-success;
 }
 
 .resident-cartola__status--partial {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
+  @include badge-warning;
 }
 
 .resident-cartola__status--pending {
-  background: var(--color-error-bg);
-  color: var(--color-error);
+  @include badge-error;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .resident-cartola {
     padding: 1.5rem;
   }

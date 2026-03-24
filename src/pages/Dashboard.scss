@@ -4,9 +4,7 @@
    ======================================== */
 
 .dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  @include dashboard-page;
   width: 100%;
 
   &__market {
@@ -107,7 +105,7 @@
 }
 
 .dashboard__refresh:hover:not(:disabled) {
-  background: #fff6db;
+  background: var(--color-warning-bg);
   border-color: rgba(247, 206, 15, 0.8);
   transform: translateY(-1px);
 }
@@ -237,19 +235,19 @@
   align-items: start;
 }
 
-@media (max-width: 900px) {
+@include below-xl {
   .dashboard__grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 1024px) {
+@include below-2xl {
   .dashboard__metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .dashboard__metrics {
     grid-template-columns: 1fr;
   }
@@ -283,10 +281,7 @@
 }
 
 .dashboard__feed-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
+  @include dashboard-header;
   padding: 1.5rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   background: #fafbfc;
@@ -305,9 +300,7 @@
 }
 
 .dashboard__feed-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  @include dashboard-controls;
 
   .btn {
     min-width: 140px;
@@ -442,7 +435,7 @@
 }
 
 .incident-item__status {
-  font-size: 0.75rem;
+  @include status-badge;
   font-weight: 700;
   padding: 0.3rem 0.6rem;
   border-radius: var(--radius-sm);
@@ -451,18 +444,15 @@
 }
 
 .incident-item__status--reported {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
+  @include badge-warning;
 }
 
 .incident-item__status--in_progress {
-  background: var(--color-info-bg);
-  color: var(--color-info);
+  @include badge-info;
 }
 
 .incident-item__status--closed {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+  @include badge-success;
 }
 
 /* ----------------------------------------
@@ -633,7 +623,7 @@
 /* ----------------------------------------
    Responsive
    ---------------------------------------- */
-@media (max-width: 640px) {
+@include below-md {
   .dashboard__feed-header {
     flex-direction: column;
     align-items: stretch;
@@ -689,7 +679,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@include below-sm {
   .metric-card {
     padding: 1rem;
     min-height: auto;

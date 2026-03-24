@@ -50,7 +50,7 @@
   line-height: 1;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .brand-name {
     font-size: 1.2rem;
   }
@@ -110,7 +110,7 @@
 
 
 .dropdown-arrow {
-  transition: transform 0.25s ease;
+  transition: transform var(--transition-slow);
   flex-shrink: 0;
 }
 
@@ -229,7 +229,7 @@
   padding: 0.625rem 1.25rem;
 }
 
-@media (max-width: 900px) {
+@include below-xl {
   .main-nav {
     display: none;
   }
@@ -245,7 +245,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .app-header {
     padding: 0.75rem 0;
   }
@@ -265,7 +265,7 @@
   }
 }
 
-@media (max-width: 380px) {
+@include below-xs {
   .header-inner {
     padding: 0 0.75rem;
   }

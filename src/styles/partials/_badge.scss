@@ -1,0 +1,71 @@
+// ========================================
+// Badge/status pill mixins
+// ========================================
+
+@mixin status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+@mixin badge-variant($bg, $color) {
+  background: $bg;
+  color: $color;
+}
+
+// Variantes semánticas predefinidas
+@mixin badge-success {
+  @include badge-variant(var(--color-success-bg), var(--color-success));
+}
+
+@mixin badge-error {
+  @include badge-variant(var(--color-error-bg), var(--color-error));
+}
+
+@mixin badge-warning {
+  @include badge-variant(var(--color-warning-bg), var(--color-warning));
+}
+
+@mixin badge-info {
+  @include badge-variant(var(--color-info-bg), var(--color-info));
+}
+
+@mixin badge-neutral {
+  @include badge-variant(var(--color-bg-tertiary), var(--color-gray));
+}
+
+@mixin badge-active {
+  @include badge-variant(rgba(34, 197, 94, 0.1), #16a34a);
+}
+
+@mixin badge-inactive {
+  @include badge-variant(rgba(148, 163, 184, 0.1), #64748b);
+}
+
+@mixin badge-pending {
+  @include badge-variant(rgba(245, 158, 11, 0.1), #b45309);
+}
+
+@mixin badge-in-progress {
+  @include badge-variant(rgba(59, 130, 246, 0.1), #1e40af);
+}
+
+@mixin badge-completed {
+  @include badge-variant(rgba(34, 197, 94, 0.1), #16a34a);
+}
+
+@mixin badge-priority-high {
+  @include badge-variant(rgba(239, 68, 68, 0.1), #991b1b);
+}
+
+@mixin badge-priority-medium {
+  @include badge-variant(rgba(245, 158, 11, 0.1), #92400e);
+}
+
+@mixin badge-priority-low {
+  @include badge-variant(rgba(59, 130, 246, 0.1), #1e40af);
+}

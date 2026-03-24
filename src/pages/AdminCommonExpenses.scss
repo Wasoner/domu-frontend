@@ -189,15 +189,13 @@
   }
 
   &__badge {
+    @include status-badge;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0.35rem 0.75rem;
-    border-radius: var(--radius-pill);
-    background: rgba(83, 164, 151, 0.12);
-    color: var(--color-green-dark);
     font-size: 0.8rem;
-    font-weight: 600;
+    @include badge-variant(rgba(83, 164, 151, 0.12), var(--color-green-dark));
   }
 
   &__primary {
@@ -266,7 +264,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .admin-ggcc {
     &__header {
       flex-direction: column;
@@ -274,7 +272,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .admin-ggcc {
     &__grid {
       grid-template-columns: 1fr;
