@@ -107,7 +107,7 @@
   color: var(--color-gray);
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .app-footer__inner {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -124,7 +124,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@include below-sm {
   .app-footer__inner {
     padding: 2rem 1rem 1.25rem;
     gap: 1.75rem;
@@ -155,7 +155,7 @@
   }
 }
 
-@media (max-width: 380px) {
+@include below-xs {
   .app-footer__inner {
     padding: 1.5rem 0.75rem 1rem;
   }

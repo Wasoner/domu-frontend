@@ -1,13 +1,9 @@
 .resident-expenses {
+  @include dashboard-page;
 }
 
 .resident-expenses__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  @include dashboard-header;
 }
 
 .resident-expenses__header h1 {
@@ -161,7 +157,7 @@
   min-width: 60px;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .resident-expenses {
     padding: 1.5rem;
   }

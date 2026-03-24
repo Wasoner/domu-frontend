@@ -5,9 +5,7 @@
   --text-muted: #5f6570;
   --text-subtle: #89919b;
 
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  @include dashboard-page;
 }
 
 .incident-stats__header {
@@ -116,12 +114,12 @@
 }
 
 .incident-kpi--neutral {
-  border-top-color: #64748b;
+  border-top-color: var(--color-text-muted);
 }
 
 .incident-kpi--neutral .incident-kpi__icon {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
 }
 
 .incident-kpi--warning {
@@ -214,7 +212,7 @@
   padding: 0.85rem;
   border-radius: 10px;
   border: 1px dashed rgba(15, 23, 42, 0.16);
-  background: #f8fafc;
+  background: var(--color-bg-secondary);
   color: var(--text-muted);
   font-size: 0.85rem;
 }
@@ -417,7 +415,7 @@
 
 .trend-chart__label {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 
@@ -467,7 +465,7 @@
 .assignment-donut__center small {
   margin-top: 0.25rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .assignment-block__legend {
@@ -502,7 +500,7 @@
 }
 
 .assignment-dot--unassigned {
-  background: #cbd5e1;
+  background: var(--color-border-soft);
 }
 
 .ops-list {
@@ -515,7 +513,7 @@
   padding: 0.85rem 0.95rem;
   border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.1);
-  background: #f8fafc;
+  background: var(--color-bg-secondary);
 }
 
 .ops-item h4 {
@@ -564,7 +562,7 @@
   }
 }
 
-@media (max-width: 1024px) {
+@include below-2xl {
   .incident-stats__grid {
     grid-template-columns: 1fr;
   }
@@ -576,7 +574,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .incident-stats__meta {
     flex-direction: column;
   }
@@ -614,7 +612,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@include below-sm {
   .incident-kpi {
     padding: 0.75rem;
     min-height: auto;

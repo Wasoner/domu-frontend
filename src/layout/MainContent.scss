@@ -16,7 +16,7 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .app-main {
     padding: 1.5rem 0;
   }
@@ -26,7 +26,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@include below-sm {
   .app-main {
     padding: 1rem 0;
   }
@@ -36,7 +36,7 @@
   }
 }
 
-@media (max-width: 380px) {
+@include below-xs {
   .app-main {
     padding: 0.75rem 0;
   }

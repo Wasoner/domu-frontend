@@ -248,7 +248,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .charge-selector__item {
     flex-direction: column;
     gap: 0.75rem;

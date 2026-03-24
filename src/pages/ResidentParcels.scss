@@ -1,13 +1,9 @@
 .resident-parcels {
+  @include dashboard-page;
 }
 
 .resident-parcels__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  @include dashboard-header;
 }
 
 .resident-parcels__header h1 {
@@ -62,10 +58,8 @@
 }
 
 .resident-parcels__filters {
-  display: flex;
-  gap: 0.75rem;
+  @include dashboard-controls;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
 }
 
 .resident-parcels__filter-btn {
@@ -138,21 +132,15 @@
 }
 
 .resident-parcels__status {
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  @include status-badge;
 }
 
 .resident-parcels__status--pending {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
+  @include badge-warning;
 }
 
 .resident-parcels__status--collected {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+  @include badge-success;
 }
 
 .resident-parcels__sender {
@@ -189,7 +177,7 @@
   opacity: 0.9;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .resident-parcels {
     padding: 1.5rem;
   }

@@ -1,13 +1,9 @@
 .admin-staff {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  @include dashboard-page;
 }
 
 .admin-staff__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  @include dashboard-controls;
 }
 
 .admin-staff__refresh {
@@ -92,9 +88,8 @@
 
 /* Controles */
 .admin-staff__controls {
+  @include dashboard-controls;
   margin-bottom: 0;
-  display: flex;
-  align-items: center;
   gap: 1rem;
 }
 
@@ -176,41 +171,11 @@
 
 /* Tabla */
 .admin-staff__table-container {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border-light);
-  overflow-x: auto;
+  @include data-table-container;
 }
 
 .admin-staff__table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-staff__table thead {
-  background: linear-gradient(135deg, rgba(83, 164, 151, 1), rgba(60, 140, 130, 1));
-  color: white;
-}
-
-.admin-staff__table th {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  white-space: nowrap;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.admin-staff__table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-border-light);
-  font-size: 0.9375rem;
-}
-
-.admin-staff__table tbody tr:hover {
-  background: var(--color-bg-secondary);
+  @include data-table;
 }
 
 .admin-staff__table tbody tr.admin-staff__row--inactive {
@@ -231,23 +196,17 @@
 }
 
 .admin-staff__status-badge {
-  display: inline-block;
+  @include status-badge;
   padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-pill);
   font-size: 0.8125rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
 }
 
 .admin-staff__status-badge--active {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
+  @include badge-active;
 }
 
 .admin-staff__status-badge--inactive {
-  background: rgba(148, 163, 184, 0.1);
-  color: #64748b;
+  @include badge-inactive;
 }
 
 .admin-staff__actions-cell {
@@ -288,7 +247,7 @@
 
 .admin-staff__action-btn--deactivate:hover {
   background: rgba(148, 163, 184, 0.1);
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .admin-staff__action-btn--delete:hover {
@@ -328,74 +287,23 @@
 
 /* Modal */
 .admin-staff__modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: grid;
-  place-items: center;
-  z-index: 1200;
-  backdrop-filter: blur(6px);
-  padding: 1rem;
+  @include modal-overlay;
 }
 
 .admin-staff__modal {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-xl);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  @include modal-container(600px);
 }
 
 .admin-staff__modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-}
-
-.admin-staff__modal-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-black);
+  @include modal-header;
 }
 
 .admin-staff__modal-close {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-medium);
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: var(--color-gray);
-  padding: 0.35rem 0.6rem;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  height: auto;
-  line-height: 1;
-}
-
-.admin-staff__modal-close:hover {
-  background: var(--color-error-bg);
-  color: var(--color-error);
-  border-color: var(--color-error);
+  @include modal-close-btn;
 }
 
 .admin-staff__form {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  @include form-container;
 }
 
 .admin-staff__form-info {
@@ -422,28 +330,15 @@
 }
 
 .admin-staff__form-error {
-  padding: 0.9rem 1.1rem;
-  background: var(--color-error-bg);
-  color: var(--color-error);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  @include form-error-banner;
 }
 
 .admin-staff__form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
+  @include form-grid;
 }
 
 .admin-staff__form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  @include form-group;
 }
 
 .admin-staff__form-group--full {
@@ -559,7 +454,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@include below-lg {
   .admin-staff__controls {
     flex-direction: column;
     align-items: stretch;
@@ -614,7 +509,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .admin-staff__table th,
   .admin-staff__table td {
     padding: 0.5rem 0.4rem;

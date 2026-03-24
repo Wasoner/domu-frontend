@@ -1,10 +1,9 @@
 .admin-amenities {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  @include dashboard-page;
 }
 
 .admin-amenities__header {
+  @include dashboard-header;
 }
 
 .admin-amenities__actions {
@@ -79,26 +78,20 @@
 }
 
 .amenity-card__status {
+  @include status-badge;
   padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
 }
 
 .amenity-card__status--active {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+  @include badge-active;
 }
 
 .amenity-card__status--inactive {
-  background: var(--color-error-bg);
-  color: var(--color-error);
+  @include badge-variant(var(--color-error-bg), var(--color-error));
 }
 
 .amenity-card__status--maintenance {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
+  @include badge-warning;
 }
 
 .amenity-card__description {
@@ -170,15 +163,7 @@
 
 /* Modal */
 .modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
+  @include modal-overlay(1000, rgba(0, 0, 0, 0.5), 4px);
 }
 
 .modal--large {
@@ -186,13 +171,7 @@
 }
 
 .modal__card {
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 520px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-xl);
+  @include modal-container(520px);
 }
 
 .modal__card--stepper {
@@ -205,35 +184,11 @@
 }
 
 .modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-}
-
-.modal__header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: var(--color-black);
+  @include modal-header;
 }
 
 .modal__close {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-medium);
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: var(--color-gray);
-  padding: 0.35rem 0.6rem;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-normal);
-}
-
-.modal__close:hover {
-  background: var(--color-error-bg);
-  color: var(--color-error);
+  @include modal-close-btn;
 }
 
 /* Stepper */
@@ -439,35 +394,29 @@
 }
 
 .summary-card__status {
+  @include status-badge;
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
-  font-weight: 600;
 }
 
 .summary-card__status--active {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+  @include badge-active;
 }
 
 .summary-card__status--maintenance {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
+  @include badge-warning;
 }
 
 .summary-card__status--inactive {
-  background: var(--color-error-bg);
-  color: var(--color-error);
+  @include badge-variant(var(--color-error-bg), var(--color-error));
 }
 
 /* Stepper Actions */
 .stepper-form__actions {
-  display: flex;
+  @include modal-footer;
   align-items: center;
   padding: 1rem 2rem 1.5rem;
-  border-top: 1px solid var(--color-border-light);
-  background: var(--color-bg-secondary);
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
 
 .stepper-form__spacer {
@@ -682,23 +631,19 @@
 }
 
 .status-badge {
+  @include status-badge;
   padding: 0.3rem 0.7rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 .status-badge--confirmed {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+  @include badge-success;
 }
 
 .status-badge--cancelled {
-  background: var(--color-error-bg);
-  color: var(--color-error);
+  @include badge-error;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .admin-amenities__list {
     grid-template-columns: 1fr;
   }

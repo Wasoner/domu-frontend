@@ -1,0 +1,17 @@
+// ========================================
+// Variables SCSS - Breakpoints & max-widths
+// (CSS custom properties no funcionan en @media queries)
+// ========================================
+
+$bp-xs: 380px;
+$bp-sm: 480px;
+$bp-md: 640px;
+$bp-lg: 768px;
+$bp-xl: 900px;
+$bp-2xl: 1024px;
+
+// Max-widths de contenedores
+$max-width-default: 1280px;
+$max-width-wide: 1400px;
+$max-width-narrow: 800px;
+$max-width-form: 600px;

@@ -163,7 +163,7 @@
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.9) 25%, rgba(248, 250, 252, 0.95) 50%, rgba(226, 232, 240, 0.9) 75%);
   background-size: 200% 100%;
-  animation: auth-layout-shimmer 1.6s infinite;
+  animation: auth-layout-shimmer 1.4s infinite;
 }
 
 .auth-layout__skeleton-block--xs {
@@ -206,7 +206,7 @@
   }
 }
 
-@media (max-width: 1024px) {
+@include below-2xl {
   .auth-layout__body {
     gap: 1rem;
   }
@@ -216,7 +216,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .auth-layout__loading-skeleton {
     padding: 1rem;
   }

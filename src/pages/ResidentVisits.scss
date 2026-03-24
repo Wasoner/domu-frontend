@@ -1,7 +1,5 @@
 .resident-visits {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  @include dashboard-page($gap: 1.25rem);
 }
 
 .resident-visits__intro {
@@ -30,7 +28,7 @@
   font-size: 0.95rem;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .resident-visits {
     gap: 1rem;
   }

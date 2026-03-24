@@ -4,12 +4,9 @@
   padding: 2rem 1rem;
 
   &__header {
-    display: flex;
-    justify-content: space-between;
+    @include dashboard-header;
     align-items: center;
     margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
   }
 
   &__title {
@@ -45,7 +42,7 @@
     &--secondary {
       background: var(--color-bg-secondary, #f1f5f9);
       color: var(--color-text-primary, #1a1a2e);
-      &:hover { background: #e2e8f0; }
+      &:hover { background: var(--color-border-default); }
     }
   }
 
@@ -85,7 +82,7 @@
     transition: background 0.15s;
 
     &:hover {
-      background: #f8fafc;
+      background: var(--color-bg-secondary);
     }
 
     &--unread {
@@ -101,8 +98,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--notif-bg, #f1f5f9);
-    color: var(--notif-color, #64748b);
+    background: var(--notif-bg, var(--color-bg-hover));
+    color: var(--notif-color, var(--color-text-muted));
     flex-shrink: 0;
   }
 

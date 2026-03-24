@@ -17,7 +17,7 @@
     &__image {
         position: relative;
         height: 200px;
-        background: #f8fafc;
+        background: var(--color-bg-secondary);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -30,7 +30,7 @@
     }
 
     &__placeholder {
-        color: #cbd5e1;
+        color: var(--color-border-soft);
     }
 
     &__price {
@@ -38,7 +38,7 @@
         top: 0.75rem;
         right: 0.75rem;
         background: white;
-        color: var(--color-text-dark, #1e293b);
+        color: var(--color-text-dark);
         padding: 0.35rem 0.7rem;
         border-radius: 0.5rem;
         font-weight: 800;

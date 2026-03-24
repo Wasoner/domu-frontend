@@ -1,0 +1,79 @@
+// ========================================
+// Form mixins
+// Estandarizan form-group, form-grid, form-input
+// ========================================
+
+@mixin form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@mixin form-label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-black);
+}
+
+@mixin form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  background: var(--color-bg-primary);
+  color: var(--color-black);
+  transition: all var(--transition-normal);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-turquoise);
+    box-shadow: 0 0 0 3px rgba(83, 164, 151, 0.15);
+  }
+}
+
+@mixin form-grid($cols: 2, $gap: 1.25rem) {
+  display: grid;
+  grid-template-columns: repeat($cols, 1fr);
+  gap: $gap;
+}
+
+@mixin form-container($gap: 1.5rem) {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+}
+
+@mixin form-error-banner {
+  padding: 0.9rem 1.1rem;
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@mixin form-info-banner {
+  padding: 0.9rem 1.1rem;
+  background: var(--color-info-bg, #e0f2fe);
+  color: var(--color-info, #0369a1);
+  border: 1px solid var(--color-info, #0284c7);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+@mixin form-help-text {
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-gray);
+  font-style: italic;
+}

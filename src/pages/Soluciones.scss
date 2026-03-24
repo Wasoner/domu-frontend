@@ -269,7 +269,7 @@
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
+@include below-2xl {
   .soluciones-grid__cards {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -280,7 +280,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .soluciones-hero {
     padding: 3.5rem 0 4rem;
   }
@@ -322,7 +322,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .soluciones-grid__cards {
     grid-template-columns: 1fr;
   }

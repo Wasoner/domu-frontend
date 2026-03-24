@@ -17,6 +17,15 @@ export default defineConfig({
       }
     })
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@use "domu-mixins" as *;\n`,
+        loadPaths: ['./src/styles/partials'],
+        api: 'modern-compiler',
+      },
+    },
+  },
   preview: {
     host: true
   },

@@ -50,7 +50,7 @@
     background: white;
     padding: 1.75rem;
     border-radius: 1rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border-default);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 
     h3 {
@@ -82,7 +82,7 @@
   .custom-select {
     width: 100%;
     padding: 0.65rem 0.85rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border-default);
     border-radius: var(--radius-md, 8px);
     background: white;
     font-size: 0.9375rem;
@@ -113,7 +113,7 @@
     aspect-ratio: 1/1;
     border-radius: 0.75rem;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border-default);
 
     img {
       width: 100%;
@@ -163,7 +163,7 @@
 
   .image-add-btn {
     aspect-ratio: 1/1;
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed var(--color-border-soft);
     border-radius: 0.75rem;
     display: flex;
     flex-direction: column;
@@ -171,7 +171,7 @@
     justify-content: center;
     gap: 0.5rem;
     cursor: pointer;
-    color: #64748b;
+    color: var(--color-text-muted);
     transition: all 0.2s ease;
 
     input {
@@ -181,7 +181,7 @@
     &:hover {
       border-color: var(--color-turquoise);
       color: var(--color-turquoise);
-      background: #f8fafc;
+      background: var(--color-bg-secondary);
     }
 
     span {
@@ -208,7 +208,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .market-create {
     .form-row {
       grid-template-columns: 1fr;

@@ -309,25 +309,20 @@
 }
 
 .status-badge {
+  @include status-badge;
   padding: 0.3rem 0.7rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 .status-badge--confirmed {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+  @include badge-success;
 }
 
 .status-badge--cancelled {
-  background: var(--color-error-bg);
-  color: var(--color-error);
+  @include badge-error;
 }
 
 .status-badge--completed {
-  background: var(--color-info-bg);
-  color: var(--color-info);
+  @include badge-info;
 }
 
 .btn-cancel {
@@ -518,7 +513,7 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
+@include below-lg {
   .amenities-grid {
     grid-template-columns: 1fr;
   }

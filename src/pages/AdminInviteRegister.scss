@@ -108,7 +108,7 @@
   color: var(--color-gray);
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .admin-invite-card {
     margin: 24px 12px;
     padding: 24px 18px;

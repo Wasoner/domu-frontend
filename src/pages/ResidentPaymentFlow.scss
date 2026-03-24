@@ -90,7 +90,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .payment-flow__content {
     padding: 1rem;
     border-radius: var(--radius-md);

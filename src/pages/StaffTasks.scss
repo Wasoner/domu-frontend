@@ -1,15 +1,9 @@
 .staff-tasks {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  @include dashboard-page(1.25rem);
 }
 
 .staff-tasks__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  flex-wrap: wrap;
+  @include dashboard-header;
 }
 
 .staff-tasks__header h1 {
@@ -160,40 +154,34 @@
 }
 
 .staff-tasks__badge {
+  @include status-badge;
   font-size: 0.73rem;
   font-weight: 700;
-  border-radius: var(--radius-pill);
   padding: 0.28rem 0.62rem;
 }
 
 .staff-tasks__badge--status-pending {
-  background: rgba(245, 158, 11, 0.16);
-  color: #b45309;
+  @include badge-pending;
 }
 
 .staff-tasks__badge--status-in_progress {
-  background: rgba(59, 130, 246, 0.14);
-  color: #1d4ed8;
+  @include badge-in-progress;
 }
 
 .staff-tasks__badge--status-completed {
-  background: rgba(34, 197, 94, 0.15);
-  color: #15803d;
+  @include badge-completed;
 }
 
 .staff-tasks__badge--priority-high {
-  background: rgba(239, 68, 68, 0.14);
-  color: #b91c1c;
+  @include badge-priority-high;
 }
 
 .staff-tasks__badge--priority-medium {
-  background: rgba(245, 158, 11, 0.14);
-  color: #92400e;
+  @include badge-priority-medium;
 }
 
 .staff-tasks__badge--priority-low {
-  background: rgba(2, 132, 199, 0.14);
-  color: #0c4a6e;
+  @include badge-priority-low;
 }
 
 .staff-tasks__date {
@@ -218,7 +206,7 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 900px) {
+@include below-xl {
   .staff-tasks__stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

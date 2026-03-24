@@ -1,3 +1,5 @@
+@use '../styles/partials/domu-mixins' as *;
+
 .btn {
   padding: 0.65rem 1.35rem;
   min-height: 42px;
@@ -92,7 +94,7 @@
   align-items: center;
 }
 
-@media (max-width: 640px) {
+@include below-md {
   .btn {
     min-height: var(--touch-min);
     padding: 0.6rem 1.1rem;

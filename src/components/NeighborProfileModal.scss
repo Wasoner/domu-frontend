@@ -1,19 +1,9 @@
 .neighbor-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  z-index: 1100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  @include modal-overlay(1100, rgba(0, 0, 0, 0.6), 8px);
 }
 
 .neighbor-modal {
-  background: white;
-  width: 100%;
-  max-width: 450px;
+  @include modal-container(450px);
   border-radius: 2rem;
   overflow: hidden;
   position: relative;
@@ -43,7 +33,7 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     z-index: 10;
     color: var(--color-gray-dark);
-    transition: transform 0.2s ease;
+    transition: transform var(--transition-normal);
 
     &:hover {
       transform: scale(1.1);
@@ -132,7 +122,7 @@
     border-radius: 0.75rem;
     overflow: hidden;
     position: relative;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--color-bg-hover);
 
     img {
       width: 100%;
@@ -156,16 +146,16 @@
 
   &__action-box {
     margin-top: 1rem;
-    background: #f8fafc;
+    background: var(--color-bg-secondary);
     padding: 1.25rem;
     border-radius: 1.25rem;
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed var(--color-border-soft);
 
     textarea {
       width: 100%;
       min-height: 80px;
       background: white;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--color-border-default);
       border-radius: 0.75rem;
       padding: 0.75rem;
       font-family: inherit;

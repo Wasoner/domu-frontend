@@ -10,7 +10,7 @@
   /* Colores primarios */
   --color-black: #000000;
   --color-orange: #f16b32;
-  --color-yellow: #f7ce0f;
+  --color-yellow: #f7ce0f; /* DEPRECATED: Color legacy segun tesis Cap.6 - no usar en nuevos componentes */
   --color-gray-dark: #67696a;
   --color-gray: #808282;
   --color-turquoise: #53a497;
@@ -35,6 +35,21 @@
   --color-info: #0369a1;
   --color-info-light: #0ea5e9;
   --color-info-bg: #e0f2fe;
+
+  /* Colores de texto - escala neutral */
+  --color-text-dark: #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+
+  /* Bordes extendidos */
+  --color-border-default: #e2e8f0;
+  --color-border-soft: #cbd5e1;
+  --color-border-subtle: #f3f4f6;
+
+  /* Fondos extendidos */
+  --color-bg-hover: #f1f5f9;
+  --color-bg-input: #f9fafb;
 
   /* Bordes */
   --color-border-light: rgba(0, 0, 0, 0.06);
