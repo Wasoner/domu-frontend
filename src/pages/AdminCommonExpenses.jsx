@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProtectedLayout } from '../layout';
 import { Skeleton, Button } from '../components';
+import { useAppContext } from '../context';
 import { api } from '../services';
 import './AdminCommonExpenses.scss';
 
@@ -13,6 +14,7 @@ const emptyCharge = {
 };
 
 const AdminCommonExpenses = () => {
+  const { buildingVersion } = useAppContext();
   const [activeTab, setActiveTab] = useState('create');
   const [periods, setPeriods] = useState([]);
   const [loadingPeriods, setLoadingPeriods] = useState(false);
@@ -87,6 +89,27 @@ const AdminCommonExpenses = () => {
     }));
   }, [periods]);
 
+  const minDueDate = useMemo(() => {
+    if (!form.period) return '';
+    const [year, month] = form.period.split('-');
+    if (!year || !month) return '';
+    return `${year}-${month}-01`;
+  }, [form.period]);
+
+  useEffect(() => {
+    setError(null);
+    setFeedback(null);
+    setPeriods([]);
+    setPeriodsLoaded(false);
+    setForm({ period: '', dueDate: '', reserveAmount: '', note: '' });
+    setCharges([{ ...emptyCharge }]);
+    setAppendTarget('');
+    setAppendCharges([{ ...emptyCharge }]);
+    setAppendNote('');
+    setReceiptChargeId('');
+    setReceiptFile(null);
+  }, [buildingVersion]);
+
   const formatCurrency = (value) => {
     const safe = Number.isFinite(value) ? value : 0;
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(safe);
@@ -142,6 +165,11 @@ const AdminCommonExpenses = () => {
 
     if (!form.period || !form.dueDate) {
       setError('Debes seleccionar un período y fecha de vencimiento.');
+      return;
+    }
+
+    if (minDueDate && form.dueDate < minDueDate) {
+      setError('La fecha de vencimiento no puede ser anterior al inicio del período seleccionado.');
       return;
     }
 
@@ -291,7 +319,17 @@ const AdminCommonExpenses = () => {
                     <input
                       type="month"
                       value={form.period}
-                      onChange={(e) => setForm((prev) => ({ ...prev, period: e.target.value }))}
+                      onChange={(e) => {
+                        const nextPeriod = e.target.value;
+                        const nextMinDueDate = nextPeriod ? `${nextPeriod}-01` : '';
+                        setForm((prev) => ({
+                          ...prev,
+                          period: nextPeriod,
+                          dueDate: prev.dueDate && nextMinDueDate && prev.dueDate < nextMinDueDate
+                            ? nextMinDueDate
+                            : prev.dueDate,
+                        }));
+                      }}
                       required
                     />
                   </label>
@@ -300,6 +338,7 @@ const AdminCommonExpenses = () => {
                     <input
                       type="date"
                       value={form.dueDate}
+                      min={minDueDate || undefined}
                       onChange={(e) => setForm((prev) => ({ ...prev, dueDate: e.target.value }))}
                       required
                     />

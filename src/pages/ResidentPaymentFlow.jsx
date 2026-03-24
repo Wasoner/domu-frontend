@@ -99,15 +99,15 @@ const ResidentPaymentFlow = () => {
   };
 
   const handleCancel = () => {
-    if (step === 'select') {
-      navigate(ROUTES.RESIDENT_CHARGES_DETAIL_VIEW);
-    } else {
-      setStep('select');
-      setPaymentMethod(null);
-    }
+    navigate(ROUTES.RESIDENT_CHARGES_DETAIL_VIEW);
   };
 
   const handleBack = () => {
+    if (step === 'transfer' || step === 'card') {
+      setShowMethodModal(true);
+      return;
+    }
+
     navigate(ROUTES.RESIDENT_CHARGES_DETAIL_VIEW);
   };
 

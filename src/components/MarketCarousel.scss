@@ -32,7 +32,18 @@
   }
 
   &__icon {
-    font-size: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(83, 164, 151, 0.12);
+    color: var(--color-turquoise);
+
+    svg {
+      display: block;
+    }
   }
 
   &__btn-more {

@@ -69,7 +69,7 @@ const formatDate = (value) => {
 };
 
 const StaffTasks = () => {
-  const { user } = useAppContext();
+  const { user, buildingVersion } = useAppContext();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -138,7 +138,7 @@ const StaffTasks = () => {
   useEffect(() => {
     if (!user?.id) return;
     fetchStaffProfile();
-  }, [user?.id, fetchStaffProfile]);
+  }, [user?.id, fetchStaffProfile, buildingVersion]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -148,7 +148,7 @@ const StaffTasks = () => {
     }
     if (!staffProfileResolved || candidateAssigneeIds.length === 0) return;
     fetchTasks(false);
-  }, [user?.id, staffProfileResolved, candidateAssigneeIds, fetchTasks]);
+  }, [user?.id, staffProfileResolved, candidateAssigneeIds, fetchTasks, buildingVersion]);
 
   const handleAdvanceTaskStatus = async (task) => {
     const nextStatus = getNextTaskStatus(task?.status);

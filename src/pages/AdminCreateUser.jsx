@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { ProtectedLayout } from '../layout';
 import { Seo, Skeleton, Icon } from '../components';
 import { useAppContext } from '../context';
@@ -79,11 +79,19 @@ const AdminCreateUser = () => {
   const [success, setSuccess] = useState('');
   const [units, setUnits] = useState([]);
   const [unitsLoading, setUnitsLoading] = useState(false);
+  const [buildingFeedback, setBuildingFeedback] = useState('idle');
+  const previousBuildingVersionRef = useRef(buildingVersion);
+
+  const selectedBuildingName = useMemo(() => {
+    const activeBuildingId = user?.selectedBuildingId ?? user?.activeBuildingId;
+    return user?.buildings?.find((building) => building.id === activeBuildingId)?.name || 'la comunidad seleccionada';
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     const load = async () => {
+      setUnits([]);
       setUnitsLoading(true);
       try {
         const data = await api.housingUnits.list();
@@ -100,6 +108,24 @@ const AdminCreateUser = () => {
     load();
     return () => { cancelled = true; };
   }, [user, buildingVersion]);
+
+  useEffect(() => {
+    if (previousBuildingVersionRef.current === buildingVersion) return;
+    previousBuildingVersionRef.current = buildingVersion;
+    setFormData((prev) => ({ ...prev, unitNumber: '' }));
+    setBuildingFeedback('loading');
+  }, [buildingVersion]);
+
+  useEffect(() => {
+    if (buildingFeedback !== 'loading' || unitsLoading) return undefined;
+
+    setBuildingFeedback('success');
+    const timeoutId = window.setTimeout(() => {
+      setBuildingFeedback('idle');
+    }, 1800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [buildingFeedback, unitsLoading]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -190,6 +216,30 @@ const AdminCreateUser = () => {
             </p>
           </div>
         </header>
+
+        <div
+          className={`admin-create-user__building-feedback ${
+            buildingFeedback !== 'idle' ? `admin-create-user__building-feedback--${buildingFeedback}` : ''
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          <Icon
+            name={buildingFeedback === 'loading' ? 'refresh' : 'building'}
+            size={16}
+            className={buildingFeedback === 'loading' ? 'is-spinning' : ''}
+          />
+          <div>
+            <strong>Edificio activo: {selectedBuildingName}</strong>
+            <span>
+              {buildingFeedback === 'loading'
+                ? 'Actualizando departamentos y contexto del formulario.'
+                : buildingFeedback === 'success'
+                  ? 'Formulario sincronizado con la comunidad seleccionada.'
+                  : 'Los departamentos y usuarios que crees se asociarán a esta comunidad.'}
+            </span>
+          </div>
+        </div>
 
         <div className="admin-create-user__content">
           {/* Selector de tipo de usuario */}

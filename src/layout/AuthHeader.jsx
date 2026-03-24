@@ -17,6 +17,11 @@ const AuthHeader = ({ user, navSections = [] }) => {
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [showMobileMenuDropdown, setShowMobileMenuDropdown] = useState(false);
   const [showMobileProfileDropdown, setShowMobileProfileDropdown] = useState(false);
+  const [buildingFeedback, setBuildingFeedback] = useState({
+    status: 'idle',
+    buildingId: null,
+    label: '',
+  });
 
   const buildingRef = useRef(null);
   const helpRef = useRef(null);
@@ -28,6 +33,7 @@ const AuthHeader = ({ user, navSections = [] }) => {
   const activeBuildingId = user?.selectedBuildingId || user?.activeBuildingId;
   const selectedBuilding = buildingOptions.find((b) => b.id === activeBuildingId) || buildingOptions[0];
   const buildingName = selectedBuilding?.name || 'Sin edificio';
+  const buildingFeedbackLabel = buildingFeedback.label || buildingName;
 
   // Dirección corta: solo calle + comuna/ciudad
   const shortAddress = (() => {
@@ -97,6 +103,31 @@ const AuthHeader = ({ user, navSections = [] }) => {
     }
   }, [buildingOptions, user?.selectedBuildingId, user?.activeBuildingId, selectBuilding]);
 
+  useEffect(() => {
+    if (buildingFeedback.status !== 'loading') return undefined;
+    if (user?.selectedBuildingId !== buildingFeedback.buildingId) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setBuildingFeedback((prev) => (
+        prev.status === 'loading' && prev.buildingId === user?.selectedBuildingId
+          ? { ...prev, status: 'success' }
+          : prev
+      ));
+    }, 450);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [buildingFeedback.status, buildingFeedback.buildingId, user?.selectedBuildingId]);
+
+  useEffect(() => {
+    if (buildingFeedback.status !== 'success') return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setBuildingFeedback({ status: 'idle', buildingId: null, label: '' });
+    }, 1800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [buildingFeedback.status]);
+
   // Navegar al panel principal según el tipo de usuario
   const handleLogoClick = () => {
     if (user?.userType === 'admin') {
@@ -122,6 +153,26 @@ const AuthHeader = ({ user, navSections = [] }) => {
     setShowMobileProfileDropdown(false);
     logout();
     navigate(ROUTES.LOGIN);
+  };
+
+  const handleBuildingSelect = (building) => {
+    if (!building?.id) {
+      setShowBuildingDropdown(false);
+      return;
+    }
+
+    if (building.id === selectedBuilding?.id) {
+      setShowBuildingDropdown(false);
+      return;
+    }
+
+    setBuildingFeedback({
+      status: 'loading',
+      buildingId: building.id,
+      label: building.name || 'Comunidad',
+    });
+    selectBuilding(building.id);
+    setShowBuildingDropdown(false);
   };
 
   // Cerrar dropdowns al hacer click fuera
@@ -194,6 +245,22 @@ const AuthHeader = ({ user, navSections = [] }) => {
               {shortAddress && (
                 <span className="auth-header__building-address">{shortAddress}</span>
               )}
+              {buildingFeedback.status !== 'idle' && (
+                <span
+                  className={`auth-header__building-status auth-header__building-status--${buildingFeedback.status}`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  <Icon
+                    name={buildingFeedback.status === 'loading' ? 'refresh' : 'check'}
+                    size={12}
+                    className={buildingFeedback.status === 'loading' ? 'is-spinning' : ''}
+                  />
+                  {buildingFeedback.status === 'loading'
+                    ? `Cargando ${buildingFeedbackLabel}`
+                    : `${buildingFeedbackLabel} listo`}
+                </span>
+              )}
             </div>
             {buildingOptions.length > 1 && (
               <svg
@@ -218,8 +285,7 @@ const AuthHeader = ({ user, navSections = [] }) => {
                     className={`auth-header__building-option ${b.id === selectedBuilding?.id ? 'auth-header__building-option--active' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      selectBuilding(b.id);
-                      setShowBuildingDropdown(false);
+                      handleBuildingSelect(b);
                     }}
                     role="option"
                     aria-selected={b.id === selectedBuilding?.id}
@@ -242,7 +308,11 @@ const AuthHeader = ({ user, navSections = [] }) => {
                         </span>
                       )}
                     </div>
-                    {b.id === selectedBuilding?.id && (
+                    {buildingFeedback.status === 'loading' && b.id === buildingFeedback.buildingId ? (
+                      <span className="auth-header__building-option-check auth-header__building-option-check--loading">
+                        <Icon name="refresh" size={14} className="is-spinning" />
+                      </span>
+                    ) : b.id === selectedBuilding?.id && (
                       <span className="auth-header__building-option-check auth-header__building-option-check--desktop">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                           <path d="M5 12L10 17L20 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

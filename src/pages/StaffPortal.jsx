@@ -4,65 +4,10 @@ import { useAppContext } from '../context';
 import { ProtectedLayout } from '../layout';
 import { Icon, MarketCarousel } from '../components';
 import { ROUTES } from '../constants';
+import { getNotificationVisual, getNotificationRoute, PRIORITY_LABELS } from '../constants/notifications';
+import { useNotifications } from '../hooks/useNotifications';
 import { api } from '../services';
 import './StaffPortal.scss';
-
-
-const mockNotifications = [
-    {
-        id: 1,
-        type: 'incident',
-        category: 'water',
-        title: 'Incidente abierto en torre B',
-        message: 'Filtracion reportada en pasillo del piso 4. Seguimiento en curso.',
-        date: '2026-02-01T09:20:00',
-        priority: 'high',
-        source: 'Administracion',
-        isNew: true,
-        to: ROUTES.RESIDENT_INCIDENTS,
-    },
-    {
-        id: 2,
-        type: 'parcel',
-        title: 'Encomienda disponible en conserjeria',
-        message: 'Paquete recibido hoy a las 10:45. Retiralo con tu identificacion.',
-        date: '2026-02-01T10:52:00',
-        priority: 'medium',
-        source: 'Conserjeria',
-        isNew: true,
-        to: ROUTES.RESIDENT_PARCELS,
-    },
-    {
-        id: 3,
-        type: 'visit',
-        title: 'Visita autorizada para hoy',
-        message: 'Juan Perez ingresara a las 19:30. Recuerda habilitar acceso en porteria.',
-        date: '2026-01-31T15:05:00',
-        priority: 'low',
-        source: 'Accesos',
-        to: ROUTES.RESIDENT_EVENTS,
-    },
-    {
-        id: 4,
-        type: 'admin',
-        title: 'Aviso de administracion',
-        message: 'Corte programado de agua el martes 3 de febrero entre 09:00 y 12:00.',
-        date: '2026-01-30T08:30:00',
-        priority: 'medium',
-        source: 'Administracion',
-        to: ROUTES.RESIDENT_PUBLICATIONS,
-    },
-    {
-        id: 5,
-        type: 'payment',
-        title: 'Pago registrado',
-        message: 'Confirmamos el pago de tu gasto comun de enero.',
-        date: '2026-01-29T12:40:00',
-        priority: 'low',
-        source: 'Finanzas',
-        to: ROUTES.RESIDENT_CHARGES_DETAIL_VIEW,
-    },
-];
 
 const residentQuickActions = [
     {
@@ -125,27 +70,6 @@ const residentUpcomingItems = [
     },
 ];
 
-const INCIDENT_CATEGORIES = {
-    water: { label: 'Agua', icon: 'water', color: '#0ea5e9', bg: '#e0f2fe' },
-    electricity: { label: 'Electricidad', icon: 'bolt', color: '#f59e0b', bg: '#fff7ed' },
-    noise: { label: 'Ruidos', icon: 'speakerWave', color: '#f97316', bg: '#fff7ed' },
-    security: { label: 'Seguridad', icon: 'lock', color: '#ef4444', bg: '#fef2f2' },
-    maintenance: { label: 'Mantencion', icon: 'wrench', color: '#2563eb', bg: '#eff6ff' },
-    cleaning: { label: 'Limpieza', icon: 'sparkles', color: '#10b981', bg: '#ecfdf5' },
-    parking: { label: 'Estacionamiento', icon: 'car', color: '#64748b', bg: '#f1f5f9' },
-    elevator: { label: 'Ascensor', icon: 'arrowsUpDown', color: '#6366f1', bg: '#eef2ff' },
-    general: { label: 'Incidente', icon: 'ticket', color: '#f43f5e', bg: '#fff1f2' },
-};
-
-const NOTIFICATION_TYPES = {
-    visit: { label: 'Visita', icon: 'door', color: '#0ea5e9', bg: '#e0f2fe' },
-    parcel: { label: 'Encomienda', icon: 'cube', color: '#f59e0b', bg: '#fff7ed' },
-    admin: { label: 'Administracion', icon: 'bellAlert', color: '#0f766e', bg: '#ecfdf5' },
-    payment: { label: 'Pago', icon: 'banknotes', color: '#16a34a', bg: '#ecfdf5' },
-    maintenance: { label: 'Mantencion', icon: 'wrench', color: '#6366f1', bg: '#eef2ff' },
-};
-
-const priorityLabels = { high: 'Alta', medium: 'Media', low: 'Baja' };
 const taskPriorityLabels = { HIGH: 'Alta', MEDIUM: 'Media', LOW: 'Baja' };
 const normalizeTaskStatus = (status) => {
     if (!status) return 'PENDING';
@@ -153,10 +77,10 @@ const normalizeTaskStatus = (status) => {
 };
 const mapForumCategoryToNotificationType = (category) => {
     const normalized = String(category || '').toLowerCase();
-    if (normalized === 'alert') return 'maintenance';
-    if (normalized === 'event') return 'visit';
-    if (normalized === 'news') return 'admin';
-    return 'admin';
+    if (normalized === 'alert') return 'MAINTENANCE_SCHEDULED';
+    if (normalized === 'event') return 'VISIT_AUTHORIZED';
+    if (normalized === 'news') return 'ADMIN_ANNOUNCEMENT';
+    return 'ADMIN_ANNOUNCEMENT';
 };
 
 const mapForumThreadToNotification = (thread) => ({
@@ -164,7 +88,7 @@ const mapForumThreadToNotification = (thread) => ({
     type: mapForumCategoryToNotificationType(thread.category),
     title: thread.title || 'Publicacion',
     message: thread.content || 'Sin detalles',
-    date: thread.date,
+    createdAt: thread.date,
     priority: thread.pinned ? 'high' : 'medium',
     source: thread.authorName || 'Administracion',
     isNew: !!thread.pinned,
@@ -173,6 +97,7 @@ const mapForumThreadToNotification = (thread) => ({
 
 const StaffPortal = () => {
     const { user } = useAppContext();
+    const { notificationsPreview, markRead } = useNotifications(user);
     const isStaff = user?.roleId === 4 || user?.userType === 'staff';
     const [latestPeriod, setLatestPeriod] = useState(null);
     const [staffTasks, setStaffTasks] = useState([]);
@@ -195,16 +120,6 @@ const StaffPortal = () => {
         const safe = Number(value);
         if (!Number.isFinite(safe)) return '-';
         return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(safe);
-    };
-
-    const getNotificationVisual = (notification) => {
-        if (notification.type === 'incident') {
-            const categoryKey = notification.category || 'general';
-            const category = INCIDENT_CATEGORIES[categoryKey] || INCIDENT_CATEGORIES.general;
-            return { ...category, tag: `Incidente • ${category.label}` };
-        }
-        const meta = NOTIFICATION_TYPES[notification.type] || NOTIFICATION_TYPES.admin;
-        return { ...meta, tag: meta.label };
     };
 
     useEffect(() => {
@@ -338,10 +253,19 @@ const StaffPortal = () => {
         return () => { isMounted = false; };
     }, [isStaff]);
 
+    const residentNotifications = useMemo(() => {
+        return notificationsPreview.map((notification) => ({
+            ...notification,
+            date: notification.createdAt,
+            to: getNotificationRoute(notification) || ROUTES.NOTIFICATIONS,
+            isNew: !notification.isRead,
+        }));
+    }, [notificationsPreview]);
+
     const notifications = useMemo(() => {
-        if (!isStaff) return mockNotifications;
+        if (!isStaff) return residentNotifications;
         return communityAnnouncements;
-    }, [isStaff, communityAnnouncements]);
+    }, [isStaff, communityAnnouncements, residentNotifications]);
 
     const quickActions = isStaff ? staffQuickActions : residentQuickActions;
 
@@ -412,14 +336,24 @@ const StaffPortal = () => {
                             <div className="resident-portal__notifications-list">
                                 {notifications.length === 0 && (
                                     <div className="resident-portal__upcoming-item">
-                                        <strong>No hay publicaciones nuevas</strong>
-                                        <small>Revisa nuevamente mas tarde.</small>
+                                        <strong>{isStaff ? 'No hay publicaciones nuevas' : 'No hay notificaciones nuevas'}</strong>
+                                        <small>{isStaff ? 'Revisa nuevamente mas tarde.' : 'La campanita te avisara cuando llegue una nueva.'}</small>
                                     </div>
                                 )}
                                 {notifications.map((notification) => {
                                     const visual = getNotificationVisual(notification);
+                                    const isUnread = notification.isNew || !notification.isRead;
                                     return (
-                                        <Link key={notification.id} to={notification.to} className={`resident-portal__notification ${notification.isNew ? 'is-new' : ''}`}>
+                                        <Link
+                                            key={notification.id}
+                                            to={notification.to}
+                                            className={`resident-portal__notification ${isUnread ? 'is-new' : ''}`}
+                                            onClick={() => {
+                                                if (!isStaff && !notification.isRead) {
+                                                    markRead(notification.id);
+                                                }
+                                            }}
+                                        >
                                             <span className="resident-portal__notification-icon" style={{ '--notif-color': visual.color, '--notif-bg': visual.bg }}>
                                                 <Icon name={visual.icon} size={18} />
                                             </span>
@@ -429,12 +363,12 @@ const StaffPortal = () => {
                                                 <div className="resident-portal__notification-meta">
                                                     <span className="resident-portal__notification-tag">{visual.tag}</span>
                                                     <span className={`resident-portal__notification-pill resident-portal__notification-pill--${notification.priority}`}>
-                                                        {priorityLabels[notification.priority]}
+                                                        {PRIORITY_LABELS[notification.priority] || 'Media'}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="resident-portal__notification-aside">
-                                                <span className="resident-portal__notification-date">{formatDate(notification.date)}</span>
+                                                <span className="resident-portal__notification-date">{formatDate(notification.date || notification.createdAt)}</span>
                                                 <Icon name="chevronRight" size={16} />
                                             </div>
                                         </Link>
@@ -519,4 +453,3 @@ const StaffPortal = () => {
 };
 
 export default StaffPortal;
-

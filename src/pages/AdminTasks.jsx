@@ -6,7 +6,7 @@ import { api } from '../services';
 import './AdminTasks.scss';
 
 const AdminTasks = () => {
-  const { user } = useAppContext();
+  const { user, buildingVersion } = useAppContext();
   const [tasks, setTasks] = useState([]);
   const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,9 +19,10 @@ const AdminTasks = () => {
     status: 'PENDING',
     assigneeIds: []
   });
-  const hasFetchedRef = useRef(false);
+  const hasFetchedRef = useRef('');
 
   const fetchStaff = useCallback(async () => {
+    setLoadingStaff(true);
     try {
       let data;
       try {
@@ -59,11 +60,12 @@ const AdminTasks = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!user || hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
+    const fetchKey = `${user?.id || user?.email || 'anon'}-${buildingVersion ?? '0'}`;
+    if (!user || hasFetchedRef.current === fetchKey) return;
+    hasFetchedRef.current = fetchKey;
     fetchTasks();
     fetchStaff();
-  }, [user, fetchTasks, fetchStaff]);
+  }, [user, fetchTasks, fetchStaff, buildingVersion]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -121,7 +123,7 @@ const AdminTasks = () => {
     try {
       await api.tasks.delete(id);
       fetchTasks();
-    } catch (err) {
+    } catch {
       alert('Error al eliminar');
     }
   };

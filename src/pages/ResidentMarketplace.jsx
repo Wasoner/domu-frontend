@@ -17,7 +17,7 @@ const CATEGORIES = [
 ];
 
 const ResidentMarketplace = () => {
-    const { user } = useAppContext();
+    const { user, buildingVersion } = useAppContext();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState(null);
@@ -49,7 +49,7 @@ const ResidentMarketplace = () => {
             setConfirmAction(null);
             fetchItems();
             setShowDetail(null);
-        } catch (err) {
+        } catch {
             alert("No se pudo eliminar el producto");
         } finally {
             setDeletingId(null);
@@ -57,8 +57,15 @@ const ResidentMarketplace = () => {
     };
 
     useEffect(() => {
+        setItems([]);
+        setShowDetail(null);
+        setShowProfileId(null);
+        setConfirmAction(null);
+    }, [buildingVersion]);
+
+    useEffect(() => {
         fetchItems();
-    }, [selectedCategory]);
+    }, [selectedCategory, buildingVersion]);
 
     const filteredItems = items.filter(item => 
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

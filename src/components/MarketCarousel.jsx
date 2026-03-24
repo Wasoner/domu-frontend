@@ -30,7 +30,9 @@ const MarketCarousel = () => {
         <section className="market-carousel">
             <div className="market-carousel__header">
                 <div className="market-carousel__title-group">
-                    <span className="market-carousel__icon">🛍️</span>
+                    <span className="market-carousel__icon" aria-hidden="true">
+                        <Icon name="shoppingBag" size={26} />
+                    </span>
                     <div>
                         <h2>Tienda de la comunidad</h2>
                         <p>Descubre lo que tus vecinos están ofreciendo</p>

@@ -80,7 +80,21 @@ const AdminParcels = () => {
 
   useEffect(() => {
     fetchParcels();
-  }, [filter, unitFilter]);
+  }, [filter, unitFilter, buildingVersion]);
+
+  useEffect(() => {
+    setUnitFilter('all');
+    setParcels([]);
+    setEditingId(null);
+    setError(null);
+    setFormData({
+      unitId: '',
+      sender: '',
+      description: '',
+      receivedAt: '',
+    });
+    setSuccessMessage(null);
+  }, [buildingVersion]);
 
   const pendingCount = useMemo(
     () => parcels.filter((parcel) => parcel.status === 'PENDING').length,
