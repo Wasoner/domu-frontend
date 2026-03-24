@@ -16,6 +16,68 @@
   margin-top: 1rem;
 }
 
+.admin-create-user__building-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-primary);
+  box-shadow: var(--shadow-sm);
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+    color: var(--color-turquoise);
+  }
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: var(--color-black);
+    font-size: 0.92rem;
+  }
+
+  span {
+    margin-top: 0.2rem;
+    color: var(--color-gray-dark);
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+}
+
+.admin-create-user__building-feedback--loading {
+  border-color: rgba(83, 164, 151, 0.25);
+  background: color-mix(in srgb, var(--color-turquoise) 7%, white);
+}
+
+.admin-create-user__building-feedback--success {
+  border-color: rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.08);
+
+  svg {
+    color: var(--color-success);
+  }
+}
+
+.admin-create-user__building-feedback .is-spinning {
+  animation: admin-create-user-spin 0.8s linear infinite;
+}
+
+@keyframes admin-create-user-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Role Selector Grid */
 .role-grid {
   display: grid;

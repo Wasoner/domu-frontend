@@ -10,7 +10,7 @@ import './ResidentLibrary.scss';
  * Document repository and community files
  */
 const ResidentLibrary = () => {
-  const { user, hasPermission } = useAppContext();
+  const { hasPermission, buildingVersion } = useAppContext();
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [documents, setDocuments] = useState([]);
@@ -54,8 +54,12 @@ const ResidentLibrary = () => {
   };
 
   useEffect(() => {
+    setDocuments([]);
+    setPreviewDocument(null);
+    setShowUploadForm(false);
+    setUploadError(null);
     fetchDocuments();
-  }, []);
+  }, [buildingVersion]);
 
   useEffect(() => {
     if (!previewDocument) return undefined;

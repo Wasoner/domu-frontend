@@ -27,13 +27,20 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [hasFetched, setHasFetched] = useState(false);
+    const [buildingFeedback, setBuildingFeedback] = useState('idle');
     const isFetchingRef = useRef(false);
     const lastFetchKeyRef = useRef(null);
+    const previousBuildingVersionRef = useRef(buildingVersion);
     const isInitialLoading = !hasFetched;
 
     const userName = useMemo(() => {
         if (!user) return 'Administrador';
         return user.firstName || user.email?.split('@')[0] || 'Administrador';
+    }, [user]);
+
+    const selectedBuildingName = useMemo(() => {
+        const activeBuildingId = user?.selectedBuildingId ?? user?.activeBuildingId;
+        return user?.buildings?.find((building) => building.id === activeBuildingId)?.name || 'la comunidad seleccionada';
     }, [user]);
 
     const fetchData = useCallback(async () => {
@@ -100,6 +107,16 @@ const Dashboard = () => {
     }, [user]);
 
     useEffect(() => {
+        if (!user || previousBuildingVersionRef.current === buildingVersion) return;
+        previousBuildingVersionRef.current = buildingVersion;
+        setBuildingFeedback('loading');
+        setHasFetched(false);
+        setRecentIncidents([]);
+        setRecentMarketItems([]);
+        setLastUpdated(null);
+    }, [buildingVersion, user]);
+
+    useEffect(() => {
         if (!user) return;
         const key = `${user.id || user.email || 'anon'}-${buildingVersion ?? '0'}`;
         if (lastFetchKeyRef.current !== key) {
@@ -109,6 +126,17 @@ const Dashboard = () => {
         const interval = setInterval(fetchData, 30000); // Actualizar cada 30s
         return () => clearInterval(interval);
     }, [fetchData, buildingVersion, user]);
+
+    useEffect(() => {
+        if (buildingFeedback !== 'loading' || loading || !hasFetched) return undefined;
+
+        setBuildingFeedback('success');
+        const timeoutId = window.setTimeout(() => {
+            setBuildingFeedback('idle');
+        }, 1800);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [buildingFeedback, loading, hasFetched]);
 
     const formatTime = (date) => {
         if (!date) return '';
@@ -180,6 +208,24 @@ const Dashboard = () => {
                         </button>
                     </div>
                 </header>
+
+                {buildingFeedback !== 'idle' && (
+                    <div className={`dashboard__building-feedback dashboard__building-feedback--${buildingFeedback}`} role="status" aria-live="polite">
+                        <Icon
+                            name={buildingFeedback === 'loading' ? 'refresh' : 'check'}
+                            size={16}
+                            className={buildingFeedback === 'loading' ? 'is-spinning' : ''}
+                        />
+                        <div>
+                            <strong>{selectedBuildingName}</strong>
+                            <span>
+                                {buildingFeedback === 'loading'
+                                    ? 'Actualizando métricas, incidentes y actividad de la comunidad.'
+                                    : 'Panel sincronizado con el edificio seleccionado.'}
+                            </span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Métricas principales - Clickables */}
                 <section className="dashboard__metrics" aria-label="Métricas de incidentes">

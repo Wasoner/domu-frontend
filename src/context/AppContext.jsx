@@ -123,16 +123,32 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const selectBuilding = (buildingId) => {
+  const selectBuilding = useCallback((buildingId) => {
+    let didChange = false;
+
     setUser((prev) => {
       if (!prev) return prev;
-      const next = { ...prev, selectedBuildingId: buildingId };
-      localStorage.setItem('selectedBuildingId', buildingId ?? '');
-      return next;
+
+      const currentBuildingId = prev.selectedBuildingId ?? prev.activeBuildingId ?? null;
+      if (currentBuildingId === buildingId) {
+        return prev;
+      }
+
+      didChange = true;
+
+      if (buildingId !== undefined && buildingId !== null) {
+        localStorage.setItem('selectedBuildingId', buildingId);
+      } else {
+        localStorage.removeItem('selectedBuildingId');
+      }
+
+      return { ...prev, selectedBuildingId: buildingId };
     });
-    // Incrementar versión para que los componentes detecten el cambio y recarguen datos
-    setBuildingVersion((v) => v + 1);
-  };
+
+    if (didChange) {
+      setBuildingVersion((v) => v + 1);
+    }
+  }, []);
 
   // Función para cerrar sesión
   const logout = () => {

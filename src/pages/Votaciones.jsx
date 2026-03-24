@@ -109,7 +109,7 @@ const PollCard = ({ poll, onVote, onExport, onClose, canVote, loadingPollId }) =
 };
 
 const Votaciones = () => {
-  const { hasPermission } = useAppContext();
+  const { hasPermission, buildingVersion } = useAppContext();
   const [tab, setTab] = useState('open');
   const [loading, setLoading] = useState(false);
   const [loadingPollId, setLoadingPollId] = useState(null);
@@ -140,8 +140,10 @@ const Votaciones = () => {
   };
 
   useEffect(() => {
+    setShowForm(false);
+    setPolls({ open: [], closed: [] });
     fetchPolls();
-  }, []);
+  }, [buildingVersion]);
 
   const handleCreate = async (payload) => {
     setCreating(true);
