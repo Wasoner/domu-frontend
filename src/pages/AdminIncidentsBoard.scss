@@ -452,7 +452,7 @@ body.is-dragging .kanban-column--can-drop .kanban-card:not(.kanban-card--draggin
   gap: 0.35rem;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: capitalize;
+  text-transform: none;
   color: var(--color-gray-dark);
   background: var(--color-bg-tertiary);
   padding: 0.2rem 0.5rem;
