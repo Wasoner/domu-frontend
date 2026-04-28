@@ -391,7 +391,6 @@ const Home = () => {
     { title: 'Administrador', route: ROUTES.SOLUCIONES_ADMINISTRADOR, iconName: 'chartBar' },
     { title: 'Comité', route: ROUTES.SOLUCIONES_COMITE, iconName: 'scale' },
     { title: 'Conserjería', route: ROUTES.SOLUCIONES_CONSERJERIA, iconName: 'buildingOffice' },
-    { title: 'Cumplimiento normativo', route: ROUTES.SOLUCIONES_FUNCIONARIOS, iconName: 'buildingLibrary' },
     { title: 'Residente', route: ROUTES.SOLUCIONES_RESIDENTE, iconName: 'home' },
     { title: 'Proveedores', route: ROUTES.SOLUCIONES_PROVEEDORES, iconName: 'wrench' },
   ];

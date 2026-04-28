@@ -59,6 +59,13 @@ const UserTypeProveedores = () => {
     window.location.href = ROUTES.SOLUCIONES;
   };
 
+  const handleViewFeatures = () => {
+    const target = document.getElementById('soluciones-funcionalidades');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="usertype-page public-page fade-in">
       <Seo
@@ -66,61 +73,105 @@ const UserTypeProveedores = () => {
         description="Gestiona órdenes de servicio, cotizaciones y seguimiento de trabajos para comunidades residenciales con DOMU."
       />
       <Header />
-      <MainContent>
-        <section className="usertype-hero">
-          <div className="usertype-hero__content">
-            <span className="usertype-hero__badge">Para Proveedores</span>
+
+      <section className="usertype-hero">
+        <div className="usertype-hero__content">
+          <div className="usertype-hero__text">
+            <span className="usertype-hero__eyebrow">Solución para Proveedores</span>
             <h1 className="usertype-hero__title">
-              Trabaja con comunidades de forma organizada
+              Trabaja con comunidades de forma <strong>organizada</strong>
             </h1>
             <p className="usertype-hero__subtitle">
-              Recibe órdenes de trabajo, envía cotizaciones y reporta avances
-              sin depender de llamadas, correos o grupos de WhatsApp.
+              Recibe órdenes de trabajo, envía cotizaciones y reporta avances sin depender de llamadas, correos o
+              grupos de WhatsApp.
             </p>
             <div className="usertype-hero__actions">
-              <Button variant="primary" size="lg" onClick={handleContact}>
-                Contactar equipo
+              <Button variant="primary" onClick={handleViewFeatures}>
+                Ver funcionalidades
               </Button>
-              <Button variant="ghost" size="lg" onClick={handleDemo}>
+              <Button variant="ghost" onClick={handleDemo}>
                 Explorar soluciones
               </Button>
             </div>
           </div>
-        </section>
+          <div className="usertype-hero__visual">
+            <span className="usertype-hero__illustration" aria-hidden="true">
+              <Icon name="wrench" className="usertype-hero__illustration-icon" strokeWidth={1.5} />
+            </span>
+          </div>
+        </div>
+      </section>
 
-        <section ref={featuresRef} className="usertype-features reveal-section">
-          <h2 className="usertype-features__title">Funcionalidades para proveedores</h2>
-          <div className="usertype-features__grid">
-            {features.map((feat, idx) => (
-              <div className="usertype-feature-card reveal-stagger-child" key={idx}>
-                <div className="usertype-feature-card__icon">
-                  <Icon name={feat.iconName} size={32} />
+      <MainContent>
+        <section id="soluciones-funcionalidades" ref={featuresRef} className="usertype-features reveal-section">
+          <div className="container">
+            <div className="usertype-section__header">
+              <h2>Herramientas pensadas para proveedores de servicios</h2>
+              <p>Flujo operativo claro para recibir, cotizar, ejecutar y reportar cada trabajo</p>
+            </div>
+            <div className="usertype-features__grid">
+              {features.map((feat, idx) => (
+                <div className="usertype-feature-card reveal-stagger-child" key={idx}>
+                  <div className="usertype-feature-card__icon" aria-hidden="true">
+                    <Icon name={feat.iconName} size={42} strokeWidth={1.8} />
+                  </div>
+                  <h3>{feat.title}</h3>
+                  <p>{feat.description}</p>
                 </div>
-                <h3>{feat.title}</h3>
-                <p>{feat.description}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
         <section ref={benefitsRef} className="usertype-benefits reveal-section">
-          <h2>Beneficios clave</h2>
-          <div className="usertype-benefits__grid">
-            {benefits.map((benefit, idx) => (
-              <div className="usertype-benefit-item" key={idx}>
-                <Icon name="checkCircle" size={20} />
-                <span>{benefit}</span>
+          <div className="container">
+            <div className="usertype-benefits__content">
+              <div className="usertype-benefits__text">
+                <h2>Beneficios para tu operación como proveedor</h2>
+                <ul className="usertype-benefits__list">
+                  {benefits.map((benefit, idx) => (
+                    <li key={idx}>{benefit}</li>
+                  ))}
+                </ul>
               </div>
-            ))}
+              <div className="usertype-benefits__visual">
+                <div className="usertype-benefits__card">
+                  <span className="usertype-benefits__card-icon" aria-hidden="true">
+                    <Icon name="clipboardCheck" className="usertype-benefits__card-icon-svg" strokeWidth={1.8} />
+                  </span>
+                  <h3>Centro de trabajo proveedor</h3>
+                  <p>Órdenes activas, cotizaciones enviadas y estados de servicio centralizados en un solo panel.</p>
+                  <div className="usertype-benefits__card-stats">
+                    <div>
+                      <strong>24/7</strong>
+                      <span>Acceso web</span>
+                    </div>
+                    <div>
+                      <strong>1</strong>
+                      <span>Canal único operativo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         <section ref={ctaRef} className="usertype-cta reveal-section">
-          <h2>Profesionaliza tu servicio a comunidades</h2>
-          <p>Ordenes de trabajo, cotizaciones y seguimiento en una sola plataforma.</p>
-          <Button variant="primary" size="lg" onClick={handleContact}>
-            Comenzar ahora
-          </Button>
+          <div className="container">
+            <div className="usertype-cta__content">
+              <h2>Conecta tu servicio con comunidades mejor organizadas</h2>
+              <p>Integra tus órdenes, cotizaciones y avances en un flujo digital profesional</p>
+              <div className="usertype-cta__actions">
+                <Button variant="primary" onClick={handleContact}>
+                  Contactar equipo
+                </Button>
+                <Button variant="ghost" onClick={handleDemo}>
+                  Conocer más
+                </Button>
+              </div>
+            </div>
+          </div>
         </section>
       </MainContent>
       <Footer />

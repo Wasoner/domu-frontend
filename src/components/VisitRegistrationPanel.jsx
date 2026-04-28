@@ -131,13 +131,14 @@ const VisitRegistrationPanel = ({ user }) => {
   const [saveContact, setSaveContact] = useState(false);
   const [housingUnits, setHousingUnits] = useState([]);
   const [loadingUnits, setLoadingUnits] = useState(false);
+  const [residentUnit, setResidentUnit] = useState(null);
+  const [loadingResidentUnit, setLoadingResidentUnit] = useState(false);
 
   const canRegister = SUPPORTED_ROLES.includes(resolvedRole);
-  // Fix: Admins/Concierges always have "access" to the form, even if they haven't typed a unit yet.
-  // We only strictly enforce unit presence for Residents (who must have it in their profile).
-  const hasAccessToForm = resolvedRole === 'resident' ? Boolean(user?.unitId) : true;
-  // hasUnit: Para residentes usa unitId del perfil, para admin/concierge usa el campo del formulario
-  const hasUnit = resolvedRole === 'resident' ? Boolean(user?.unitId) : Boolean(formData.unit);
+  // Para residentes, la unidad activa se obtiene desde /users/me/unit (edificio seleccionado).
+  const residentUnitId = residentUnit?.unitId || null;
+  const hasAccessToForm = resolvedRole === 'resident' ? (loadingResidentUnit || Boolean(residentUnitId)) : true;
+  const hasUnit = resolvedRole === 'resident' ? Boolean(residentUnitId) : Boolean(formData.unit);
 
   const [qrInput, setQrInput] = useState('');
 
@@ -323,13 +324,35 @@ const VisitRegistrationPanel = ({ user }) => {
     }
   }, [user, resolvedRole]);
 
+  const fetchResidentUnit = useCallback(async () => {
+    if (!user || resolvedRole !== 'resident') {
+      setResidentUnit(null);
+      return;
+    }
+    setLoadingResidentUnit(true);
+    try {
+      const response = await api.users.getMyUnit();
+      const selectedBuildingId = user?.selectedBuildingId ?? user?.activeBuildingId;
+      const matchesSelectedBuilding = !selectedBuildingId
+        || !response?.buildingId
+        || Number(response.buildingId) === Number(selectedBuildingId);
+      setResidentUnit(matchesSelectedBuilding ? (response || null) : null);
+    } catch (error) {
+      console.error('[VisitPanel] Error cargando unidad activa del residente:', error);
+      setResidentUnit(null);
+    } finally {
+      setLoadingResidentUnit(false);
+    }
+  }, [user, resolvedRole]);
+
   useEffect(() => {
     if (user) {
       fetchVisits();
       fetchContacts();
       fetchHousingUnits();
+      fetchResidentUnit();
     }
-  }, [user, fetchVisits, fetchContacts, fetchHousingUnits]);
+  }, [user, fetchVisits, fetchContacts, fetchHousingUnits, fetchResidentUnit]);
 
   useEffect(() => {
     if (!feedback) return undefined;
@@ -403,7 +426,7 @@ const VisitRegistrationPanel = ({ user }) => {
     if (!formData.rut.trim()) return 'El RUT es obligatorio.';
     if (!rutIsValid(formData.rut)) return 'El RUT debe tener el formato 12345678-9.';
     if (!hasUnit) return resolvedRole === 'resident'
-      ? 'No encontramos tu unidad. Actualiza tu perfil o contacta al administrador.'
+      ? 'No encontramos tu unidad activa en la comunidad seleccionada. Contacta al administrador.'
       : 'Debes indicar la unidad/departamento para esta visita.';
     if (!formData.entryDate) return 'La fecha de ingreso es obligatoria.';
     if (!formData.entryTime) return 'La hora de ingreso es obligatoria.';
@@ -429,7 +452,7 @@ const VisitRegistrationPanel = ({ user }) => {
         : undefined;
       
       // Para residentes, usar unitId del perfil; para admin/concierge, usar el del formulario
-      const unitId = resolvedRole === 'resident' ? user?.unitId : Number(formData.unit);
+      const unitId = resolvedRole === 'resident' ? residentUnitId : Number(formData.unit);
       
       const payload = {
         visitorName: buildVisitorName(formData),
@@ -620,12 +643,16 @@ const VisitRegistrationPanel = ({ user }) => {
             )}
 
             {/* Unit info */}
-            {resolvedRole === 'resident' && user?.unitId && (
+            {resolvedRole === 'resident' && residentUnitId && (
               <div className="visit-form__unit-badge">
                 <span className="visit-form__unit-icon" aria-hidden="true">
                   <Icon name="buildingOffice" size={18} />
                 </span>
-                <span>Unidad {user.unitId}</span>
+                <span>
+                  Unidad {residentUnit?.number || residentUnitId}
+                  {residentUnit?.tower ? ` · Torre ${residentUnit.tower}` : ''}
+                  {residentUnit?.floor ? ` · Piso ${residentUnit.floor}` : ''}
+                </span>
               </div>
             )}
 
