@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react
 import { useLocation } from 'react-router-dom';
 import { ProtectedLayout } from '../layout';
 import { Icon, Skeleton, Button } from '../components';
-import { api } from '../services';
+import { api, getWebSocketUrl } from '../services';
 import { useAppContext } from '../context';
 import './ChatHub.scss';
 
@@ -86,11 +86,8 @@ const ChatHub = () => {
         const token = localStorage.getItem('authToken');
         if (!token) return;
 
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = import.meta.env.DEV ? 'localhost:8080' : window.location.host;
-
         const connectWs = () => {
-            const socket = new WebSocket(`${protocol}//${host}/ws/chat?token=${token}`);
+            const socket = new WebSocket(getWebSocketUrl(`/ws/chat?token=${encodeURIComponent(token)}`));
 
             socket.onopen = () => {
                 console.log('[Chat WS] Connected');

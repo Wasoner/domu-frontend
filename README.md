@@ -43,6 +43,9 @@ Create a `.env` file in the root directory based on `.env.example`:
 # Backend API URL (default for local dev)
 VITE_API_BASE_URL=/api
 
+# Optional WebSocket URL override. By default it is derived from VITE_API_BASE_URL.
+VITE_WS_BASE_URL=ws://localhost:8080
+
 # Map provider (MapTiler Free)
 VITE_MAPTILER_KEY=your_maptiler_key_here
 
