@@ -3,6 +3,11 @@ import { ProtectedLayout } from '../layout';
 import { useAppContext } from '../context';
 import { Icon, Skeleton } from '../components';
 import { api } from '../services';
+import {
+  getIncidentCategoryLabelEs,
+  normalizeIncidentCategoryForKanbanIcon,
+  stripIncidentCategoryFromTitle,
+} from '../constants/incidentCategories';
 import './AdminIncidentsBoard.scss';
 
 /**
@@ -47,14 +52,24 @@ const CATEGORY_ICONS = {
   elevator: 'arrowsUpDown',
   water: 'water',
   electricity: 'bolt',
+  electrical: 'bolt',
+  plumbing: 'water',
+  'common-area': 'clipboard',
   general: 'clipboard',
+  other: 'clipboard',
 };
 
 /**
  * Componente de tarjeta de incidente draggable
  */
 const IncidentCard = ({ incident, onDragStart, onDragEnd, isDragging, staffMembers, onAssign }) => {
-  const categoryIcon = CATEGORY_ICONS[incident.category] || CATEGORY_ICONS.general;
+  const iconKey = normalizeIncidentCategoryForKanbanIcon(incident.category);
+  const categoryIcon = CATEGORY_ICONS[iconKey] || CATEGORY_ICONS.general;
+  const categoryLabel = getIncidentCategoryLabelEs(incident.category);
+  const displayTitle = useMemo(() => {
+    const cleaned = stripIncidentCategoryFromTitle(incident.title || '');
+    return cleaned || incident.title || 'Sin título';
+  }, [incident.title]);
   const [isAssigning, setIsAssigning] = useState(false);
 
   const isDragIgnoredTarget = (target) => {
@@ -107,12 +122,12 @@ const IncidentCard = ({ incident, onDragStart, onDragEnd, isDragging, staffMembe
       <div className="kanban-card__header">
         <span className="kanban-card__category">
           <Icon name={categoryIcon} size={14} />
-          {incident.category || 'general'}
+          {categoryLabel}
         </span>
         <span className="kanban-card__id">#{incident.id}</span>
       </div>
 
-      <h4 className="kanban-card__title">{incident.title}</h4>
+      <h4 className="kanban-card__title">{displayTitle}</h4>
 
       {incident.description && (
         <p className="kanban-card__description">

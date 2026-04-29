@@ -158,6 +158,30 @@ const Dashboard = () => {
         return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(value);
     };
 
+    const translateIncidentTextToSpanish = useCallback((value) => {
+        if (!value || typeof value !== 'string') return value;
+
+        const dictionary = {
+            security: 'seguridad',
+            maintenance: 'mantenimiento',
+            cleaning: 'limpieza',
+            noise: 'ruidos',
+            parking: 'estacionamiento',
+            package: 'paqueteria',
+            packages: 'paqueteria',
+            elevator: 'ascensor',
+            electricity: 'electricidad',
+            water: 'agua',
+            plumbing: 'plomeria',
+            general: 'general',
+        };
+
+        return value.replace(/\b[a-zA-Z_]+\b/g, (word) => {
+            const normalizedWord = word.toLowerCase();
+            return dictionary[normalizedWord] || word;
+        });
+    }, []);
+
     const getStatusLabel = (status) => {
         const labels = {
             REPORTED: 'Reportado',
@@ -340,9 +364,9 @@ const Dashboard = () => {
                                     >
                                         <div className="incident-item__main">
                                             <span className="incident-item__category">
-                                                {incident.category}
+                                                {translateIncidentTextToSpanish(incident.category)}
                                             </span>
-                                            <p className="incident-item__title">{incident.title}</p>
+                                            <p className="incident-item__title">{translateIncidentTextToSpanish(incident.title)}</p>
                                             <span className="incident-item__time">
                                                 {formatIncidentDate(incident.createdAt)}
                                             </span>

@@ -79,66 +79,68 @@ const CreatePollModal = ({ isOpen, onClose, onSubmit, loading = false }) => {
           </button>
         </header>
         <form onSubmit={handleSubmit}>
-          <FormField
-            label="Título"
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-            maxLength={180}
-            placeholder="Título de la votación"
-          />
+          <div className="poll-modal__body">
+            <FormField
+              label="Título"
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+              maxLength={180}
+              placeholder="Título de la votación"
+            />
 
-          <FormField
-            label="Descripción"
-            as="textarea"
-            name="description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Descripción opcional..."
-            rows={3}
-          />
+            <FormField
+              label="Descripción"
+              as="textarea"
+              name="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Descripción opcional..."
+              rows={3}
+            />
 
-          <FormField
-            label="Cierre"
-            type="datetime-local"
-            name="closesAt"
-            value={formData.closesAt}
-            onChange={(e) => setFormData({ ...formData, closesAt: e.target.value })}
-            required
-          />
+            <FormField
+              label="Cierre"
+              type="datetime-local"
+              name="closesAt"
+              value={formData.closesAt}
+              onChange={(e) => setFormData({ ...formData, closesAt: e.target.value })}
+              required
+            />
 
-          <div className="form-group form-group--options">
-            <div className="form-group__header">
-              <label className="form-label">Opciones (mínimo 2)</label>
-              <button type="button" className="add-option-btn" onClick={addOption}>
-                <Icon name="plus" size={16} /> Agregar opción
-              </button>
-            </div>
-            <div className="options-list">
-              {formData.options.map((opt, index) => (
-                <div key={opt.id} className="option-row">
-                  <input
-                    type="text"
-                    value={opt.label}
-                    onChange={(e) => updateOption(opt.id, e.target.value)}
-                    placeholder={`Opción ${index + 1}`}
-                    required={index < 2}
-                    className="form-field__input"
-                  />
-                  {formData.options.length > 2 && (
-                    <button
-                      type="button"
-                      className="icon-btn remove-option-btn"
-                      onClick={() => removeOption(opt.id)}
-                      title="Eliminar opción"
-                    >
-                      <Icon name="trash" size={16} />
-                    </button>
-                  )}
-                </div>
-              ))}
+            <div className="form-group form-group--options">
+              <div className="form-group__header">
+                <label className="form-label">Opciones (mínimo 2)</label>
+                <button type="button" className="add-option-btn" onClick={addOption}>
+                  <Icon name="plus" size={16} /> Agregar opción
+                </button>
+              </div>
+              <div className="options-list">
+                {formData.options.map((opt, index) => (
+                  <div key={opt.id} className="option-row">
+                    <input
+                      type="text"
+                      value={opt.label}
+                      onChange={(e) => updateOption(opt.id, e.target.value)}
+                      placeholder={`Opción ${index + 1}`}
+                      required={index < 2}
+                      className="form-field__input"
+                    />
+                    {formData.options.length > 2 && (
+                      <button
+                        type="button"
+                        className="icon-btn remove-option-btn"
+                        onClick={() => removeOption(opt.id)}
+                        title="Eliminar opción"
+                      >
+                        <Icon name="trash" size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

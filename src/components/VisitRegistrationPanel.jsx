@@ -2,21 +2,17 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 
 import { api } from '../services';
 import Button from './Button';
+import Icon from './Icon';
 import Skeleton from './Skeleton';
 import './VisitPanel.scss';
 
 const SUPPORTED_ROLES = ['resident', 'concierge', 'admin'];
-const ROLE_LABELS = {
-  resident: 'Residente',
-  concierge: 'Conserje',
-  admin: 'Administrador',
-};
 
 const TABS = [
-  { id: 'register', label: 'Nueva visita', icon: '➕', description: 'Registrar una nueva visita' },
-  { id: 'upcoming', label: 'Próximas', icon: '📅', description: 'Visitas agendadas' },
-  { id: 'history', label: 'Historial', icon: '📋', description: 'Visitas pasadas' },
-  { id: 'contacts', label: 'Contactos', icon: '👥', description: 'Visitas frecuentes' },
+  { id: 'register', label: 'Nueva visita', iconName: 'plusCircle', description: 'Registrar una nueva visita' },
+  { id: 'upcoming', label: 'Próximas', iconName: 'calendar', description: 'Visitas agendadas' },
+  { id: 'history', label: 'Historial', iconName: 'clockHistory', description: 'Visitas pasadas' },
+  { id: 'contacts', label: 'Contactos', iconName: 'users', description: 'Visitas frecuentes' },
 ];
 
 const VISIT_TYPES = [
@@ -43,7 +39,6 @@ const getInitialFormState = () => {
     exitDate: '',
     exitTime: '',
     unit: '',
-    notifyAll: false,
     customExit: false,
   };
 };
@@ -123,8 +118,6 @@ const VisitRegistrationPanel = ({ user }) => {
     return 'resident';
   }, [user]);
   console.log('[VisitPanel] Rol resuelto:', resolvedRole);
-  const displayRole = ROLE_LABELS[resolvedRole] || 'Usuario';
-
   const [activeTab, setActiveTab] = useState('register');
   const [formData, setFormData] = useState(getInitialFormState);
   const [upcomingVisits, setUpcomingVisits] = useState([]);
@@ -138,13 +131,14 @@ const VisitRegistrationPanel = ({ user }) => {
   const [saveContact, setSaveContact] = useState(false);
   const [housingUnits, setHousingUnits] = useState([]);
   const [loadingUnits, setLoadingUnits] = useState(false);
+  const [residentUnit, setResidentUnit] = useState(null);
+  const [loadingResidentUnit, setLoadingResidentUnit] = useState(false);
 
   const canRegister = SUPPORTED_ROLES.includes(resolvedRole);
-  // Fix: Admins/Concierges always have "access" to the form, even if they haven't typed a unit yet.
-  // We only strictly enforce unit presence for Residents (who must have it in their profile).
-  const hasAccessToForm = resolvedRole === 'resident' ? Boolean(user?.unitId) : true;
-  // hasUnit: Para residentes usa unitId del perfil, para admin/concierge usa el campo del formulario
-  const hasUnit = resolvedRole === 'resident' ? Boolean(user?.unitId) : Boolean(formData.unit);
+  // Para residentes, la unidad activa se obtiene desde /users/me/unit (edificio seleccionado).
+  const residentUnitId = residentUnit?.unitId || null;
+  const hasAccessToForm = resolvedRole === 'resident' ? (loadingResidentUnit || Boolean(residentUnitId)) : true;
+  const hasUnit = resolvedRole === 'resident' ? Boolean(residentUnitId) : Boolean(formData.unit);
 
   const [qrInput, setQrInput] = useState('');
 
@@ -330,13 +324,35 @@ const VisitRegistrationPanel = ({ user }) => {
     }
   }, [user, resolvedRole]);
 
+  const fetchResidentUnit = useCallback(async () => {
+    if (!user || resolvedRole !== 'resident') {
+      setResidentUnit(null);
+      return;
+    }
+    setLoadingResidentUnit(true);
+    try {
+      const response = await api.users.getMyUnit();
+      const selectedBuildingId = user?.selectedBuildingId ?? user?.activeBuildingId;
+      const matchesSelectedBuilding = !selectedBuildingId
+        || !response?.buildingId
+        || Number(response.buildingId) === Number(selectedBuildingId);
+      setResidentUnit(matchesSelectedBuilding ? (response || null) : null);
+    } catch (error) {
+      console.error('[VisitPanel] Error cargando unidad activa del residente:', error);
+      setResidentUnit(null);
+    } finally {
+      setLoadingResidentUnit(false);
+    }
+  }, [user, resolvedRole]);
+
   useEffect(() => {
     if (user) {
       fetchVisits();
       fetchContacts();
       fetchHousingUnits();
+      fetchResidentUnit();
     }
-  }, [user, fetchVisits, fetchContacts, fetchHousingUnits]);
+  }, [user, fetchVisits, fetchContacts, fetchHousingUnits, fetchResidentUnit]);
 
   useEffect(() => {
     if (!feedback) return undefined;
@@ -410,7 +426,7 @@ const VisitRegistrationPanel = ({ user }) => {
     if (!formData.rut.trim()) return 'El RUT es obligatorio.';
     if (!rutIsValid(formData.rut)) return 'El RUT debe tener el formato 12345678-9.';
     if (!hasUnit) return resolvedRole === 'resident'
-      ? 'No encontramos tu unidad. Actualiza tu perfil o contacta al administrador.'
+      ? 'No encontramos tu unidad activa en la comunidad seleccionada. Contacta al administrador.'
       : 'Debes indicar la unidad/departamento para esta visita.';
     if (!formData.entryDate) return 'La fecha de ingreso es obligatoria.';
     if (!formData.entryTime) return 'La hora de ingreso es obligatoria.';
@@ -436,7 +452,7 @@ const VisitRegistrationPanel = ({ user }) => {
         : undefined;
       
       // Para residentes, usar unitId del perfil; para admin/concierge, usar el del formulario
-      const unitId = resolvedRole === 'resident' ? user?.unitId : Number(formData.unit);
+      const unitId = resolvedRole === 'resident' ? residentUnitId : Number(formData.unit);
       
       const payload = {
         visitorName: buildVisitorName(formData),
@@ -520,7 +536,9 @@ const VisitRegistrationPanel = ({ user }) => {
           </div>
         </header>
         <div className="visit-panel__locked-card" role="alert">
-          <div className="visit-panel__locked-icon" aria-hidden="true">🔒</div>
+          <div className="visit-panel__locked-icon" aria-hidden="true">
+            <Icon name="lock" size={22} />
+          </div>
           <div>
             <p className="visit-panel__locked-title">Sesión requerida</p>
             <p className="visit-panel__locked-text">
@@ -542,7 +560,9 @@ const VisitRegistrationPanel = ({ user }) => {
           </div>
         </header>
         <div className="visit-panel__locked-card" role="alert">
-          <div className="visit-panel__locked-icon" aria-hidden="true">🚫</div>
+          <div className="visit-panel__locked-icon" aria-hidden="true">
+            <Icon name="shield" size={22} />
+          </div>
           <div>
             <p className="visit-panel__locked-title">No podemos registrar todavía</p>
             <p className="visit-panel__locked-text">
@@ -558,50 +578,41 @@ const VisitRegistrationPanel = ({ user }) => {
 
   return (
     <section className="visit-panel" aria-label="Control y registro de visitas">
-      {/* Header */}
-      <header className="visit-panel__header">
-        <div className="visit-panel__header-content">
-          <p className="visit-panel__eyebrow">Registro de visitas</p>
-          <h3>Controla quién ingresa a tu comunidad</h3>
-        </div>
-        <div className="visit-panel__role-pill">
-          <span className="visit-panel__role-icon">👤</span>
-          {displayRole}
-        </div>
-      </header>
-
       {/* Feedback */}
       {feedback && (
         <div className={`visit-panel__feedback visit-panel__feedback--${feedback.type}`} role="status">
-          <span className="visit-panel__feedback-icon">
-            {feedback.type === 'success' ? '✓' : '!'}
+          <span className="visit-panel__feedback-icon" aria-hidden="true">
+            {feedback.type === 'success' ? <Icon name="check" size={14} /> : <Icon name="exclamation" size={14} />}
           </span>
           {feedback.message}
         </div>
       )}
 
       {/* Tabs */}
-      <nav className="visit-panel__tabs" role="tablist">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            className={`visit-panel__tab ${activeTab === tab.id ? 'is-active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            <span className="visit-panel__tab-icon">{tab.icon}</span>
-            <span className="visit-panel__tab-label">{tab.label}</span>
-            {tab.id === 'upcoming' && upcomingVisits.length > 0 && (
-              <span className="visit-panel__tab-badge">{upcomingVisits.length}</span>
-            )}
-            {tab.id === 'contacts' && contacts.length > 0 && (
-              <span className="visit-panel__tab-badge">{contacts.length}</span>
-            )}
-          </button>
-        ))}
-      </nav>
+      <div className="visit-panel__nav-shell">
+        <nav className="visit-panel__categories" role="tablist" aria-label="Secciones de visitas">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              title={tab.description}
+              className={`category-pill ${activeTab === tab.id ? 'is-active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon name={tab.iconName} size={16} />
+              {tab.label}
+              {tab.id === 'upcoming' && upcomingVisits.length > 0 && (
+                <span className="visit-panel__category-badge">{upcomingVisits.length}</span>
+              )}
+              {tab.id === 'contacts' && contacts.length > 0 && (
+                <span className="visit-panel__category-badge">{contacts.length}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+      </div>
 
       {/* Tab Content */}
       <div className="visit-panel__content">
@@ -611,26 +622,37 @@ const VisitRegistrationPanel = ({ user }) => {
             {/* QR Scanner for Admin/Concierge */}
             {resolvedRole !== 'resident' && (
               <div className="visit-form__qr-section">
-                <label className="visit-form__field">
-                  <span>📷 Escanear Cédula (QR)</span>
+                <label className="visit-form__field visit-form__field--qr">
+                  <span className="visit-form__qr-label">
+                    <Icon name="qrCode" size={18} />
+                    Escanear cédula (QR)
+                  </span>
                   <input
                     type="text"
                     value={qrInput}
                     onChange={handleQrInputChange}
-                    placeholder="Haz clic aquí y escanea el QR..."
+                    placeholder="Haz clic aquí y escanea el código…"
                     className="visit-form__qr-input"
                     autoComplete="off"
                   />
-                  <p className="visit-form__hint">El formulario se completará automáticamente.</p>
+                  <p className="visit-form__hint visit-form__hint--muted">
+                    El formulario se completará automáticamente al leer el código.
+                  </p>
                 </label>
               </div>
             )}
 
             {/* Unit info */}
-            {resolvedRole === 'resident' && user?.unitId && (
+            {resolvedRole === 'resident' && residentUnitId && (
               <div className="visit-form__unit-badge">
-                <span className="visit-form__unit-icon">🏢</span>
-                <span>Unidad {user.unitId}</span>
+                <span className="visit-form__unit-icon" aria-hidden="true">
+                  <Icon name="buildingOffice" size={18} />
+                </span>
+                <span>
+                  Unidad {residentUnit?.number || residentUnitId}
+                  {residentUnit?.tower ? ` · Torre ${residentUnit.tower}` : ''}
+                  {residentUnit?.floor ? ` · Piso ${residentUnit.floor}` : ''}
+                </span>
               </div>
             )}
 
@@ -714,18 +736,6 @@ const VisitRegistrationPanel = ({ user }) => {
                         </option>
                       ))}
                     </select>
-                  </label>
-
-                  <label className="visit-form__checkbox-card">
-                    <input
-                      type="checkbox"
-                      name="notifyAll"
-                      checked={formData.notifyAll}
-                      onChange={(e) => setFormData({ ...formData, notifyAll: e.target.checked })}
-                    />
-                    <span className="visit-form__checkbox-text">
-                      Marcar como visible para todos y notificar a todos cuando llegue tu visita
-                    </span>
                   </label>
 
                   {resolvedRole !== 'resident' && (
@@ -828,7 +838,8 @@ const VisitRegistrationPanel = ({ user }) => {
                     className="visit-form__customize-btn"
                     onClick={() => setFormData({ ...formData, customExit: true })}
                   >
-                    <span>✏️</span> Personalizar la fecha de salida
+                    <Icon name="edit" size={16} />
+                    Personalizar la fecha de salida
                   </button>
                 </div>
               )}
@@ -848,14 +859,15 @@ const VisitRegistrationPanel = ({ user }) => {
                   <Button type="button" variant="ghost" onClick={resetForm} disabled={submitting}>
                     Limpiar
                   </Button>
-                  <Button type="submit" variant="secondary" disabled={submitting}>
-                    {submitting ? 'Registrando...' : 'Continuar'}
+                  <Button type="submit" variant="primary" disabled={submitting} loading={submitting}>
+                    {submitting ? 'Registrando…' : 'Registrar visita'}
                   </Button>
                 </div>
               </div>
 
               <p className="visit-form__privacy">
-                <span>📋</span> Aviso de privacidad
+                <Icon name="informationCircle" size={16} />
+                Los datos se usan solo para autorizar el ingreso ante conserjería.
               </p>
             </form>
           </div>
@@ -873,11 +885,17 @@ const VisitRegistrationPanel = ({ user }) => {
               <Skeleton.List rows={3} />
             ) : upcomingVisits.length === 0 ? (
               <div className="visit-panel__empty">
-                <span className="visit-panel__empty-icon">📅</span>
+                <span className="visit-panel__empty-icon" aria-hidden="true">
+                  <Icon name="calendar" size={40} />
+                </span>
                 <h5>Sin visitas agendadas</h5>
-                <p>Registra una nueva visita para avisar al equipo de conserjería</p>
-                <Button variant="primary" onClick={() => setActiveTab('register')}>
-                  Registrar visita
+                <p>Registra una nueva visita para avisar al equipo de conserjería.</p>
+                <Button
+                  variant="secondary"
+                  onClick={() => setActiveTab('register')}
+                  icon={<Icon name="plusCircle" size={18} />}
+                >
+                  Nueva visita
                 </Button>
               </div>
             ) : (
@@ -890,8 +908,14 @@ const VisitRegistrationPanel = ({ user }) => {
                     <div className="visit-card__content">
                       <h5 className="visit-card__name">{visit.visitorName}</h5>
                       <div className="visit-card__meta">
-                        <span>🏠 Unidad {visit.unitId}</span>
-                        <span>⏱ Válida hasta {formatShortDate(visit.validUntil)}</span>
+                        <span className="visit-card__meta-item">
+                          <Icon name="buildingOffice" size={14} />
+                          Unidad {visit.unitId}
+                        </span>
+                        <span className="visit-card__meta-item">
+                          <Icon name="clock" size={14} />
+                          Válida hasta {formatShortDate(visit.validUntil)}
+                        </span>
                       </div>
                       <span className={`visit-card__status visit-card__status--${statusColor(visit.status)}`}>
                         {statusLabel(visit.status)}
@@ -899,7 +923,7 @@ const VisitRegistrationPanel = ({ user }) => {
                     </div>
                     <div className="visit-card__actions">
                       <Button
-                        variant="primary"
+                        variant="secondary"
                         size="small"
                         onClick={() => handleCheckIn(visit.authorizationId)}
                         disabled={submitting}
@@ -926,9 +950,11 @@ const VisitRegistrationPanel = ({ user }) => {
               <Skeleton.List rows={3} />
             ) : pastVisits.length === 0 ? (
               <div className="visit-panel__empty">
-                <span className="visit-panel__empty-icon">📋</span>
+                <span className="visit-panel__empty-icon" aria-hidden="true">
+                  <Icon name="clipboard" size={40} />
+                </span>
                 <h5>Sin historial</h5>
-                <p>Aquí aparecerán las visitas que ya ingresaron o expiraron</p>
+                <p>Aquí aparecerán las visitas que ya ingresaron o expiraron.</p>
               </div>
             ) : (
               <div className="visit-panel__list">
@@ -940,11 +966,22 @@ const VisitRegistrationPanel = ({ user }) => {
                     <div className="visit-card__content">
                       <h5 className="visit-card__name">{visit.visitorName}</h5>
                       <div className="visit-card__meta">
-                        <span>🏠 Unidad {visit.unitId}</span>
-                        <span>
-                          {visit.checkInAt
-                            ? `✓ Ingresó ${formatShortDate(visit.checkInAt)}`
-                            : `✗ Expiró ${formatShortDate(visit.validUntil)}`}
+                        <span className="visit-card__meta-item">
+                          <Icon name="buildingOffice" size={14} />
+                          Unidad {visit.unitId}
+                        </span>
+                        <span className="visit-card__meta-item">
+                          {visit.checkInAt ? (
+                            <>
+                              <Icon name="check" size={14} />
+                              Ingresó {formatShortDate(visit.checkInAt)}
+                            </>
+                          ) : (
+                            <>
+                              <Icon name="clock" size={14} />
+                              Expiró {formatShortDate(visit.validUntil)}
+                            </>
+                          )}
                         </span>
                       </div>
                       <span className={`visit-card__status visit-card__status--${statusColor(visit.status)}`}>
@@ -975,28 +1012,38 @@ const VisitRegistrationPanel = ({ user }) => {
                 <h4>Contactos frecuentes</h4>
                 <p>Visitantes guardados para registro rápido</p>
               </div>
-              <form className="visit-panel__search" onSubmit={handleContactSearchSubmit}>
+              <form className="visit-panel__search visit-panel__search--inline" onSubmit={handleContactSearchSubmit}>
+                <Icon name="magnifyingGlass" size={20} className="visit-panel__search-icon" />
                 <input
                   type="search"
                   value={contactSearch}
                   onChange={handleContactSearchChange}
-                  placeholder="Buscar por nombre o RUT..."
+                  placeholder="Buscar por nombre o RUT…"
+                  aria-label="Buscar contactos"
                 />
-                <Button type="submit" variant="secondary" size="small" disabled={loadingContacts}>
-                  {loadingContacts ? '...' : 'Buscar'}
+                <Button type="submit" variant="secondary" size="small" disabled={loadingContacts} loading={loadingContacts}>
+                  Buscar
                 </Button>
               </form>
             </div>
 
             {loadingContacts ? (
-              <div className="visit-panel__loading">Buscando contactos...</div>
+              <div className="visit-panel__skeleton-block" aria-busy="true" aria-label="Cargando contactos">
+                <Skeleton.List rows={4} />
+              </div>
             ) : contacts.length === 0 ? (
               <div className="visit-panel__empty">
-                <span className="visit-panel__empty-icon">👥</span>
+                <span className="visit-panel__empty-icon" aria-hidden="true">
+                  <Icon name="users" size={40} />
+                </span>
                 <h5>Sin contactos guardados</h5>
-                <p>Al registrar una visita, marca "Guardar como contacto" para tenerla aquí</p>
-                <Button variant="primary" onClick={() => setActiveTab('register')}>
-                  Registrar visita
+                <p>Al registrar una visita, marca &quot;Guardar como contacto frecuente&quot; para tenerla aquí.</p>
+                <Button
+                  variant="secondary"
+                  onClick={() => setActiveTab('register')}
+                  icon={<Icon name="plusCircle" size={18} />}
+                >
+                  Nueva visita
                 </Button>
               </div>
             ) : (
@@ -1009,15 +1056,26 @@ const VisitRegistrationPanel = ({ user }) => {
                     <div className="visit-card__content">
                       <h5 className="visit-card__name">{contact.visitorName}</h5>
                       <div className="visit-card__meta">
-                        {contact.visitorDocument && <span>📄 {contact.visitorDocument}</span>}
-                        {contact.unitId && <span>🏠 Unidad {contact.unitId}</span>}
+                        {contact.visitorDocument && (
+                          <span className="visit-card__meta-item">
+                            <Icon name="document" size={14} />
+                            {contact.visitorDocument}
+                          </span>
+                        )}
+                        {contact.unitId && (
+                          <span className="visit-card__meta-item">
+                            <Icon name="buildingOffice" size={14} />
+                            Unidad {contact.unitId}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="visit-card__actions">
                       <Button
-                        variant="primary"
+                        variant="secondary"
                         size="small"
                         onClick={() => handleLoadContact(contact)}
+                        icon={<Icon name="arrowRight" size={16} />}
                       >
                         Usar
                       </Button>

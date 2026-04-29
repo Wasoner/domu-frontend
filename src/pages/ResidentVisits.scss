@@ -3,9 +3,44 @@
 }
 
 .resident-visits__intro {
+  width: 100%;
+}
+
+.resident-visits__intro-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.resident-visits__intro-text {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  min-width: min(100%, 280px);
+  flex: 1;
+}
+
+.resident-visits__role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: var(--radius-pill);
+  padding: 0.375rem 0.875rem;
+  background: var(--color-bg-secondary);
+  color: var(--color-gray-dark);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  border: 1px solid var(--color-border-light);
+  flex-shrink: 0;
+}
+
+.resident-visits__role-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-turquoise);
 }
 
 .resident-visits__intro h1 {
