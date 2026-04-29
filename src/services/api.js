@@ -6,6 +6,37 @@
 
 // Prefer same-origin /api so dev proxy and production reverse proxy behave the same.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || '';
+
+const trimTrailingSlash = (value) => String(value || '').replace(/\/+$/, '');
+
+const getDefaultWebSocketOrigin = () => {
+  if (import.meta.env.DEV) {
+    return 'ws://localhost:8080';
+  }
+
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}`;
+};
+
+const getWebSocketOriginFromApiBase = () => {
+  if (!API_BASE_URL.startsWith('http://') && !API_BASE_URL.startsWith('https://')) {
+    return getDefaultWebSocketOrigin();
+  }
+
+  const apiUrl = new URL(API_BASE_URL);
+  apiUrl.protocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+  return apiUrl.origin;
+};
+
+const getWebSocketUrl = (path) => {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const origin = WS_BASE_URL
+    ? trimTrailingSlash(WS_BASE_URL)
+    : getWebSocketOriginFromApiBase();
+
+  return new URL(normalizedPath, `${trimTrailingSlash(origin)}/`).toString();
+};
 
 /**
  * Get authentication token from localStorage
@@ -1134,4 +1165,4 @@ export const api = {
 
 };
 
-export { getPermissions, hasPermission };
+export { getPermissions, getWebSocketUrl, hasPermission };

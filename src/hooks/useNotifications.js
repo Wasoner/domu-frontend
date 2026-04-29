@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../services/api';
+import { api, getWebSocketUrl } from '../services/api';
 
 const WS_RECONNECT_DELAY = 5000;
 
@@ -44,9 +44,7 @@ export const useNotifications = (user) => {
     if (!token || !user) return;
 
     const connectWs = () => {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = import.meta.env.DEV ? 'localhost:8080' : window.location.host;
-      const socket = new WebSocket(`${protocol}//${host}/ws/notifications?token=${token}`);
+      const socket = new WebSocket(getWebSocketUrl(`/ws/notifications?token=${encodeURIComponent(token)}`));
 
       socket.onopen = () => {
         console.log('[Notifications WS] Connected');
