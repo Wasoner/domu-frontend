@@ -6,6 +6,8 @@ import { api, getWebSocketUrl } from '../services';
 import { useAppContext } from '../context';
 import './ChatHub.scss';
 
+const normalizeId = (value) => (value === null || value === undefined ? null : String(value));
+
 const ChatHub = () => {
     const { user } = useAppContext();
     const location = useLocation();
@@ -62,7 +64,7 @@ const ChatHub = () => {
             ]);
             setRooms(roomsData || []);
             setRequests(requestsData || []);
-            setOnlineUsers(new Set(onlineData || []));
+            setOnlineUsers(new Set((onlineData || []).map(normalizeId).filter(Boolean)));
 
             if (location.state?.roomId) {
                 const room = (roomsData || []).find(r => r.id === location.state.roomId);
@@ -99,21 +101,23 @@ const ChatHub = () => {
 
                     if (data.type === 'NEW_MESSAGE') {
                         const current = activeRoomRef.current;
-                        if (current?.id === data.roomId) {
+                        if (normalizeId(current?.id) === normalizeId(data.roomId)) {
                             setMessages(prev => [...prev, data.message]);
                         }
                         setRooms(prev => prev.map(r =>
-                            r.id === data.roomId
+                            normalizeId(r.id) === normalizeId(data.roomId)
                                 ? { ...r, lastMessage: data.message, lastMessageAt: new Date().toISOString() }
                                 : r
                         ));
                     } else if (data.type === 'PRESENCE') {
                         setOnlineUsers(prev => {
                             const next = new Set(prev);
+                            const userId = normalizeId(data.userId);
+                            if (!userId) return next;
                             if (data.online) {
-                                next.add(data.userId);
+                                next.add(userId);
                             } else {
-                                next.delete(data.userId);
+                                next.delete(userId);
                             }
                             return next;
                         });
@@ -167,7 +171,7 @@ const ChatHub = () => {
 
     const handleSendMessage = (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !activeRoom || !ws.current) return;
+        if (!newMessage.trim() || !activeRoom || ws.current?.readyState !== WebSocket.OPEN) return;
 
         ws.current.send(JSON.stringify({
             type: 'SEND_MSG',
@@ -246,10 +250,10 @@ const ChatHub = () => {
     });
 
     const getOtherParticipant = (room) => {
-        return room?.participants?.find(p => p.id !== user?.id);
+        return room?.participants?.find(p => normalizeId(p.id) !== normalizeId(user?.id));
     };
 
-    const isUserOnline = (userId) => onlineUsers.has(userId);
+    const isUserOnline = (userId) => onlineUsers.has(normalizeId(userId));
 
     if (loading) return (
         <ProtectedLayout allowedRoles={['resident', 'admin', 'concierge', 'staff']}>
@@ -406,7 +410,7 @@ const ChatHub = () => {
                                     </div>
                                 )}
                                 {messages.map((msg, index) => (
-                                    <div key={msg.id || index} className={`message-bubble ${msg.senderId === user?.id ? 'is-mine' : ''}`}>
+                                    <div key={msg.id || index} className={`message-bubble ${normalizeId(msg.senderId) === normalizeId(user?.id) ? 'is-mine' : ''}`}>
                                         <div className="message-bubble__content">
                                             <p>{msg.content}</p>
                                             <span className="message-bubble__time">
